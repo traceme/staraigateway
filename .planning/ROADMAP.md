@@ -30,11 +30,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User can create a new organization and is automatically its owner
   4. User can view their organization dashboard (even if empty)
   5. User can reset a forgotten password via email link
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md — SvelteKit scaffold, database schema, complete auth system (signup, login, sessions, email verification, password reset)
+- [ ] 01-02-PLAN.md — Organization creation, LiteLLM integration, app layout shell with dashboard, sidebar, and org switcher
 
 ### Phase 2: Core Gateway
 **Goal**: An org admin can add their LLM provider API keys, members can generate personal API keys, and those keys work with Cursor/Continue.dev/Claude Code via OpenAI-compatible endpoints
@@ -46,7 +46,7 @@ Plans:
   3. Member can create and revoke personal API keys scoped to their organization
   4. A member's API key successfully authenticates a streaming chat completion request to /v1/chat/completions with tool use
   5. The /v1/embeddings and /v1/models endpoints work with member API keys
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
 - [ ] 02-01: TBD
@@ -63,7 +63,7 @@ Plans:
   3. Dashboard displays model pricing and context window information
   4. Admin can set hard spend limits (requests rejected when exceeded) and soft limits (alerts but allowed) per member and per team
   5. Budgets reset on a configurable monthly cycle and members receive notifications when approaching their limit
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
 - [ ] 03-01: TBD
@@ -78,7 +78,7 @@ Plans:
   2. Org owner can invite members via email, assign roles (Owner/Admin/Member), and admins can remove members
   3. Admin can revoke any member's API keys and set per-key rate limits (RPM/TPM)
   4. Admin dashboard shows org-wide usage overview, and dedicated management pages exist for members, provider keys, API keys, and budgets
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
 - [ ] 04-01: TBD
@@ -95,7 +95,7 @@ Plans:
   3. Semantic caching returns cached responses for similar queries and load balancing distributes across multiple keys for the same provider
   4. A company can deploy LLMTokenHub via docker-compose with a configuration guide and have it working end-to-end
   5. A landing page explains the product value proposition and integration docs cover Cursor, Continue.dev, and Claude Code setup
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
 - [ ] 05-01: TBD
