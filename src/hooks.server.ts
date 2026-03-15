@@ -2,6 +2,13 @@ import type { Handle } from '@sveltejs/kit';
 import { validateSession, SESSION_COOKIE_NAME } from '$lib/server/auth/session';
 
 export const handle: Handle = async ({ event, resolve }) => {
+	// /v1/* routes use API key auth (Bearer token), not session cookies
+	if (event.url.pathname.startsWith('/v1/')) {
+		event.locals.user = null;
+		event.locals.session = null;
+		return resolve(event);
+	}
+
 	const token = event.cookies.get(SESSION_COOKIE_NAME);
 
 	if (!token) {
