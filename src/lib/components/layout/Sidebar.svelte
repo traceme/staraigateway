@@ -21,10 +21,9 @@
 		},
 		{
 			label: 'API Keys',
-			href: '#',
+			href: `/org/${currentOrg.slug}/api-keys`,
 			icon: 'code',
-			active: false,
-			tooltip: 'Coming in Phase 2'
+			active: true
 		},
 		{
 			label: 'Members',
