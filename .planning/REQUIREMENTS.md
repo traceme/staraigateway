@@ -125,61 +125,61 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | — | Pending |
-| AUTH-02 | — | Pending |
-| AUTH-03 | — | Pending |
-| AUTH-04 | — | Pending |
-| AUTH-05 | — | Pending |
-| ORG-01 | — | Pending |
-| ORG-02 | — | Pending |
-| ORG-03 | — | Pending |
-| ORG-04 | — | Pending |
-| ORG-05 | — | Pending |
-| PKEY-01 | — | Pending |
-| PKEY-02 | — | Pending |
-| PKEY-03 | — | Pending |
-| PKEY-04 | — | Pending |
-| PKEY-05 | — | Pending |
-| AKEY-01 | — | Pending |
-| AKEY-02 | — | Pending |
-| AKEY-03 | — | Pending |
-| AKEY-04 | — | Pending |
-| AKEY-05 | — | Pending |
-| GW-01 | — | Pending |
-| GW-02 | — | Pending |
-| GW-03 | — | Pending |
-| GW-04 | — | Pending |
-| GW-05 | — | Pending |
-| GW-06 | — | Pending |
-| GW-07 | — | Pending |
-| GW-08 | — | Pending |
-| GW-09 | — | Pending |
-| GW-10 | — | Pending |
-| TRACK-01 | — | Pending |
-| TRACK-02 | — | Pending |
-| TRACK-03 | — | Pending |
-| TRACK-04 | — | Pending |
-| TRACK-05 | — | Pending |
-| BUDG-01 | — | Pending |
-| BUDG-02 | — | Pending |
-| BUDG-03 | — | Pending |
-| BUDG-04 | — | Pending |
-| BUDG-05 | — | Pending |
-| DASH-01 | — | Pending |
-| DASH-02 | — | Pending |
-| DASH-03 | — | Pending |
-| DASH-04 | — | Pending |
-| DASH-05 | — | Pending |
-| SHIP-01 | — | Pending |
-| SHIP-02 | — | Pending |
-| SHIP-03 | — | Pending |
-| SHIP-04 | — | Pending |
+| AUTH-01 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| AUTH-03 | Phase 4 | Pending |
+| AUTH-04 | Phase 4 | Pending |
+| AUTH-05 | Phase 1 | Pending |
+| ORG-01 | Phase 1 | Pending |
+| ORG-02 | Phase 4 | Pending |
+| ORG-03 | Phase 4 | Pending |
+| ORG-04 | Phase 4 | Pending |
+| ORG-05 | Phase 1 | Pending |
+| PKEY-01 | Phase 2 | Pending |
+| PKEY-02 | Phase 2 | Pending |
+| PKEY-03 | Phase 2 | Pending |
+| PKEY-04 | Phase 2 | Pending |
+| PKEY-05 | Phase 2 | Pending |
+| AKEY-01 | Phase 2 | Pending |
+| AKEY-02 | Phase 2 | Pending |
+| AKEY-03 | Phase 4 | Pending |
+| AKEY-04 | Phase 2 | Pending |
+| AKEY-05 | Phase 4 | Pending |
+| GW-01 | Phase 2 | Pending |
+| GW-02 | Phase 2 | Pending |
+| GW-03 | Phase 2 | Pending |
+| GW-04 | Phase 2 | Pending |
+| GW-05 | Phase 2 | Pending |
+| GW-06 | Phase 5 | Pending |
+| GW-07 | Phase 5 | Pending |
+| GW-08 | Phase 5 | Pending |
+| GW-09 | Phase 5 | Pending |
+| GW-10 | Phase 5 | Pending |
+| TRACK-01 | Phase 3 | Pending |
+| TRACK-02 | Phase 3 | Pending |
+| TRACK-03 | Phase 3 | Pending |
+| TRACK-04 | Phase 3 | Pending |
+| TRACK-05 | Phase 3 | Pending |
+| BUDG-01 | Phase 3 | Pending |
+| BUDG-02 | Phase 3 | Pending |
+| BUDG-03 | Phase 3 | Pending |
+| BUDG-04 | Phase 3 | Pending |
+| BUDG-05 | Phase 3 | Pending |
+| DASH-01 | Phase 4 | Pending |
+| DASH-02 | Phase 4 | Pending |
+| DASH-03 | Phase 4 | Pending |
+| DASH-04 | Phase 4 | Pending |
+| DASH-05 | Phase 4 | Pending |
+| SHIP-01 | Phase 5 | Pending |
+| SHIP-02 | Phase 5 | Pending |
+| SHIP-03 | Phase 5 | Pending |
+| SHIP-04 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 45 total
-- Mapped to phases: 0
-- Unmapped: 45 ⚠️
+- v1 requirements: 49 total
+- Mapped to phases: 49
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-15*
-*Last updated: 2026-03-15 after initial definition*
+*Last updated: 2026-03-15 after roadmap creation*
