@@ -15,10 +15,9 @@
 		},
 		{
 			label: 'Provider Keys',
-			href: '#',
+			href: `/org/${currentOrg.slug}/provider-keys`,
 			icon: 'key',
-			active: false,
-			tooltip: 'Coming in Phase 2'
+			active: true
 		},
 		{
 			label: 'API Keys',
