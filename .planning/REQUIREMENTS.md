@@ -9,11 +9,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Authentication
 
-- [ ] **AUTH-01**: User can create account with email and password
-- [ ] **AUTH-02**: User can log in and stay logged in across sessions
+- [x] **AUTH-01**: User can create account with email and password
+- [x] **AUTH-02**: User can log in and stay logged in across sessions
 - [ ] **AUTH-03**: User can log in via Google OAuth
 - [ ] **AUTH-04**: User can log in via GitHub OAuth
-- [ ] **AUTH-05**: User can reset password via email link
+- [x] **AUTH-05**: User can reset password via email link
 
 ### Organization
 
@@ -125,11 +125,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Complete |
+| AUTH-02 | Phase 1 | Complete |
 | AUTH-03 | Phase 4 | Pending |
 | AUTH-04 | Phase 4 | Pending |
-| AUTH-05 | Phase 1 | Pending |
+| AUTH-05 | Phase 1 | Complete |
 | ORG-01 | Phase 1 | Complete |
 | ORG-02 | Phase 4 | Pending |
 | ORG-03 | Phase 4 | Pending |
