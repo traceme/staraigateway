@@ -1,0 +1,185 @@
+# Requirements: LLMTokenHub
+
+**Defined:** 2026-03-15
+**Core Value:** Any company can sign up, plug in their LLM API keys, and immediately give their entire team controlled, budget-tracked access to AI models.
+
+## v1 Requirements
+
+Requirements for initial release. Each maps to roadmap phases.
+
+### Authentication
+
+- [ ] **AUTH-01**: User can create account with email and password
+- [ ] **AUTH-02**: User can log in and stay logged in across sessions
+- [ ] **AUTH-03**: User can log in via Google OAuth
+- [ ] **AUTH-04**: User can log in via GitHub OAuth
+- [ ] **AUTH-05**: User can reset password via email link
+
+### Organization
+
+- [ ] **ORG-01**: User can create an organization
+- [ ] **ORG-02**: Org owner can invite members via email
+- [ ] **ORG-03**: Org owner can assign roles (Owner, Admin, Member)
+- [ ] **ORG-04**: Admin can remove members from organization
+- [ ] **ORG-05**: Member can view their organization's dashboard
+
+### Provider Keys (BYO)
+
+- [ ] **PKEY-01**: Admin can submit provider API keys (OpenAI, Anthropic, Google, etc.)
+- [ ] **PKEY-02**: Provider keys are encrypted at rest (AES-256-GCM)
+- [ ] **PKEY-03**: Admin can validate submitted keys against provider API
+- [ ] **PKEY-04**: Admin can add/remove/update provider keys
+- [ ] **PKEY-05**: Admin can submit China model provider keys (DeepSeek, Qwen, GLM, Doubao)
+
+### API Keys (Member)
+
+- [ ] **AKEY-01**: Member can create personal API keys for their org
+- [ ] **AKEY-02**: Member can revoke their own API keys
+- [ ] **AKEY-03**: Admin can revoke any member's API keys
+- [ ] **AKEY-04**: Each API key is scoped to one organization
+- [ ] **AKEY-05**: Admin can set per-key rate limits (RPM/TPM)
+
+### API Gateway
+
+- [ ] **GW-01**: API key authenticates requests to `/v1/chat/completions`
+- [ ] **GW-02**: API supports streaming responses via Server-Sent Events
+- [ ] **GW-03**: API passes through function calling / tool use parameters
+- [ ] **GW-04**: API supports `/v1/embeddings` endpoint
+- [ ] **GW-05**: API supports `/v1/models` endpoint listing available models
+- [ ] **GW-06**: API auto-retries on provider 429/500/503 errors
+- [ ] **GW-07**: API falls back to alternative provider when primary is down
+- [ ] **GW-08**: Smart routing selects cheap model for simple tasks, expensive for complex
+- [ ] **GW-09**: Semantic caching returns cached responses for similar queries (Redis)
+- [ ] **GW-10**: Load balances across multiple API keys for same provider
+
+### Usage & Cost Tracking
+
+- [ ] **TRACK-01**: Every request logs tokens (input/output), cost, model, and timestamp
+- [ ] **TRACK-02**: Dashboard shows per-member cost breakdown
+- [ ] **TRACK-03**: Dashboard shows per-team cost breakdown
+- [ ] **TRACK-04**: Dashboard shows daily and monthly usage trends with charts
+- [ ] **TRACK-05**: Dashboard displays model pricing and context window info
+
+### Budget Controls
+
+- [ ] **BUDG-01**: Admin can set hard spend limit per member (reject when exceeded)
+- [ ] **BUDG-02**: Admin can set soft spend limit per member (alert but allow)
+- [ ] **BUDG-03**: Admin can set per-team monthly budget
+- [ ] **BUDG-04**: Budgets reset on configurable monthly cycle
+- [ ] **BUDG-05**: Members receive notification when approaching budget limit
+
+### Dashboard
+
+- [ ] **DASH-01**: Admin dashboard shows org-wide usage and cost overview
+- [ ] **DASH-02**: Member management page (invite, roles, remove)
+- [ ] **DASH-03**: Provider key management page (add, validate, remove)
+- [ ] **DASH-04**: API key management page (create, revoke, view usage)
+- [ ] **DASH-05**: Budget configuration page
+
+### Self-Host & Launch
+
+- [ ] **SHIP-01**: Docker-compose package for self-hosted deployment
+- [ ] **SHIP-02**: Landing page explaining the product and value proposition
+- [ ] **SHIP-03**: Integration docs for Cursor, Continue.dev, and Claude Code setup
+- [ ] **SHIP-04**: Self-host configuration guide
+
+## v2 Requirements
+
+Deferred to future release. Tracked but not in current roadmap.
+
+### Enterprise Auth
+
+- **EAUTH-01**: SSO/SAML integration for enterprise identity providers
+- **EAUTH-02**: SCIM 2.0 user provisioning
+
+### Advanced Observability
+
+- **OBS-01**: Full request/response logging with prompt content
+- **OBS-02**: Audit log of all admin actions (immutable)
+- **OBS-03**: Webhook/alert system for budget alerts and outage notifications
+
+### Advanced Features
+
+- **ADV-01**: API playground for testing models in-browser
+- **ADV-02**: Prompt/response guardrails (content filtering, PII detection)
+- **ADV-03**: Cost optimization recommendations (suggest cheaper models)
+- **ADV-04**: Provider health dashboard (real-time upstream status)
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Built-in chat UI | v1 is API + dashboard only; users bring their own tools (Cursor, etc.) |
+| API credit reselling / markup billing | BYO keys only; reselling adds payment processing complexity |
+| Model fine-tuning / hosting | Requires GPU infrastructure, completely different product |
+| Mobile app | Web dashboard only; ensure responsive design instead |
+| Real-time collaboration | Shared prompts/chat — different product category |
+| Custom model marketplace | Moderation burden, legal complexity |
+| Prompt management / library | Feature creep into LangSmith/PromptLayer space |
+| Complex RBAC (5+ roles) | Three roles sufficient: Owner, Admin, Member |
+| Multi-region deployment | Single region SaaS for v1; self-host users choose their own region |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| AUTH-01 | — | Pending |
+| AUTH-02 | — | Pending |
+| AUTH-03 | — | Pending |
+| AUTH-04 | — | Pending |
+| AUTH-05 | — | Pending |
+| ORG-01 | — | Pending |
+| ORG-02 | — | Pending |
+| ORG-03 | — | Pending |
+| ORG-04 | — | Pending |
+| ORG-05 | — | Pending |
+| PKEY-01 | — | Pending |
+| PKEY-02 | — | Pending |
+| PKEY-03 | — | Pending |
+| PKEY-04 | — | Pending |
+| PKEY-05 | — | Pending |
+| AKEY-01 | — | Pending |
+| AKEY-02 | — | Pending |
+| AKEY-03 | — | Pending |
+| AKEY-04 | — | Pending |
+| AKEY-05 | — | Pending |
+| GW-01 | — | Pending |
+| GW-02 | — | Pending |
+| GW-03 | — | Pending |
+| GW-04 | — | Pending |
+| GW-05 | — | Pending |
+| GW-06 | — | Pending |
+| GW-07 | — | Pending |
+| GW-08 | — | Pending |
+| GW-09 | — | Pending |
+| GW-10 | — | Pending |
+| TRACK-01 | — | Pending |
+| TRACK-02 | — | Pending |
+| TRACK-03 | — | Pending |
+| TRACK-04 | — | Pending |
+| TRACK-05 | — | Pending |
+| BUDG-01 | — | Pending |
+| BUDG-02 | — | Pending |
+| BUDG-03 | — | Pending |
+| BUDG-04 | — | Pending |
+| BUDG-05 | — | Pending |
+| DASH-01 | — | Pending |
+| DASH-02 | — | Pending |
+| DASH-03 | — | Pending |
+| DASH-04 | — | Pending |
+| DASH-05 | — | Pending |
+| SHIP-01 | — | Pending |
+| SHIP-02 | — | Pending |
+| SHIP-03 | — | Pending |
+| SHIP-04 | — | Pending |
+
+**Coverage:**
+- v1 requirements: 45 total
+- Mapped to phases: 0
+- Unmapped: 45 ⚠️
+
+---
+*Requirements defined: 2026-03-15*
+*Last updated: 2026-03-15 after initial definition*
