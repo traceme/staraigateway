@@ -5,7 +5,9 @@ import type {
 	appOrganizations,
 	appOrgMembers,
 	appEmailVerifications,
-	appPasswordResets
+	appPasswordResets,
+	appProviderKeys,
+	appApiKeys
 } from '$lib/server/db/schema';
 
 // Select types (for reading from DB)
@@ -20,6 +22,14 @@ export type PasswordReset = InferSelectModel<typeof appPasswordResets>;
 export type NewUser = InferInsertModel<typeof appUsers>;
 export type NewOrganization = InferInsertModel<typeof appOrganizations>;
 export type NewOrgMember = InferInsertModel<typeof appOrgMembers>;
+
+// Provider key types
+export type ProviderKey = InferSelectModel<typeof appProviderKeys>;
+export type NewProviderKey = InferInsertModel<typeof appProviderKeys>;
+
+// API key types
+export type ApiKey = InferSelectModel<typeof appApiKeys>;
+export type NewApiKey = InferInsertModel<typeof appApiKeys>;
 
 // Role type
 export type OrgRole = 'owner' | 'admin' | 'member';
