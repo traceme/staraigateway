@@ -33,19 +33,19 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### API Keys (Member)
 
-- [ ] **AKEY-01**: Member can create personal API keys for their org
-- [ ] **AKEY-02**: Member can revoke their own API keys
+- [x] **AKEY-01**: Member can create personal API keys for their org
+- [x] **AKEY-02**: Member can revoke their own API keys
 - [ ] **AKEY-03**: Admin can revoke any member's API keys
-- [ ] **AKEY-04**: Each API key is scoped to one organization
+- [x] **AKEY-04**: Each API key is scoped to one organization
 - [ ] **AKEY-05**: Admin can set per-key rate limits (RPM/TPM)
 
 ### API Gateway
 
-- [ ] **GW-01**: API key authenticates requests to `/v1/chat/completions`
-- [ ] **GW-02**: API supports streaming responses via Server-Sent Events
-- [ ] **GW-03**: API passes through function calling / tool use parameters
-- [ ] **GW-04**: API supports `/v1/embeddings` endpoint
-- [ ] **GW-05**: API supports `/v1/models` endpoint listing available models
+- [x] **GW-01**: API key authenticates requests to `/v1/chat/completions`
+- [x] **GW-02**: API supports streaming responses via Server-Sent Events
+- [x] **GW-03**: API passes through function calling / tool use parameters
+- [x] **GW-04**: API supports `/v1/embeddings` endpoint
+- [x] **GW-05**: API supports `/v1/models` endpoint listing available models
 - [ ] **GW-06**: API auto-retries on provider 429/500/503 errors
 - [ ] **GW-07**: API falls back to alternative provider when primary is down
 - [ ] **GW-08**: Smart routing selects cheap model for simple tasks, expensive for complex
@@ -140,16 +140,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PKEY-03 | Phase 2 | Complete |
 | PKEY-04 | Phase 2 | Complete |
 | PKEY-05 | Phase 2 | Complete |
-| AKEY-01 | Phase 2 | Pending |
-| AKEY-02 | Phase 2 | Pending |
+| AKEY-01 | Phase 2 | Complete |
+| AKEY-02 | Phase 2 | Complete |
 | AKEY-03 | Phase 4 | Pending |
-| AKEY-04 | Phase 2 | Pending |
+| AKEY-04 | Phase 2 | Complete |
 | AKEY-05 | Phase 4 | Pending |
-| GW-01 | Phase 2 | Pending |
-| GW-02 | Phase 2 | Pending |
-| GW-03 | Phase 2 | Pending |
-| GW-04 | Phase 2 | Pending |
-| GW-05 | Phase 2 | Pending |
+| GW-01 | Phase 2 | Complete |
+| GW-02 | Phase 2 | Complete |
+| GW-03 | Phase 2 | Complete |
+| GW-04 | Phase 2 | Complete |
+| GW-05 | Phase 2 | Complete |
 | GW-06 | Phase 5 | Pending |
 | GW-07 | Phase 5 | Pending |
 | GW-08 | Phase 5 | Pending |

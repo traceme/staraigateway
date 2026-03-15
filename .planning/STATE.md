@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in-progress
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-03-15T16:22:00.000Z"
-last_activity: "2026-03-15 -- Plan 02-01 executed (provider key management: schema, encryption, CRUD, UI)"
+status: completed
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-03-15T16:27:58.156Z"
+last_activity: "2026-03-15 -- Plan 02-02 executed (member API key management: generation, show-once, CRUD, UI)"
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 4
-  percent: 67
+  completed_plans: 6
+  percent: 100
 ---
 
 # Project State
@@ -44,13 +44,14 @@ Progress: [███████░░░] 67%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation | 3/3 | 12 min | 4 min |
-| 02-core-gateway | 1/3 | 6 min | 6 min |
+| 02-core-gateway | 2/3 | 9 min | 4.5 min |
 
 **Recent Trend:**
 - Last 5 plans: 3 min, 4 min, 5 min, 6 min
 - Trend: stable
 
 *Updated after each plan completion*
+| Phase 02 P03 | 2 min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,12 @@ Recent decisions affecting current work:
 - 02-01: IV:ciphertext:authTag hex format for encrypted key storage
 - 02-01: Direct DB lookups in form actions (SvelteKit parent() not available in RequestEvent)
 - 02-01: Base URL field for custom and azure providers
+- 02-02: Node.js built-in crypto for SHA-256 API key hashing (not oslo)
+- 02-02: base64url encoding for key body (URL-safe, compact)
+- 02-02: Soft delete for revoked keys (isActive=false, keeps audit trail)
+- [Phase 02]: Duplicated key hash lookup in gateway/auth.ts (Plan 02 and 03 run in parallel)
+- [Phase 02]: Fire-and-forget lastUsedAt update to avoid blocking API responses
+- [Phase 02]: Pure SSE pass-through for streaming (no buffering or transformation)
 
 ### Pending Todos
 
@@ -87,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T16:22:00.000Z
-Stopped at: Completed 02-01-PLAN.md
-Resume file: .planning/phases/02-core-gateway/02-01-SUMMARY.md
+Last session: 2026-03-15T16:27:39.792Z
+Stopped at: Completed 02-03-PLAN.md
+Resume file: None
