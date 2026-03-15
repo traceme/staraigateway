@@ -35,7 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 - [x] 01-01-PLAN.md — SvelteKit scaffold and database schema
 - [ ] 01-02-PLAN.md — Complete auth system (signup, login, sessions, email verification, password reset)
-- [ ] 01-03-PLAN.md — Organization creation, LiteLLM integration, app layout shell with dashboard, sidebar, and org switcher
+- [x] 01-03-PLAN.md — Organization creation, LiteLLM integration, app layout shell with dashboard, sidebar, and org switcher
 
 ### Phase 2: Core Gateway
 **Goal**: An org admin can add their LLM provider API keys, members can generate personal API keys, and those keys work with Cursor/Continue.dev/Claude Code via OpenAI-compatible endpoints
@@ -110,7 +110,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 1/3 | In progress | - |
+| 1. Foundation | 2/3 | In progress | - |
 | 2. Core Gateway | 0/3 | Not started | - |
 | 3. Usage & Budget Controls | 0/2 | Not started | - |
 | 4. Dashboard & Team Management | 0/3 | Not started | - |

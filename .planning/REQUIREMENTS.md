@@ -17,11 +17,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Organization
 
-- [ ] **ORG-01**: User can create an organization
+- [x] **ORG-01**: User can create an organization
 - [ ] **ORG-02**: Org owner can invite members via email
 - [ ] **ORG-03**: Org owner can assign roles (Owner, Admin, Member)
 - [ ] **ORG-04**: Admin can remove members from organization
-- [ ] **ORG-05**: Member can view their organization's dashboard
+- [x] **ORG-05**: Member can view their organization's dashboard
 
 ### Provider Keys (BYO)
 
@@ -130,11 +130,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-03 | Phase 4 | Pending |
 | AUTH-04 | Phase 4 | Pending |
 | AUTH-05 | Phase 1 | Pending |
-| ORG-01 | Phase 1 | Pending |
+| ORG-01 | Phase 1 | Complete |
 | ORG-02 | Phase 4 | Pending |
 | ORG-03 | Phase 4 | Pending |
 | ORG-04 | Phase 4 | Pending |
-| ORG-05 | Phase 1 | Pending |
+| ORG-05 | Phase 1 | Complete |
 | PKEY-01 | Phase 2 | Pending |
 | PKEY-02 | Phase 2 | Pending |
 | PKEY-03 | Phase 2 | Pending |
