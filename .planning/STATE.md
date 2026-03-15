@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-15T16:04:00.525Z"
-last_activity: "2026-03-15 -- Plan 01-02 executed (auth system: signup, login, sessions, password reset)"
+status: in-progress
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-03-15T16:22:00.000Z"
+last_activity: "2026-03-15 -- Plan 02-01 executed (provider key management: schema, encryption, CRUD, UI)"
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-  percent: 14
+  total_plans: 6
+  completed_plans: 4
+  percent: 67
 ---
 
 # Project State
@@ -21,32 +21,33 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Any company can sign up, plug in their LLM API keys, and immediately give their entire team controlled, budget-tracked access to AI models.
-**Current focus:** Phase 1: Foundation
+**Current focus:** Phase 2: Core Gateway
 
 ## Current Position
 
-Phase: 1 of 5 (Foundation)
-Plan: 3 of 3 in current phase
-Status: Phase 01 complete (all 3 plans done), ready for Phase 02
-Last activity: 2026-03-15 -- Plan 01-02 executed (auth system: signup, login, sessions, password reset)
+Phase: 2 of 5 (Core Gateway)
+Plan: 1 of 3 in current phase
+Status: Plan 02-01 complete (provider key management), continuing Phase 02
+Last activity: 2026-03-15 -- Plan 02-01 executed (provider key management: schema, encryption, CRUD, UI)
 
-Progress: [##░░░░░░░░] 14%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 4 min
-- Total execution time: 0.2 hours
+- Total plans completed: 4
+- Average duration: 5 min
+- Total execution time: 0.3 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation | 3/3 | 12 min | 4 min |
+| 02-core-gateway | 1/3 | 6 min | 6 min |
 
 **Recent Trend:**
-- Last 5 plans: 3 min, 4 min, 5 min
+- Last 5 plans: 3 min, 4 min, 5 min, 6 min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -70,6 +71,10 @@ Recent decisions affecting current work:
 - 01-02: Oslo crypto libraries (@oslojs/encoding, @oslojs/crypto) for session token hashing
 - 01-02: Anti-enumeration on forgot-password (always shows success)
 - 01-02: Graceful email failure for dev environments without SMTP
+- 02-01: Node.js built-in crypto for AES-256-GCM (no external dependency)
+- 02-01: IV:ciphertext:authTag hex format for encrypted key storage
+- 02-01: Direct DB lookups in form actions (SvelteKit parent() not available in RequestEvent)
+- 02-01: Base URL field for custom and azure providers
 
 ### Pending Todos
 
@@ -82,6 +87,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T16:04:00.522Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-core-gateway/02-CONTEXT.md
+Last session: 2026-03-15T16:22:00.000Z
+Stopped at: Completed 02-01-PLAN.md
+Resume file: .planning/phases/02-core-gateway/02-01-SUMMARY.md

@@ -25,11 +25,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Provider Keys (BYO)
 
-- [ ] **PKEY-01**: Admin can submit provider API keys (OpenAI, Anthropic, Google, etc.)
-- [ ] **PKEY-02**: Provider keys are encrypted at rest (AES-256-GCM)
-- [ ] **PKEY-03**: Admin can validate submitted keys against provider API
-- [ ] **PKEY-04**: Admin can add/remove/update provider keys
-- [ ] **PKEY-05**: Admin can submit China model provider keys (DeepSeek, Qwen, GLM, Doubao)
+- [x] **PKEY-01**: Admin can submit provider API keys (OpenAI, Anthropic, Google, etc.)
+- [x] **PKEY-02**: Provider keys are encrypted at rest (AES-256-GCM)
+- [x] **PKEY-03**: Admin can validate submitted keys against provider API
+- [x] **PKEY-04**: Admin can add/remove/update provider keys
+- [x] **PKEY-05**: Admin can submit China model provider keys (DeepSeek, Qwen, GLM, Doubao)
 
 ### API Keys (Member)
 
@@ -135,11 +135,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ORG-03 | Phase 4 | Pending |
 | ORG-04 | Phase 4 | Pending |
 | ORG-05 | Phase 1 | Complete |
-| PKEY-01 | Phase 2 | Pending |
-| PKEY-02 | Phase 2 | Pending |
-| PKEY-03 | Phase 2 | Pending |
-| PKEY-04 | Phase 2 | Pending |
-| PKEY-05 | Phase 2 | Pending |
+| PKEY-01 | Phase 2 | Complete |
+| PKEY-02 | Phase 2 | Complete |
+| PKEY-03 | Phase 2 | Complete |
+| PKEY-04 | Phase 2 | Complete |
+| PKEY-05 | Phase 2 | Complete |
 | AKEY-01 | Phase 2 | Pending |
 | AKEY-02 | Phase 2 | Pending |
 | AKEY-03 | Phase 4 | Pending |
