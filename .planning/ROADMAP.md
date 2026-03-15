@@ -33,7 +33,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — SvelteKit scaffold and database schema
+- [x] 01-01-PLAN.md — SvelteKit scaffold and database schema
 - [ ] 01-02-PLAN.md — Complete auth system (signup, login, sessions, email verification, password reset)
 - [ ] 01-03-PLAN.md — Organization creation, LiteLLM integration, app layout shell with dashboard, sidebar, and org switcher
 
@@ -110,7 +110,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/3 | Not started | - |
+| 1. Foundation | 1/3 | In progress | - |
 | 2. Core Gateway | 0/3 | Not started | - |
 | 3. Usage & Budget Controls | 0/2 | Not started | - |
 | 4. Dashboard & Team Management | 0/3 | Not started | - |
