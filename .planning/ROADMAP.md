@@ -50,9 +50,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
-- [ ] 02-03: TBD
+- [ ] 02-01-PLAN.md — DB schema (provider keys + API keys tables), AES-256-GCM encryption, provider key CRUD + validation + management UI
+- [ ] 02-02-PLAN.md — Member API key generation with show-once pattern, SHA-256 hashed storage, key management UI
+- [ ] 02-03-PLAN.md — OpenAI-compatible gateway proxy (/v1/chat/completions, /v1/embeddings, /v1/models) with API key auth
 
 ### Phase 3: Usage & Budget Controls
 **Goal**: Admins have full visibility into team spending and can set hard/soft budget limits that automatically enforce themselves
