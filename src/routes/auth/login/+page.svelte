@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { ActionData } from './$types';
+	import { page } from '$app/stores';
+	import OAuthButtons from '$lib/components/auth/OAuthButtons.svelte';
+	import type { ActionData, PageData } from './$types';
 
-	let { form }: { form: ActionData } = $props();
+	let { form, data }: { form: ActionData; data: PageData } = $props();
 	let loading = $state(false);
+
+	const oauthError = $derived($page.url.searchParams.get('error') === 'oauth_failed');
 </script>
 
 <svelte:head>
@@ -12,6 +16,12 @@
 
 <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
 	<h2 class="mb-6 text-lg font-medium text-zinc-50">Log in to your account</h2>
+
+	{#if oauthError}
+		<div class="mb-4 rounded-lg border border-red-800/30 bg-red-900/20 p-4 text-sm text-red-400">
+			Sign in failed. Please try again.
+		</div>
+	{/if}
 
 	<form
 		method="POST"
@@ -66,6 +76,8 @@
 			{loading ? 'Logging in...' : 'Log in'}
 		</button>
 	</form>
+
+	<OAuthButtons googleEnabled={data.googleEnabled} githubEnabled={data.githubEnabled} />
 
 	<p class="mt-4 text-center text-sm text-zinc-400">
 		Don't have an account?

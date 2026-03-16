@@ -5,7 +5,15 @@ import { eq } from 'drizzle-orm';
 import { loginSchema } from '$lib/server/auth/validation';
 import { verifyPassword } from '$lib/server/auth/password';
 import { createSession, SESSION_COOKIE_NAME } from '$lib/server/auth/session';
-import type { Actions } from './$types';
+import { env } from '$env/dynamic/private';
+import type { Actions, PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async () => {
+	return {
+		googleEnabled: !!env.GOOGLE_CLIENT_ID,
+		githubEnabled: !!env.GITHUB_CLIENT_ID
+	};
+};
 
 export const actions = {
 	default: async ({ request, cookies }) => {
