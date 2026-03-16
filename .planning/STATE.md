@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in_progress
-stopped_at: Gap closure phase 6 created from audit
-last_updated: "2026-03-16T14:35:00Z"
-last_activity: 2026-03-16 -- v1.0 audit complete, gap closure phase 6 created
+status: completed
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-03-16T09:10:42Z"
+last_activity: 2026-03-16 -- Plan 06-01 executed (gap closure: notifications wired, cron digest, LiteLLM docker)
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 17
-  completed_plans: 16
-  percent: 94
+  completed_plans: 17
+  percent: 100
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Any company can sign up, plug in their LLM API keys, and immediately give their entire team controlled, budget-tracked access to AI models.
-**Current focus:** Phase 5: Advanced Gateway & Launch
+**Current focus:** Phase 6: Gap Closure (v1.0 milestone complete)
 
 ## Current Position
 
-Phase: 5 of 5 (Advanced Gateway & Launch)
-Plan: 2 of 4 in current phase
-Status: Plan 05-02 complete (gateway settings UI: smart routing config, cache TTL, toggle)
-Last activity: 2026-03-16 -- Plan 05-02 executed (smart routing settings, cache TTL settings, API key toggle)
+Phase: 6 of 6 (Gap Closure - Notifications & Docker)
+Plan: 1 of 1 in current phase
+Status: Plan 06-01 complete (gap closure: notifications, cron digest, LiteLLM docker)
+Last activity: 2026-03-16 -- Plan 06-01 executed (gateway notifications wired, cron digest endpoint, LiteLLM in docker-compose)
 
-Progress: [█████████░] 94%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [█████████░] 94%
 | Phase 05 P03 | 2 | 1 tasks | 8 files |
 | Phase 05 P01 | 8 | 3 tasks | 15 files |
 | Phase 05 P02 | 15 | 2 tasks | 8 files |
+| Phase 06 P01 | 2 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -118,6 +119,9 @@ Recent decisions affecting current work:
 - [Phase 05]: Separate form actions per settings section (saveRouting, saveCacheTtl) for independent saves
 - [Phase 05]: Redis availability checked via $env/dynamic/private at load time, passed as prop
 - [Phase 05]: orgHasRouting requires both cheap AND expensive models to be configured
+- [Phase 06]: Fire-and-forget .catch(() => {}) pattern for gateway notification side effects
+- [Phase 06]: Bearer token CRON_SECRET auth for cron digest endpoint
+- [Phase 06]: Per-org try/catch in digest for fault isolation
 
 ### Pending Todos
 
@@ -130,6 +134,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T07:45:03Z
-Stopped at: Completed 05-02-PLAN.md
-Resume file: .planning/phases/05-advanced-gateway-launch/05-02-SUMMARY.md
+Last session: 2026-03-16T09:10:42Z
+Stopped at: Completed 06-01-PLAN.md
+Resume file: .planning/phases/06-gap-closure-notifications-docker/06-01-SUMMARY.md
