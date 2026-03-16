@@ -23,7 +23,7 @@
 
 **Milestone Goal:** Make LLMTokenHub production-ready with comprehensive test coverage, security audit, performance optimization, and tech debt cleanup before real users arrive.
 
-- [ ] **Phase 7: Tech Debt Cleanup** - Remove dead code, fix DRY violations, harden DB operations and configuration
+- [x] **Phase 7: Tech Debt Cleanup** - Remove dead code, fix DRY violations, harden DB operations and configuration
 - [ ] **Phase 8: Security Hardening** - Fix auth vulnerabilities, restrict CORS, enforce request limits, secure tokens and secrets
 - [ ] **Phase 9: Performance Optimization** - Cache gateway auth, optimize budget queries, fix cache collisions, batch notifications
 - [ ] **Phase 10: Unit Test Coverage** - Unit tests for gateway, auth, and member management modules
@@ -45,8 +45,8 @@
 
 Plans:
 - [x] 07-01-PLAN.md — Remove dead exports, extract shared getBudgetResetDate, standardize .env.example
-- [ ] 07-02-PLAN.md — Transaction-wrap invitation acceptance, session cleanup cron, DB pool config
-- [ ] 07-03-PLAN.md — Migrate models field from text to jsonb, remove JSON.parse calls
+- [x] 07-02-PLAN.md — Transaction-wrap invitation acceptance, session cleanup cron, DB pool config
+- [x] 07-03-PLAN.md — Migrate models field from text to jsonb, remove JSON.parse calls
 
 ### Phase 8: Security Hardening
 **Goal**: All known security vulnerabilities are fixed and the gateway is safe for production traffic
@@ -122,7 +122,7 @@ Plans:
 | 4. Dashboard & Team Management | v1.0 | 3/3 | Complete | 2026-03-16 |
 | 5. Advanced Gateway & Launch | v1.0 | 4/4 | Complete | 2026-03-16 |
 | 6. Gap Closure | v1.0 | 1/1 | Complete | 2026-03-16 |
-| 7. Tech Debt Cleanup | v1.1 | 2/3 | In Progress | - |
+| 7. Tech Debt Cleanup | v1.1 | 3/3 | Complete | 2026-03-17 |
 | 8. Security Hardening | v1.1 | 0/? | Not started | - |
 | 9. Performance Optimization | v1.1 | 0/? | Not started | - |
 | 10. Unit Test Coverage | v1.1 | 0/? | Not started | - |
