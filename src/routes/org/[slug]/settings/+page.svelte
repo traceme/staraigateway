@@ -1,5 +1,7 @@
 <script lang="ts">
 	import OrgSettingsForm from '$lib/components/settings/OrgSettingsForm.svelte';
+	import SmartRoutingSettings from '$lib/components/settings/SmartRoutingSettings.svelte';
+	import CacheTtlSetting from '$lib/components/settings/CacheTtlSetting.svelte';
 
 	let { data } = $props();
 </script>
@@ -16,11 +18,29 @@
 		</p>
 	</div>
 
-	<div class="rounded-lg border border-zinc-800 bg-zinc-900/50 p-6">
-		<OrgSettingsForm
-			defaultRpmLimit={data.defaultRpmLimit}
-			defaultTpmLimit={data.defaultTpmLimit}
-			orgSlug={data.currentOrg.slug}
-		/>
+	<div class="space-y-8">
+		<div class="rounded-lg border border-zinc-800 bg-zinc-900/50 p-6">
+			<OrgSettingsForm
+				defaultRpmLimit={data.defaultRpmLimit}
+				defaultTpmLimit={data.defaultTpmLimit}
+				orgSlug={data.currentOrg.slug}
+			/>
+		</div>
+
+		<div class="rounded-lg border border-zinc-800 bg-zinc-900/50 p-6">
+			<SmartRoutingSettings
+				cheapModel={data.smartRoutingCheapModel}
+				expensiveModel={data.smartRoutingExpensiveModel}
+				orgSlug={data.currentOrg.slug}
+			/>
+		</div>
+
+		<div class="rounded-lg border border-zinc-800 bg-zinc-900/50 p-6">
+			<CacheTtlSetting
+				cacheTtlSeconds={data.cacheTtlSeconds}
+				orgSlug={data.currentOrg.slug}
+				redisAvailable={data.redisAvailable}
+			/>
+		</div>
 	</div>
 </div>
