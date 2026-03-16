@@ -100,9 +100,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
-- [ ] 05-03: TBD
+- [ ] 05-01-PLAN.md — Gateway resilience: retry/fallback, smart routing, Redis caching, round-robin load balancing, vitest setup + unit tests
+- [ ] 05-02-PLAN.md — Smart routing & cache settings UI (org settings page extensions, API key smart routing toggle)
+- [ ] 05-03-PLAN.md — Landing page, integration docs, Docker packaging, self-host guide
 
 ## Progress
 
