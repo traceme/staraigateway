@@ -4,6 +4,7 @@ import { verificationEmail } from './emails/verification';
 import { passwordResetEmail } from './emails/password-reset';
 import { budgetWarningEmail } from './emails/budget-warning';
 import { adminDigestEmail } from './emails/admin-digest';
+import { invitationEmail } from './emails/invitation';
 
 function getTransport() {
 	return nodemailer.createTransport({
@@ -71,6 +72,26 @@ export async function sendBudgetWarningEmail(
 	const { subject, html, text } = budgetWarningEmail(memberName, currentSpend, limit, orgName);
 	const transport = getTransport();
 	await transport.sendMail({ from: getFromAddress(), to: email, subject, html, text });
+}
+
+export async function sendInvitationEmail(
+	email: string,
+	token: string,
+	orgName: string,
+	inviterName: string,
+	role: string
+): Promise<void> {
+	const acceptUrl = `${getAppUrl()}/auth/invite/${token}`;
+	const { subject, html, text } = invitationEmail(orgName, inviterName, role, acceptUrl);
+
+	const transport = getTransport();
+	await transport.sendMail({
+		from: getFromAddress(),
+		to: email,
+		subject,
+		html,
+		text
+	});
 }
 
 export async function sendAdminDigestEmail(
