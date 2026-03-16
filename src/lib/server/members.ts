@@ -131,19 +131,20 @@ export async function acceptInvitation(
 		return { orgId: invitation.orgId };
 	}
 
-	// Insert org membership
-	await db.insert(appOrgMembers).values({
-		id: crypto.randomUUID(),
-		orgId: invitation.orgId,
-		userId,
-		role: invitation.role
-	});
+	// Atomic: insert membership + mark invitation accepted (rolls back on failure)
+	await db.transaction(async (tx) => {
+		await tx.insert(appOrgMembers).values({
+			id: crypto.randomUUID(),
+			orgId: invitation.orgId,
+			userId,
+			role: invitation.role
+		});
 
-	// Mark invitation as accepted
-	await db
-		.update(appOrgInvitations)
-		.set({ acceptedAt: new Date() })
-		.where(eq(appOrgInvitations.id, invitation.id));
+		await tx
+			.update(appOrgInvitations)
+			.set({ acceptedAt: new Date() })
+			.where(eq(appOrgInvitations.id, invitation.id));
+	});
 
 	return { orgId: invitation.orgId };
 }
