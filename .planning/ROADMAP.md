@@ -41,11 +41,12 @@
   3. Invitation acceptance either fully completes (member added AND invitation marked accepted) or fully rolls back on failure
   4. `.env.example` lists every required env var with consistent naming (`APP_URL` not `BASE_URL`), and `CRON_SECRET` is documented with generation instructions
   5. `models` field is stored as `jsonb` in PostgreSQL and no manual `JSON.parse` calls exist for that field in application code
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
+- [ ] 07-01-PLAN.md — Remove dead exports, extract shared getBudgetResetDate, standardize .env.example
+- [ ] 07-02-PLAN.md — Transaction-wrap invitation acceptance, session cleanup cron, DB pool config
+- [ ] 07-03-PLAN.md — Migrate models field from text to jsonb, remove JSON.parse calls
 
 ### Phase 8: Security Hardening
 **Goal**: All known security vulnerabilities are fixed and the gateway is safe for production traffic
@@ -121,7 +122,7 @@ Plans:
 | 4. Dashboard & Team Management | v1.0 | 3/3 | Complete | 2026-03-16 |
 | 5. Advanced Gateway & Launch | v1.0 | 4/4 | Complete | 2026-03-16 |
 | 6. Gap Closure | v1.0 | 1/1 | Complete | 2026-03-16 |
-| 7. Tech Debt Cleanup | v1.1 | 0/? | Not started | - |
+| 7. Tech Debt Cleanup | v1.1 | 0/3 | Not started | - |
 | 8. Security Hardening | v1.1 | 0/? | Not started | - |
 | 9. Performance Optimization | v1.1 | 0/? | Not started | - |
 | 10. Unit Test Coverage | v1.1 | 0/? | Not started | - |
