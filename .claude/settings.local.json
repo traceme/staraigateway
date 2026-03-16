@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(gsd:map-codebase)",
+      "Bash(grep:*)",
+      "Bash(node:*)",
+      "Bash(git init:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Skill(gsd:ui-phase)",
+      "Skill(gsd:discuss-phase)",
+      "WebSearch",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npm run:*)",
+      "Bash(cat:*)",
+      "Skill(gsd:plan-milestone-gaps)",
+      "Skill(gsd:new-milestone)"
+    ]
+  }
+}
