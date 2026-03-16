@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Completed 05-03-PLAN.md
-last_updated: "2026-03-16T07:10:38.217Z"
-last_activity: 2026-03-16 -- Plan 03-03 executed (budget config UI, warning banner, email notifications)
+status: in-progress
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-03-16T07:11:30Z"
+last_activity: 2026-03-16 -- Plan 05-01 executed (retry/fallback, smart routing, Redis cache, round-robin)
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 16
-  completed_plans: 14
-  percent: 100
+  completed_plans: 15
+  percent: 94
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Any company can sign up, plug in their LLM API keys, and immediately give their entire team controlled, budget-tracked access to AI models.
-**Current focus:** Phase 3: Usage & Budget Controls
+**Current focus:** Phase 5: Advanced Gateway & Launch
 
 ## Current Position
 
-Phase: 3 of 5 (Usage & Budget Controls)
-Plan: 3 of 3 in current phase (PHASE COMPLETE)
-Status: Plan 03-03 complete (budget config UI, warning banner, email notifications)
-Last activity: 2026-03-16 -- Plan 03-03 executed (budget config UI, warning banner, email notifications)
+Phase: 5 of 5 (Advanced Gateway & Launch)
+Plan: 1 of 4 in current phase
+Status: Plan 05-01 complete (retry/fallback, smart routing, Redis cache, round-robin)
+Last activity: 2026-03-16 -- Plan 05-01 executed (retry/fallback, smart routing, Redis cache, round-robin)
 
-Progress: [██████████] 100%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Progress: [██████████] 100%
 | Phase 04 P03 | 5 | 2 tasks | 11 files |
 | Phase 04 P02 | 5 | 3 tasks | 15 files |
 | Phase 05 P03 | 2 | 1 tasks | 8 files |
+| Phase 05 P01 | 8 | 3 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,11 @@ Recent decisions affecting current work:
 - [Phase 04]: Member removal cascades to deactivate all API keys (soft delete)
 - [Phase 04]: Only owner can change roles; admins and owners can invite/remove
 - [Phase 05]: Landing page as standalone public page outside app sidebar layout
+- [Phase 05]: ioredis for Redis client (mature, supports lazy connect, retry strategies)
+- [Phase 05]: In-memory Map for round-robin counters (no Redis dependency for rotation state)
+- [Phase 05]: ~4 chars per token heuristic for smart routing estimation
+- [Phase 05]: Cache-aside pattern: check before call, set after success, fire-and-forget
+- [Phase 05]: Vitest $env/dynamic/private mock via resolve alias
 
 ### Pending Todos
 
@@ -120,6 +126,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T07:06:08.127Z
-Stopped at: Completed 05-03-PLAN.md
-Resume file: None
+Last session: 2026-03-16T07:11:30Z
+Stopped at: Completed 05-01-PLAN.md
+Resume file: .planning/phases/05-advanced-gateway-launch/05-01-SUMMARY.md

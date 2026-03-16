@@ -100,7 +100,7 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Gateway resilience: retry/fallback, smart routing, Redis caching, round-robin load balancing, vitest setup + unit/integration tests
+- [x] 05-01-PLAN.md — Gateway resilience: retry/fallback, smart routing, Redis caching, round-robin load balancing, vitest setup + unit/integration tests
 - [ ] 05-02-PLAN.md — Smart routing & cache settings UI (org settings page extensions, API key smart routing toggle)
 - [ ] 05-03-PLAN.md — Landing page with hero, features grid, cost comparison, self-host CTA, and footer
 - [ ] 05-04-PLAN.md — Integration docs, Docker packaging, self-host guide
@@ -116,4 +116,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 2. Core Gateway | 1/3 | In Progress|  |
 | 3. Usage & Budget Controls | 2/3 | In Progress|  |
 | 4. Dashboard & Team Management | 0/3 | Not started | - |
-| 5. Advanced Gateway & Launch | 2/4 | In Progress|  |
+| 5. Advanced Gateway & Launch | 3/4 | In Progress|  |

@@ -9,11 +9,15 @@ export interface GatewayAuth {
 	apiKeyId: string;
 	effectiveRpmLimit: number | null;
 	effectiveTpmLimit: number | null;
+	smartRouting: boolean;
 	org: {
 		id: string;
 		name: string;
 		slug: string;
 		litellmOrgId: string | null;
+		smartRoutingCheapModel: string | null;
+		smartRoutingExpensiveModel: string | null;
+		cacheTtlSeconds: number;
 	};
 }
 
@@ -40,11 +44,15 @@ export async function authenticateApiKey(request: Request): Promise<GatewayAuth 
 			orgId: appApiKeys.orgId,
 			rpmLimit: appApiKeys.rpmLimit,
 			tpmLimit: appApiKeys.tpmLimit,
+			smartRouting: appApiKeys.smartRouting,
 			orgName: appOrganizations.name,
 			orgSlug: appOrganizations.slug,
 			litellmOrgId: appOrganizations.litellmOrgId,
 			defaultRpmLimit: appOrganizations.defaultRpmLimit,
-			defaultTpmLimit: appOrganizations.defaultTpmLimit
+			defaultTpmLimit: appOrganizations.defaultTpmLimit,
+			smartRoutingCheapModel: appOrganizations.smartRoutingCheapModel,
+			smartRoutingExpensiveModel: appOrganizations.smartRoutingExpensiveModel,
+			cacheTtlSeconds: appOrganizations.cacheTtlSeconds
 		})
 		.from(appApiKeys)
 		.innerJoin(appOrganizations, eq(appApiKeys.orgId, appOrganizations.id))
@@ -72,11 +80,15 @@ export async function authenticateApiKey(request: Request): Promise<GatewayAuth 
 		apiKeyId: row.keyId,
 		effectiveRpmLimit,
 		effectiveTpmLimit,
+		smartRouting: row.smartRouting,
 		org: {
 			id: row.orgId,
 			name: row.orgName,
 			slug: row.orgSlug,
-			litellmOrgId: row.litellmOrgId
+			litellmOrgId: row.litellmOrgId,
+			smartRoutingCheapModel: row.smartRoutingCheapModel,
+			smartRoutingExpensiveModel: row.smartRoutingExpensiveModel,
+			cacheTtlSeconds: row.cacheTtlSeconds
 		}
 	};
 }

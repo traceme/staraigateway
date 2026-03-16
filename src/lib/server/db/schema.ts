@@ -49,6 +49,9 @@ export const appOrganizations = pgTable(
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 		defaultRpmLimit: integer('default_rpm_limit'),
 		defaultTpmLimit: integer('default_tpm_limit'),
+		smartRoutingCheapModel: text('smart_routing_cheap_model'),
+		smartRoutingExpensiveModel: text('smart_routing_expensive_model'),
+		cacheTtlSeconds: integer('cache_ttl_seconds').notNull().default(3600),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 	},
 	(table) => [index('app_organizations_slug_idx').on(table.slug)]
@@ -129,6 +132,7 @@ export const appApiKeys = pgTable(
 		keyHash: text('key_hash').notNull(), // SHA-256 hash of full key
 		rpmLimit: integer('rpm_limit'),
 		tpmLimit: integer('tpm_limit'),
+		smartRouting: boolean('smart_routing').notNull().default(false),
 		isActive: boolean('is_active').notNull().default(true),
 		lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()

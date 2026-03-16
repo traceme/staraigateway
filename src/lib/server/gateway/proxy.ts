@@ -17,15 +17,48 @@ import {
 	rateLimitResponse,
 	addRateLimitHeaders
 } from './rate-limit';
+import { selectKeyRoundRobin } from './load-balancer';
+import { estimateTokenCount, selectModelTier } from './routing';
+import { generateCacheKey, getCachedResponse, setCachedResponse } from './cache';
+import { getRedis } from '$lib/server/redis';
 
 const LITELLM_API_URL = env.LITELLM_API_URL ?? 'http://localhost:4000';
 
+export const RETRYABLE_STATUSES = new Set([429, 500, 503]);
+const MAX_RETRIES = 3;
+const BASE_DELAY_MS = 500;
+
 /**
- * Proxy a request to LiteLLM with the org's decrypted provider key.
- * Selects the first active provider key that supports the requested model.
- * Supports both streaming (SSE pass-through) and non-streaming responses.
- * Logs usage data (token counts, cost) fire-and-forget after response.
- * Enforces per-key rate limits (RPM/TPM) before forwarding.
+ * Fetch with exponential backoff retry on retryable status codes (429, 500, 503).
+ * Returns the last response after all retries are exhausted.
+ */
+export async function fetchWithRetry(
+	url: string,
+	init: RequestInit,
+	retries = MAX_RETRIES
+): Promise<Response> {
+	for (let attempt = 0; attempt <= retries; attempt++) {
+		const response = await fetch(url, init);
+		if (!RETRYABLE_STATUSES.has(response.status) || attempt === retries) return response;
+		const delay = BASE_DELAY_MS * Math.pow(2, attempt);
+		const jitter = delay * 0.25 * Math.random();
+		await new Promise((resolve) => setTimeout(resolve, delay + jitter));
+	}
+	// Should not reach here, but TypeScript needs it
+	throw new Error('Retry exhausted');
+}
+
+/**
+ * Proxy a request to LiteLLM with retry/fallback, smart routing, caching, and load balancing.
+ *
+ * Flow:
+ * 1. Parse request, extract model + messages
+ * 2. Smart routing: substitute model for small requests (if enabled)
+ * 3. Cache check: return cached response for non-streaming (if Redis available)
+ * 4. Rate limit check
+ * 5. Key selection with round-robin across matching provider keys
+ * 6. Try each key with fetchWithRetry, fallback to next key on failure
+ * 7. Cache set on success for non-streaming responses
  */
 export async function proxyToLiteLLM(
 	request: Request,
@@ -52,12 +85,57 @@ export async function proxyToLiteLLM(
 		return errorResponse(400, 'Invalid JSON in request body', 'invalid_request_error');
 	}
 
-	const model = body.model as string | undefined;
-	if (!model) {
+	const requestedModel = body.model as string | undefined;
+	if (!requestedModel) {
 		return errorResponse(400, 'Missing "model" field in request body', 'invalid_request_error');
 	}
 
-	// Find an active provider key that supports this model
+	// --- Smart Routing: substitute model for small requests ---
+	let effectiveModel = requestedModel;
+	let effectiveBody = body;
+
+	if (
+		auth?.smartRouting &&
+		auth.org.smartRoutingCheapModel &&
+		auth.org.smartRoutingExpensiveModel
+	) {
+		const messages = body.messages as Array<{ content?: string }> | undefined;
+		if (messages) {
+			const tokens = estimateTokenCount(messages);
+			const selectedModel = selectModelTier(
+				tokens,
+				auth.org.smartRoutingCheapModel,
+				auth.org.smartRoutingExpensiveModel
+			);
+			if (selectedModel !== requestedModel) {
+				effectiveModel = selectedModel;
+				effectiveBody = { ...body, model: effectiveModel };
+			}
+		}
+	}
+
+	const isStreaming = effectiveBody.stream === true;
+
+	// --- Cache check (non-streaming only) ---
+	let cacheKey: string | null = null;
+	if (!isStreaming && getRedis()) {
+		const messages = effectiveBody.messages as unknown[] | undefined;
+		if (messages) {
+			cacheKey = generateCacheKey(orgId, effectiveModel, messages);
+			const cached = await getCachedResponse(cacheKey);
+			if (cached) {
+				return new Response(cached, {
+					status: 200,
+					headers: {
+						'Content-Type': 'application/json',
+						'X-Cache': 'HIT'
+					}
+				});
+			}
+		}
+	}
+
+	// --- Find all active provider keys ---
 	const providerKeys = await db
 		.select({
 			id: appProviderKeys.id,
@@ -69,287 +147,329 @@ export async function proxyToLiteLLM(
 		.from(appProviderKeys)
 		.where(and(eq(appProviderKeys.orgId, orgId), eq(appProviderKeys.isActive, true)));
 
-	// Find the first key whose models array contains the requested model
-	const matchingKey = providerKeys.find((key) => {
+	// Find all keys whose models array contains the effective model
+	let matchingKeys = providerKeys.filter((key) => {
 		if (!key.models) return false;
 		try {
 			const modelList = JSON.parse(key.models) as string[];
-			return modelList.includes(model);
+			return modelList.includes(effectiveModel);
 		} catch {
 			return false;
 		}
 	});
 
-	if (!matchingKey) {
+	// If smart routing substituted the model but no keys match, fall back to requested model
+	if (matchingKeys.length === 0 && effectiveModel !== requestedModel) {
+		effectiveModel = requestedModel;
+		effectiveBody = body;
+		matchingKeys = providerKeys.filter((key) => {
+			if (!key.models) return false;
+			try {
+				const modelList = JSON.parse(key.models) as string[];
+				return modelList.includes(requestedModel);
+			} catch {
+				return false;
+			}
+		});
+	}
+
+	if (matchingKeys.length === 0) {
 		return errorResponse(
 			404,
-			`No provider configured for model: ${model}`,
+			`No provider configured for model: ${effectiveModel}`,
 			'invalid_request_error'
 		);
 	}
 
-	// Decrypt the provider key
-	let decryptedKey: string;
-	try {
-		decryptedKey = decrypt(matchingKey.encryptedKey);
-	} catch {
-		return errorResponse(500, 'Failed to decrypt provider key', 'server_error');
-	}
-
-	// Build headers for LiteLLM
-	const providerDef = getProvider(matchingKey.provider);
-	const headers: Record<string, string> = {
-		'Content-Type': 'application/json'
-	};
-
-	// Set auth header in the format the provider expects
-	if (providerDef?.authHeader === 'x-api-key') {
-		headers['x-api-key'] = decryptedKey;
-	} else if (providerDef?.authHeader === 'api-key') {
-		headers['api-key'] = decryptedKey;
-	} else {
-		headers['Authorization'] = `Bearer ${decryptedKey}`;
-	}
-
-	// Forward to LiteLLM
-	const litellmUrl = `${LITELLM_API_URL}${path}`;
-	const isStreaming = body.stream === true;
+	// --- Round-robin key ordering ---
+	const provider = matchingKeys[0].provider;
+	const orderedKeys = selectKeyRoundRobin(matchingKeys, orgId, provider);
 
 	// Get rate limit snapshot for response headers
 	const rlSnapshot = auth
 		? checkRateLimit(apiKeyId ?? '', auth.effectiveRpmLimit, auth.effectiveTpmLimit)
 		: null;
 
-	try {
-		const litellmResponse = await fetch(litellmUrl, {
-			method: 'POST',
-			headers,
-			body: JSON.stringify(body)
-		});
+	const litellmUrl = `${LITELLM_API_URL}${path}`;
 
-		if (!litellmResponse.ok) {
-			// Pass through LiteLLM error response
-			const errorBody = await litellmResponse.text();
-			const latencyMs = Date.now() - startTime;
+	// --- Try each key with retry/fallback ---
+	let lastErrorResponse: Response | null = null;
 
-			// Log error usage if auth is available
-			if (auth && apiKeyId) {
-				logUsage(
-					auth,
-					apiKeyId,
-					path,
-					model,
-					matchingKey.provider,
-					0,
-					0,
-					0,
-					latencyMs,
-					'error',
-					isStreaming,
-					`LiteLLM returned ${litellmResponse.status}`
-				);
-			}
-
-			return new Response(errorBody, {
-				status: litellmResponse.status,
-				headers: {
-					'Content-Type':
-						litellmResponse.headers.get('Content-Type') ?? 'application/json'
-				}
-			});
+	for (const key of orderedKeys) {
+		// Decrypt the provider key
+		let decryptedKey: string;
+		try {
+			decryptedKey = decrypt(key.encryptedKey);
+		} catch {
+			continue; // Skip keys that fail to decrypt
 		}
 
-		// Streaming response: pass through SSE with usage extraction
-		if (isStreaming && litellmResponse.body) {
-			const reader = litellmResponse.body.getReader();
-			const decoder = new TextDecoder();
-			// Ring buffer to keep the last few SSE lines for usage extraction
-			const recentLines: string[] = [];
-			const MAX_RECENT = 10;
+		// Build headers for LiteLLM
+		const providerDef = getProvider(key.provider);
+		const headers: Record<string, string> = {
+			'Content-Type': 'application/json'
+		};
 
-			const stream = new ReadableStream({
-				async pull(controller) {
-					try {
-						const { done, value } = await reader.read();
-						if (done) {
-							// Stream ended - extract usage from buffered lines
-							const latencyMs = Date.now() - startTime;
-							if (auth && apiKeyId) {
-								const sseText = recentLines.join('\n');
-								const usage = extractUsageFromSSEText(sseText);
-								const totalTokens = usage
-									? usage.inputTokens + usage.outputTokens
-									: 0;
-								// Record tokens for rate limiting
-								recordRequest(apiKeyId, totalTokens);
-								if (usage) {
-									const cost = calculateCost(
-										usage.model || model,
-										usage.inputTokens,
-										usage.outputTokens
-									);
-									logUsage(
-										auth,
-										apiKeyId,
-										path,
-										usage.model || model,
-										matchingKey.provider,
-										usage.inputTokens,
-										usage.outputTokens,
-										cost,
-										latencyMs,
-										'success',
-										true
-									);
-								} else {
-									// No usage data found in stream - log with zero tokens
-									logUsage(
-										auth,
-										apiKeyId,
-										path,
-										model,
-										matchingKey.provider,
-										0,
-										0,
-										0,
-										latencyMs,
-										'success',
-										true
-									);
+		if (providerDef?.authHeader === 'x-api-key') {
+			headers['x-api-key'] = decryptedKey;
+		} else if (providerDef?.authHeader === 'api-key') {
+			headers['api-key'] = decryptedKey;
+		} else {
+			headers['Authorization'] = `Bearer ${decryptedKey}`;
+		}
+
+		try {
+			const litellmResponse = await fetchWithRetry(litellmUrl, {
+				method: 'POST',
+				headers,
+				body: JSON.stringify(effectiveBody)
+			});
+
+			// If not OK and retryable, try next key
+			if (!litellmResponse.ok && RETRYABLE_STATUSES.has(litellmResponse.status)) {
+				lastErrorResponse = litellmResponse;
+				continue;
+			}
+
+			if (!litellmResponse.ok) {
+				// Non-retryable error — pass through
+				const errorBody = await litellmResponse.text();
+				const latencyMs = Date.now() - startTime;
+
+				if (auth && apiKeyId) {
+					logUsage(
+						auth,
+						apiKeyId,
+						path,
+						effectiveModel,
+						key.provider,
+						0,
+						0,
+						0,
+						latencyMs,
+						'error',
+						isStreaming,
+						`LiteLLM returned ${litellmResponse.status}`
+					);
+				}
+
+				return new Response(errorBody, {
+					status: litellmResponse.status,
+					headers: {
+						'Content-Type':
+							litellmResponse.headers.get('Content-Type') ?? 'application/json'
+					}
+				});
+			}
+
+			// --- Streaming response: pass through SSE with usage extraction ---
+			if (isStreaming && litellmResponse.body) {
+				const reader = litellmResponse.body.getReader();
+				const decoder = new TextDecoder();
+				const recentLines: string[] = [];
+				const MAX_RECENT = 10;
+
+				const stream = new ReadableStream({
+					async pull(controller) {
+						try {
+							const { done, value } = await reader.read();
+							if (done) {
+								const latencyMs = Date.now() - startTime;
+								if (auth && apiKeyId) {
+									const sseText = recentLines.join('\n');
+									const usage = extractUsageFromSSEText(sseText);
+									const totalTokens = usage
+										? usage.inputTokens + usage.outputTokens
+										: 0;
+									recordRequest(apiKeyId, totalTokens);
+									if (usage) {
+										const cost = calculateCost(
+											usage.model || effectiveModel,
+											usage.inputTokens,
+											usage.outputTokens
+										);
+										logUsage(
+											auth,
+											apiKeyId,
+											path,
+											usage.model || effectiveModel,
+											key.provider,
+											usage.inputTokens,
+											usage.outputTokens,
+											cost,
+											latencyMs,
+											'success',
+											true
+										);
+									} else {
+										logUsage(
+											auth,
+											apiKeyId,
+											path,
+											effectiveModel,
+											key.provider,
+											0,
+											0,
+											0,
+											latencyMs,
+											'success',
+											true
+										);
+									}
+								}
+								controller.close();
+								return;
+							}
+
+							controller.enqueue(value);
+
+							const text = decoder.decode(value, { stream: true });
+							const lines = text.split('\n').filter((l) => l.trim().length > 0);
+							for (const line of lines) {
+								recentLines.push(line);
+								if (recentLines.length > MAX_RECENT) {
+									recentLines.shift();
 								}
 							}
-							controller.close();
-							return;
-						}
-
-						// Pass through the chunk unchanged
-						controller.enqueue(value);
-
-						// Buffer recent lines for usage extraction
-						const text = decoder.decode(value, { stream: true });
-						const lines = text.split('\n').filter((l) => l.trim().length > 0);
-						for (const line of lines) {
-							recentLines.push(line);
-							if (recentLines.length > MAX_RECENT) {
-								recentLines.shift();
+						} catch (err) {
+							const latencyMs = Date.now() - startTime;
+							if (auth && apiKeyId) {
+								logUsage(
+									auth,
+									apiKeyId,
+									path,
+									effectiveModel,
+									key.provider,
+									0,
+									0,
+									0,
+									latencyMs,
+									'error',
+									true,
+									err instanceof Error ? err.message : 'Stream read error'
+								);
 							}
+							controller.error(err);
 						}
-					} catch (err) {
-						const latencyMs = Date.now() - startTime;
-						if (auth && apiKeyId) {
-							logUsage(
-								auth,
-								apiKeyId,
-								path,
-								model,
-								matchingKey.provider,
-								0,
-								0,
-								0,
-								latencyMs,
-								'error',
-								true,
-								err instanceof Error ? err.message : 'Stream read error'
-							);
-						}
-						controller.error(err);
+					},
+					cancel() {
+						reader.cancel();
 					}
-				},
-				cancel() {
-					reader.cancel();
-				}
-			});
+				});
 
-			// Add rate limit headers to the initial SSE response
-			const sseResponse = new Response(stream, {
+				const sseResponse = new Response(stream, {
+					status: 200,
+					headers: {
+						'Content-Type': 'text/event-stream',
+						'Cache-Control': 'no-cache',
+						Connection: 'keep-alive'
+					}
+				});
+
+				return rlSnapshot ? addRateLimitHeaders(sseResponse, rlSnapshot) : sseResponse;
+			}
+
+			// --- Non-streaming: return JSON response with usage logging + cache set ---
+			const responseBody = await litellmResponse.text();
+			const latencyMs = Date.now() - startTime;
+
+			if (auth && apiKeyId) {
+				const usage = extractUsageFromJSON(responseBody);
+				const totalTokens = usage ? usage.inputTokens + usage.outputTokens : 0;
+				recordRequest(apiKeyId, totalTokens);
+				if (usage) {
+					const cost = calculateCost(
+						usage.model || effectiveModel,
+						usage.inputTokens,
+						usage.outputTokens
+					);
+					logUsage(
+						auth,
+						apiKeyId,
+						path,
+						usage.model || effectiveModel,
+						key.provider,
+						usage.inputTokens,
+						usage.outputTokens,
+						cost,
+						latencyMs,
+						'success',
+						false
+					);
+				} else {
+					logUsage(
+						auth,
+						apiKeyId,
+						path,
+						effectiveModel,
+						key.provider,
+						0,
+						0,
+						0,
+						latencyMs,
+						'success',
+						false
+					);
+				}
+			}
+
+			// Cache set on success (fire-and-forget)
+			if (cacheKey && auth) {
+				try {
+					setCachedResponse(cacheKey, responseBody, auth.org.cacheTtlSeconds);
+				} catch {
+					// Silently fail
+				}
+			}
+
+			const jsonResponse = new Response(responseBody, {
 				status: 200,
 				headers: {
-					'Content-Type': 'text/event-stream',
-					'Cache-Control': 'no-cache',
-					Connection: 'keep-alive'
+					'Content-Type': 'application/json',
+					'X-Cache': 'MISS'
 				}
 			});
 
-			return rlSnapshot ? addRateLimitHeaders(sseResponse, rlSnapshot) : sseResponse;
+			return rlSnapshot ? addRateLimitHeaders(jsonResponse, rlSnapshot) : jsonResponse;
+		} catch (err) {
+			// Network error for this key, try next
+			lastErrorResponse = new Response(
+				JSON.stringify({
+					error: {
+						message: err instanceof Error ? err.message : 'Unknown proxy error',
+						type: 'server_error',
+						code: 'server_error'
+					}
+				}),
+				{ status: 502, headers: { 'Content-Type': 'application/json' } }
+			);
+			continue;
 		}
+	}
 
-		// Non-streaming: return JSON response with usage logging
-		const responseBody = await litellmResponse.text();
+	// All keys exhausted — return last error
+	if (lastErrorResponse) {
 		const latencyMs = Date.now() - startTime;
-
-		if (auth && apiKeyId) {
-			const usage = extractUsageFromJSON(responseBody);
-			const totalTokens = usage ? usage.inputTokens + usage.outputTokens : 0;
-			// Record tokens for rate limiting
-			recordRequest(apiKeyId, totalTokens);
-			if (usage) {
-				const cost = calculateCost(
-					usage.model || model,
-					usage.inputTokens,
-					usage.outputTokens
-				);
-				logUsage(
-					auth,
-					apiKeyId,
-					path,
-					usage.model || model,
-					matchingKey.provider,
-					usage.inputTokens,
-					usage.outputTokens,
-					cost,
-					latencyMs,
-					'success',
-					false
-				);
-			} else {
-				// No usage data in response - log with zero tokens
-				logUsage(
-					auth,
-					apiKeyId,
-					path,
-					model,
-					matchingKey.provider,
-					0,
-					0,
-					0,
-					latencyMs,
-					'success',
-					false
-				);
-			}
-		}
-
-		const jsonResponse = new Response(responseBody, {
-			status: 200,
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		});
-
-		return rlSnapshot ? addRateLimitHeaders(jsonResponse, rlSnapshot) : jsonResponse;
-	} catch (err) {
-		const message = err instanceof Error ? err.message : 'Unknown proxy error';
-		const latencyMs = Date.now() - startTime;
-
 		if (auth && apiKeyId) {
 			logUsage(
 				auth,
 				apiKeyId,
 				path,
-				model,
-				matchingKey.provider,
+				effectiveModel,
+				orderedKeys[0]?.provider ?? 'unknown',
 				0,
 				0,
 				0,
 				latencyMs,
 				'error',
 				isStreaming,
-				message
+				'All provider keys exhausted after retries'
 			);
 		}
-
-		return errorResponse(502, `LiteLLM proxy error: ${message}`, 'server_error');
+		return lastErrorResponse;
 	}
+
+	return errorResponse(502, 'All provider keys failed', 'server_error');
 }
 
 function errorResponse(status: number, message: string, type: string): Response {
