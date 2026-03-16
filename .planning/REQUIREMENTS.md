@@ -46,11 +46,11 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **GW-03**: API passes through function calling / tool use parameters
 - [x] **GW-04**: API supports `/v1/embeddings` endpoint
 - [x] **GW-05**: API supports `/v1/models` endpoint listing available models
-- [ ] **GW-06**: API auto-retries on provider 429/500/503 errors
-- [ ] **GW-07**: API falls back to alternative provider when primary is down
+- [x] **GW-06**: API auto-retries on provider 429/500/503 errors
+- [x] **GW-07**: API falls back to alternative provider when primary is down
 - [x] **GW-08**: Smart routing selects cheap model for simple tasks, expensive for complex
 - [x] **GW-09**: Semantic caching returns cached responses for similar queries (Redis)
-- [ ] **GW-10**: Load balances across multiple API keys for same provider
+- [x] **GW-10**: Load balances across multiple API keys for same provider
 
 ### Usage & Cost Tracking
 
@@ -79,9 +79,9 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Self-Host & Launch
 
 - [x] **SHIP-01**: Docker-compose package for self-hosted deployment
-- [ ] **SHIP-02**: Landing page explaining the product and value proposition
-- [ ] **SHIP-03**: Integration docs for Cursor, Continue.dev, and Claude Code setup
-- [ ] **SHIP-04**: Self-host configuration guide
+- [x] **SHIP-02**: Landing page explaining the product and value proposition
+- [x] **SHIP-03**: Integration docs for Cursor, Continue.dev, and Claude Code setup
+- [x] **SHIP-04**: Self-host configuration guide
 
 ## v2 Requirements
 
@@ -150,11 +150,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GW-03 | Phase 2 | Complete |
 | GW-04 | Phase 2 | Complete |
 | GW-05 | Phase 2 | Complete |
-| GW-06 | Phase 5 | Pending |
-| GW-07 | Phase 5 | Pending |
+| GW-06 | Phase 5 | Complete |
+| GW-07 | Phase 5 | Complete |
 | GW-08 | Phase 5 | Complete |
 | GW-09 | Phase 5 | Complete |
-| GW-10 | Phase 5 | Pending |
+| GW-10 | Phase 5 | Complete |
 | TRACK-01 | Phase 3 | Complete |
 | TRACK-02 | Phase 3 | Complete |
 | TRACK-03 | Phase 3 | Complete |
@@ -171,9 +171,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DASH-04 | Phase 4 | Complete |
 | DASH-05 | Phase 4 | Complete |
 | SHIP-01 | Phase 5 | Complete |
-| SHIP-02 | Phase 5 | Pending |
-| SHIP-03 | Phase 5 | Pending |
-| SHIP-04 | Phase 5 | Pending |
+| SHIP-02 | Phase 5 | Complete |
+| SHIP-03 | Phase 5 | Complete |
+| SHIP-04 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 49 total
