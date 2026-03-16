@@ -67,8 +67,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md — DB schema (usage logs + budgets), gateway usage logging, budget enforcement (hard/soft limits)
+- [ ] 03-02-PLAN.md — Usage dashboard (KPI cards, trend charts, per-member/model breakdown tabs), Models pricing page
+- [ ] 03-03-PLAN.md — Budget configuration UI (per-member panel, org defaults), budget warning banner, email notifications
 
 ### Phase 4: Dashboard & Team Management
 **Goal**: The full admin experience is complete -- org owners can invite members, manage roles, and access all management pages; users can log in via Google/GitHub OAuth
@@ -112,6 +113,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/3 | In progress | - |
 | 2. Core Gateway | 1/3 | In Progress|  |
-| 3. Usage & Budget Controls | 0/2 | Not started | - |
+| 3. Usage & Budget Controls | 0/3 | Not started | - |
 | 4. Dashboard & Team Management | 0/3 | Not started | - |
 | 5. Advanced Gateway & Launch | 0/3 | Not started | - |
