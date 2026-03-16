@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A multi-tenant SaaS platform (like OpenRouter.ai) where companies create accounts, submit their own LLM provider API keys, and their team members generate personal API keys to access LLMs through a unified gateway. Built on LiteLLM as the proxy/routing layer, with a SvelteKit management dashboard. Also available as a self-hosted package for companies with data sovereignty requirements.
+A multi-tenant LLM API gateway where companies create organizations, submit their own provider API keys (OpenAI, Anthropic, Google, DeepSeek, Qwen, GLM, Doubao, and 100+ more), and team members generate personal API keys to access LLMs through a unified OpenAI-compatible endpoint. Features smart routing, fallback chains, Redis caching, budget controls with email notifications, and a full admin dashboard. Available as SaaS or self-hosted via Docker Compose.
 
 ## Core Value
 
@@ -12,24 +12,24 @@ Any company can sign up, plug in their LLM API keys, and immediately give their 
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ Multi-tenant organization system (company signup, member invites, roles) — v1.0
+- ✓ BYO API key management (companies submit OpenAI, Anthropic, Google, China model keys) — v1.0
+- ✓ Per-member API key generation (members create personal keys to access LLMs) — v1.0
+- ✓ LiteLLM-based proxy routing (per-org serverless-style lightweight proxy) — v1.0
+- ✓ Usage & cost tracking dashboard (per-member token usage, cost by model, daily/monthly trends) — v1.0
+- ✓ Budget controls (per-member/per-team monthly spend limits with alerts) — v1.0
+- ✓ Member management (invite, assign admin/member roles, revoke access) — v1.0
+- ✓ API key management UI (create/revoke keys, view usage, set per-key rate limits) — v1.0
+- ✓ Auth system (email/password + OAuth via Google/GitHub) — v1.0
+- ✓ OpenAI-compatible API endpoint (works with Cursor, Continue.dev, Claude Code) — v1.0
+- ✓ Smart model routing (cheap models for simple tasks, expensive for complex) — v1.0
+- ✓ Fallback chains (auto-switch provider when one is down) — v1.0
+- ✓ Self-host package (docker-compose for companies to deploy themselves) — v1.0
+- ✓ Landing/marketing page — v1.0
 
 ### Active
 
-- [ ] Multi-tenant organization system (company signup, member invites, roles)
-- [ ] BYO API key management (companies submit OpenAI, Anthropic, Google, China model keys)
-- [ ] Per-member API key generation (members create personal keys to access LLMs)
-- [ ] LiteLLM-based proxy routing (per-org serverless-style lightweight proxy)
-- [ ] Usage & cost tracking dashboard (per-member token usage, cost by model, daily/monthly trends)
-- [ ] Budget controls (per-member/per-team monthly spend limits with alerts)
-- [ ] Member management (invite, assign admin/member roles, revoke access)
-- [ ] API key management UI (create/revoke keys, view usage, set per-key rate limits)
-- [ ] Auth system (email/password + OAuth via Google/GitHub)
-- [ ] OpenAI-compatible API endpoint (works with Cursor, Continue.dev, Claude Code)
-- [ ] Smart model routing (cheap models for simple tasks, expensive for complex)
-- [ ] Fallback chains (auto-switch provider when one is down)
-- [ ] Self-host package (docker-compose for companies to deploy themselves)
-- [ ] Landing/marketing page
+(None yet — define with `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -41,20 +41,25 @@ Any company can sign up, plug in their LLM API keys, and immediately give their 
 
 ## Context
 
-This project lives in a repo that already contains Open WebUI, LiteLLM, and LibreChat as subfolders for reference. The PRD (`prd.md`) describes the cost optimization strategy that drives this product — 80% of users' usage is below subscription break-even, making API pooling 40-60% cheaper than per-seat subscriptions.
+Shipped v1.0 MVP with ~10,500 LOC (TypeScript + Svelte) across 201 files.
 
-The existing codebase provides reference implementations:
-- **LiteLLM** (`litellm/`): The proxy engine we'll build on — Virtual Keys, cost tracking, 100+ provider support
-- **Open WebUI** (`open-webui/`): Reference for SvelteKit patterns, user management, RAG
-- **LibreChat** (`LibreChat/`): Reference for multi-provider API handling, TypeScript patterns
+**Tech stack:** SvelteKit (Svelte 5 runes), Tailwind CSS v4, Drizzle ORM + postgres.js, PostgreSQL, Redis (ioredis), LiteLLM proxy, Node.js built-in crypto (AES-256-GCM, SHA-256).
 
-Key architectural insight: Per-org isolation via lightweight/serverless proxy instances rather than persistent LiteLLM processes per tenant. This keeps infra costs low while maintaining strong isolation.
+**Auth:** Custom session management using Lucia patterns + Arctic for OAuth (Google/GitHub). Oslo crypto for session token hashing.
 
-Target market: 20-100 person teams, especially in China where domestic model support (DeepSeek, Qwen, GLM, Doubao) is a differentiator vs OpenRouter.
+**Gateway:** Retry with exponential backoff + jitter on 429/500/503, provider fallback loop, smart routing (~4 chars/token heuristic), Redis cache-aside pattern, round-robin load balancing with in-memory Map.
+
+**Budget:** Cascade system (individual > role default > org default), cents-based storage for precision, fire-and-forget notification side effects.
+
+**Deployment:** Multi-stage Dockerfile (node:22-alpine), 4-service docker-compose (app + litellm + postgres + redis).
+
+**Reference implementations** in repo: LiteLLM (`litellm/`), Open WebUI (`open-webui/`), LibreChat (`LibreChat/`).
+
+Target market: 20-100 person teams, especially in China where domestic model support is a differentiator.
 
 ## Constraints
 
-- **Tech Stack**: SvelteKit frontend, LiteLLM as proxy core, PostgreSQL for data
+- **Tech Stack**: SvelteKit frontend, LiteLLM as proxy core, PostgreSQL for data, Redis for caching
 - **Deployment**: Single Cloud VM for SaaS, docker-compose for self-host
 - **Provider Support**: Must support all 100+ LiteLLM providers including China models
 - **API Compatibility**: Must be OpenAI-compatible (`/v1/chat/completions`) for IDE plugin integration
@@ -64,11 +69,25 @@ Target market: 20-100 person teams, especially in China where domestic model sup
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| BYO keys only (no reselling) | Simpler business model, no billing complexity, focus on platform value | — Pending |
-| Build on LiteLLM | 100+ providers already supported, Virtual Keys, cost tracking built-in | — Pending |
-| Per-org serverless proxy | Low infra cost, strong isolation, scales with demand | — Pending |
-| SvelteKit for dashboard | Fast, lightweight, consistent with Open WebUI reference code | — Pending |
-| Self-hostable from v1 | Key differentiator — companies with data sovereignty needs can run it themselves | — Pending |
+| BYO keys only (no reselling) | Simpler business model, no billing complexity, focus on platform value | ✓ Good |
+| Build on LiteLLM | 100+ providers already supported, Virtual Keys, cost tracking built-in | ✓ Good |
+| SvelteKit for dashboard | Fast, lightweight, consistent with Open WebUI reference code | ✓ Good |
+| Self-hostable from v1 | Key differentiator for data sovereignty needs | ✓ Good |
+| Drizzle ORM (not Prisma) | Avoid dual-Prisma migration conflicts with LiteLLM | ✓ Good |
+| Custom session management (Lucia patterns + Arctic) | Lightweight, modern, supports PKCE for OAuth | ✓ Good |
+| Lazy DB initialization via Proxy | Avoids build-time DATABASE_URL requirement | ✓ Good |
+| Node.js built-in crypto for encryption | No external dependency for AES-256-GCM and SHA-256 | ✓ Good |
+| In-memory Map for rate limit windows | Simpler than Redis for single-instance deployment | ⚠️ Revisit for multi-instance |
+| Chart.js direct canvas (not svelte-chartjs) | svelte-chartjs not compatible with Svelte 5 runes | ✓ Good |
+| ioredis for Redis client | Mature, lazy connect, retry strategies | ✓ Good |
+| Fire-and-forget for gateway side effects | Non-blocking notification and usage logging | ✓ Good |
+
+## Tech Debt
+
+- Dead export: `validateApiKeyFromHash` in api-keys.ts (superseded by inline gateway query)
+- Dead export: `decryptProviderKeyById` in provider-keys.ts (superseded by inline decrypt in proxy)
+- Dead export: `checkLiteLLMHealth` in litellm.ts (Docker healthcheck handles this)
+- Minor DRY: `getBudgetResetDate` logic duplicated in gateway/budget.ts and budget/notifications.ts
 
 ---
-*Last updated: 2026-03-15 after initialization*
+*Last updated: 2026-03-16 after v1.0 milestone*
