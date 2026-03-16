@@ -31,12 +31,3 @@ export async function createLiteLLMOrganization(
 		return null;
 	}
 }
-
-export async function checkLiteLLMHealth(): Promise<boolean> {
-	try {
-		const response = await fetch(`${LITELLM_API_URL}/health`);
-		return response.ok;
-	} catch {
-		return false;
-	}
-}

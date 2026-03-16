@@ -2,6 +2,7 @@ import { db } from '$lib/server/db';
 import { appBudgets, appUsageLogs, appOrgMembers } from '$lib/server/db/schema';
 import { eq, and, gte, sql, isNull, or } from 'drizzle-orm';
 import type { GatewayAuth } from './auth';
+import { getBudgetResetDate } from '$lib/server/budget/utils';
 
 export interface BudgetCheckResult {
 	allowed: boolean;
@@ -10,17 +11,6 @@ export interface BudgetCheckResult {
 	currentSpendCents: number;
 	hardLimitCents: number | null;
 	softLimitCents: number | null;
-}
-
-function getBudgetResetDate(resetDay: number): Date {
-	const now = new Date();
-	const year = now.getFullYear();
-	const month = now.getMonth();
-	// If current day < resetDay, reset date is in previous month
-	if (now.getDate() < resetDay) {
-		return new Date(year, month - 1, resetDay);
-	}
-	return new Date(year, month, resetDay);
 }
 
 export async function checkBudget(auth: GatewayAuth): Promise<BudgetCheckResult> {

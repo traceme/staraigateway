@@ -1,6 +1,6 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { db } from '$lib/server/db';
-import { appApiKeys, appUsers, appOrganizations } from '$lib/server/db/schema';
+import { appApiKeys } from '$lib/server/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 
 /** Metadata returned to the client (never includes keyHash). */
@@ -110,39 +110,4 @@ export async function revokeApiKey(
 		.returning({ id: appApiKeys.id });
 
 	return !!updated;
-}
-
-/**
- * Validate an API key by its hash. Used by the gateway to authenticate requests.
- * Returns the key record, user, and org if valid; null otherwise.
- * Updates lastUsedAt on successful validation.
- */
-export async function validateApiKeyFromHash(
-	keyHash: string
-): Promise<{
-	apiKey: typeof appApiKeys.$inferSelect;
-	user: typeof appUsers.$inferSelect;
-	org: typeof appOrganizations.$inferSelect;
-} | null> {
-	const rows = await db
-		.select({
-			apiKey: appApiKeys,
-			user: appUsers,
-			org: appOrganizations
-		})
-		.from(appApiKeys)
-		.innerJoin(appUsers, eq(appApiKeys.userId, appUsers.id))
-		.innerJoin(appOrganizations, eq(appApiKeys.orgId, appOrganizations.id))
-		.where(and(eq(appApiKeys.keyHash, keyHash), eq(appApiKeys.isActive, true)))
-		.limit(1);
-
-	if (rows.length === 0) return null;
-
-	// Update lastUsedAt timestamp
-	await db
-		.update(appApiKeys)
-		.set({ lastUsedAt: new Date() })
-		.where(eq(appApiKeys.id, rows[0].apiKey.id));
-
-	return rows[0];
 }

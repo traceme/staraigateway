@@ -8,16 +8,7 @@ import {
 } from '$lib/server/db/schema';
 import { sendBudgetWarningEmail, sendAdminDigestEmail } from '$lib/server/auth/email';
 import { eq, and, gte, sql, isNull, or } from 'drizzle-orm';
-
-function getBudgetResetDate(resetDay: number): Date {
-	const now = new Date();
-	const year = now.getFullYear();
-	const month = now.getMonth();
-	if (now.getDate() < resetDay) {
-		return new Date(year, month - 1, resetDay);
-	}
-	return new Date(year, month, resetDay);
-}
+import { getBudgetResetDate } from '$lib/server/budget/utils';
 
 interface MemberBudgetInfo {
 	userId: string;

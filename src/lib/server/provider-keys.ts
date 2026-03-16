@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import { appProviderKeys } from '$lib/server/db/schema';
-import { encrypt, decrypt } from '$lib/server/crypto';
+import { encrypt } from '$lib/server/crypto';
 import { getProvider } from '$lib/server/providers';
 import { eq, and } from 'drizzle-orm';
 
@@ -161,21 +161,4 @@ export async function validateProviderKey(
 		const message = err instanceof Error ? err.message : 'Unknown error';
 		return { valid: false, models: [], error: message };
 	}
-}
-
-/**
- * Decrypt a provider key by ID + orgId. Used by the gateway proxy.
- */
-export async function decryptProviderKeyById(
-	id: string,
-	orgId: string
-): Promise<string | null> {
-	const rows = await db
-		.select({ encryptedKey: appProviderKeys.encryptedKey })
-		.from(appProviderKeys)
-		.where(and(eq(appProviderKeys.id, id), eq(appProviderKeys.orgId, orgId)))
-		.limit(1);
-
-	if (rows.length === 0) return null;
-	return decrypt(rows[0].encryptedKey);
 }
