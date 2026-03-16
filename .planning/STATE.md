@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-03-16T07:11:30Z"
-last_activity: 2026-03-16 -- Plan 05-01 executed (retry/fallback, smart routing, Redis cache, round-robin)
+stopped_at: Completed 05-02-PLAN.md
+last_updated: "2026-03-16T07:45:03Z"
+last_activity: 2026-03-16 -- Plan 05-02 executed (smart routing settings, cache TTL settings, API key toggle)
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 16
-  completed_plans: 15
-  percent: 94
+  completed_plans: 16
+  percent: 100
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 ## Current Position
 
 Phase: 5 of 5 (Advanced Gateway & Launch)
-Plan: 1 of 4 in current phase
-Status: Plan 05-01 complete (retry/fallback, smart routing, Redis cache, round-robin)
-Last activity: 2026-03-16 -- Plan 05-01 executed (retry/fallback, smart routing, Redis cache, round-robin)
+Plan: 2 of 4 in current phase
+Status: Plan 05-02 complete (gateway settings UI: smart routing config, cache TTL, toggle)
+Last activity: 2026-03-16 -- Plan 05-02 executed (smart routing settings, cache TTL settings, API key toggle)
 
 Progress: [█████████░] 94%
 
@@ -60,6 +60,7 @@ Progress: [█████████░] 94%
 | Phase 04 P02 | 5 | 3 tasks | 15 files |
 | Phase 05 P03 | 2 | 1 tasks | 8 files |
 | Phase 05 P01 | 8 | 3 tasks | 15 files |
+| Phase 05 P02 | 15 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -114,6 +115,9 @@ Recent decisions affecting current work:
 - [Phase 05]: ~4 chars per token heuristic for smart routing estimation
 - [Phase 05]: Cache-aside pattern: check before call, set after success, fire-and-forget
 - [Phase 05]: Vitest $env/dynamic/private mock via resolve alias
+- [Phase 05]: Separate form actions per settings section (saveRouting, saveCacheTtl) for independent saves
+- [Phase 05]: Redis availability checked via $env/dynamic/private at load time, passed as prop
+- [Phase 05]: orgHasRouting requires both cheap AND expensive models to be configured
 
 ### Pending Todos
 
@@ -126,6 +130,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T07:11:30Z
-Stopped at: Completed 05-01-PLAN.md
-Resume file: .planning/phases/05-advanced-gateway-launch/05-01-SUMMARY.md
+Last session: 2026-03-16T07:45:03Z
+Stopped at: Completed 05-02-PLAN.md
+Resume file: .planning/phases/05-advanced-gateway-launch/05-02-SUMMARY.md

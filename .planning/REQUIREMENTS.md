@@ -48,8 +48,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **GW-05**: API supports `/v1/models` endpoint listing available models
 - [ ] **GW-06**: API auto-retries on provider 429/500/503 errors
 - [ ] **GW-07**: API falls back to alternative provider when primary is down
-- [ ] **GW-08**: Smart routing selects cheap model for simple tasks, expensive for complex
-- [ ] **GW-09**: Semantic caching returns cached responses for similar queries (Redis)
+- [x] **GW-08**: Smart routing selects cheap model for simple tasks, expensive for complex
+- [x] **GW-09**: Semantic caching returns cached responses for similar queries (Redis)
 - [ ] **GW-10**: Load balances across multiple API keys for same provider
 
 ### Usage & Cost Tracking
@@ -152,8 +152,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GW-05 | Phase 2 | Complete |
 | GW-06 | Phase 5 | Pending |
 | GW-07 | Phase 5 | Pending |
-| GW-08 | Phase 5 | Pending |
-| GW-09 | Phase 5 | Pending |
+| GW-08 | Phase 5 | Complete |
+| GW-09 | Phase 5 | Complete |
 | GW-10 | Phase 5 | Pending |
 | TRACK-01 | Phase 3 | Complete |
 | TRACK-02 | Phase 3 | Complete |
