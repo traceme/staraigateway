@@ -18,9 +18,9 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Organization
 
 - [x] **ORG-01**: User can create an organization
-- [ ] **ORG-02**: Org owner can invite members via email
-- [ ] **ORG-03**: Org owner can assign roles (Owner, Admin, Member)
-- [ ] **ORG-04**: Admin can remove members from organization
+- [x] **ORG-02**: Org owner can invite members via email
+- [x] **ORG-03**: Org owner can assign roles (Owner, Admin, Member)
+- [x] **ORG-04**: Admin can remove members from organization
 - [x] **ORG-05**: Member can view their organization's dashboard
 
 ### Provider Keys (BYO)
@@ -70,11 +70,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Dashboard
 
-- [ ] **DASH-01**: Admin dashboard shows org-wide usage and cost overview
-- [ ] **DASH-02**: Member management page (invite, roles, remove)
+- [x] **DASH-01**: Admin dashboard shows org-wide usage and cost overview
+- [x] **DASH-02**: Member management page (invite, roles, remove)
 - [x] **DASH-03**: Provider key management page (add, validate, remove)
 - [x] **DASH-04**: API key management page (create, revoke, view usage)
-- [ ] **DASH-05**: Budget configuration page
+- [x] **DASH-05**: Budget configuration page
 
 ### Self-Host & Launch
 
@@ -131,9 +131,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-04 | Phase 4 | Complete |
 | AUTH-05 | Phase 1 | Complete |
 | ORG-01 | Phase 1 | Complete |
-| ORG-02 | Phase 4 | Pending |
-| ORG-03 | Phase 4 | Pending |
-| ORG-04 | Phase 4 | Pending |
+| ORG-02 | Phase 4 | Complete |
+| ORG-03 | Phase 4 | Complete |
+| ORG-04 | Phase 4 | Complete |
 | ORG-05 | Phase 1 | Complete |
 | PKEY-01 | Phase 2 | Complete |
 | PKEY-02 | Phase 2 | Complete |
@@ -165,11 +165,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BUDG-03 | Phase 3 | Complete |
 | BUDG-04 | Phase 3 | Complete |
 | BUDG-05 | Phase 3 | Complete |
-| DASH-01 | Phase 4 | Pending |
-| DASH-02 | Phase 4 | Pending |
+| DASH-01 | Phase 4 | Complete |
+| DASH-02 | Phase 4 | Complete |
 | DASH-03 | Phase 4 | Complete |
 | DASH-04 | Phase 4 | Complete |
-| DASH-05 | Phase 4 | Pending |
+| DASH-05 | Phase 4 | Complete |
 | SHIP-01 | Phase 5 | Pending |
 | SHIP-02 | Phase 5 | Pending |
 | SHIP-03 | Phase 5 | Pending |

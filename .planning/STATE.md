@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 04-03-PLAN.md
-last_updated: "2026-03-16T04:13:19.099Z"
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-03-16T04:14:11.503Z"
 last_activity: 2026-03-16 -- Plan 03-03 executed (budget config UI, warning banner, email notifications)
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 12
-  completed_plans: 11
+  completed_plans: 12
   percent: 100
 ---
 
@@ -57,6 +57,7 @@ Progress: [██████████] 100%
 | Phase 03 P03 | 6 min | 2 tasks | 12 files |
 | Phase 04 P01 | 4 | 2 tasks | 12 files |
 | Phase 04 P03 | 5 | 2 tasks | 11 files |
+| Phase 04 P02 | 5 | 3 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,9 @@ Recent decisions affecting current work:
 - [Phase 04]: Account linking by email: existing users auto-linked on first OAuth login
 - [Phase 04]: In-memory Map for rate limit windows (no Redis dependency)
 - [Phase 04]: Rate limit cascade: per-key > org default > null (no limit)
+- [Phase 04]: Graceful SMTP failure on invitation email (invitation still created)
+- [Phase 04]: Member removal cascades to deactivate all API keys (soft delete)
+- [Phase 04]: Only owner can change roles; admins and owners can invite/remove
 
 ### Pending Todos
 
@@ -114,6 +118,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T04:13:19.097Z
-Stopped at: Completed 04-03-PLAN.md
+Last session: 2026-03-16T04:14:05.676Z
+Stopped at: Completed 04-02-PLAN.md
 Resume file: None
