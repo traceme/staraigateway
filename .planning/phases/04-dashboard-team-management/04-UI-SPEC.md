@@ -95,7 +95,7 @@ New and modified components in this phase:
 | `RoleBadge` | `src/lib/components/members/RoleBadge.svelte` | Pill badge showing role with color coding: Owner (green), Admin (blue), Member (zinc). |
 | `PendingBadge` | `src/lib/components/members/PendingBadge.svelte` | Amber pill badge showing "Pending" for unaccepted invitations. |
 | `RateLimitFields` | `src/lib/components/api-keys/RateLimitFields.svelte` | RPM and TPM number inputs with labels, used in key creation/edit forms. Shows "Inherits org default (X)" when empty. |
-| `InvitationBanner` | `src/lib/components/members/InvitationBanner.svelte` | Top-of-page banner shown to users who arrived via invitation link, confirming org join. |
+| `InvitationBanner` | `src/lib/components/members/InvitationBanner.svelte` | Top-of-page banner shown to users with a pending org invitation. Displays org name, inviter, and Accept / Decline buttons. Dismissable. |
 | `AdminKpiCards` | `src/lib/components/dashboard/AdminKpiCards.svelte` | Row of KPI cards for admin dashboard: total members, active keys, total spend, requests this month. Reuses `KpiCard` from Phase 3. |
 | `MemberActionMenu` | `src/lib/components/members/MemberActionMenu.svelte` | Dropdown menu on member row: Change Role, View Keys, Set Budget, Remove Member. |
 | `OrgSettingsForm` | `src/lib/components/settings/OrgSettingsForm.svelte` | Form for org-wide default rate limits (RPM/TPM). Admin only. |
@@ -144,7 +144,7 @@ New and modified components in this phase:
 ```
 
 - OAuth buttons are full-width, stacked vertically with 12px gap
-- "or" divider: horizontal rule with centered text `text-zinc-500`, `border-zinc-800`
+- "or" divider: horizontal rule with centered text `text-zinc-400`, `border-zinc-800`
 - OAuth buttons: `bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-100 rounded-lg py-3 px-4`
 - Provider logos: 20px inline SVG, left-aligned within button
 - If OAuth env vars not configured, OAuth section hidden entirely (graceful degradation)
@@ -178,7 +178,7 @@ New and modified components in this phase:
 - Table: same styling as existing api-keys table (`bg-zinc-900 rounded-lg border border-zinc-800`)
 - Role column: uses `RoleBadge` component
 - Pending section: separated by a subtle section header row
-- Pending rows: `text-zinc-500` muted text, amber `PendingBadge`
+- Pending rows: `text-zinc-400` muted text, amber `PendingBadge`
 - Action menu (three-dot `⋮`): dropdown with Change Role, View Keys, Set Budget, Remove Member
 - Pending action: revoke button (✕) to cancel invitation
 - Members see the table but without action menu (read-only for non-admin)
@@ -245,7 +245,7 @@ Admin view additions:
 - RPM column: shows per-key RPM limit, or "—" if inheriting org default
 - TPM column: shows per-key TPM limit (formatted as "100K"), or "—" if inheriting org default
 - Admin can click three-dot menu on any key: Edit Rate Limits, Revoke
-- Revoked keys: `text-zinc-600` muted row, no action menu
+- Revoked keys: `text-zinc-400` muted row, no action menu
 - Tab toggle style: same as Usage page tabs (`border-b-2 border-blue-500` active)
 
 ### API Key Create/Edit — Modified (rate limit fields)
@@ -314,7 +314,7 @@ Admin KPI section added at top:
 
 - Admin KPI cards: 4-column grid on desktop, 2x2 on tablet, stack on mobile
 - Reuses `KpiCard` component from Phase 3
-- Quick links: `text-blue-400 hover:text-blue-300 underline` inline links
+- Quick links: `text-blue-500 hover:text-blue-500/80 underline` inline links
 - Divider between admin section and personal section: `border-t border-zinc-800`
 - Non-admin users see no admin section (existing dashboard only)
 
@@ -352,6 +352,111 @@ Admin KPI section added at top:
 - Success feedback: inline green text "Settings saved" that fades after 3 seconds
 - Helper text: `text-xs text-zinc-500`
 
+### InvitationBanner — Full Specification
+
+Layout:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│ ℹ  {inviter name} invited you to join {org name}.  [Accept] [Decline]  ✕ │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+- Position: top of page content area, above all other content, full width within the content column
+- Background: `bg-blue-900/30 border border-blue-500/30 rounded-lg`
+- Text: `text-zinc-100 text-sm`
+- Info icon: Lucide-style `info` SVG, 16px, `text-blue-500`, inline before message
+- "Accept" button: `bg-blue-600 hover:bg-blue-700 text-white text-sm rounded px-3 py-1`
+- "Decline" button: `bg-zinc-800 hover:bg-zinc-800 text-zinc-300 text-sm rounded px-3 py-1`
+- Dismiss (✕): `text-zinc-400 hover:text-zinc-100`, does not accept or decline — only hides the banner for the session
+- Padding: `p-4` (16px, md token)
+- Internal layout: flexbox, items center, gap `sm` (8px); buttons grouped at the end with `gap-2`
+
+States:
+
+| State | Behavior |
+|-------|----------|
+| Shown | User has a pending org invitation (checked on page load) |
+| Dismissed | User clicked ✕; banner hidden for the browser session (sessionStorage flag) |
+| Accepted | User clicked "Accept"; banner replaced with success toast "You joined {org name}", page reloads to show org context |
+| Declined | User clicked "Decline"; banner removed, invitation marked as declined |
+
+Accessibility:
+
+| Attribute | Value |
+|-----------|-------|
+| `role` | `alert` |
+| `aria-label` | `Organization invitation from {inviter name}` |
+| Accept button | `aria-label="Accept invitation to {org name}"` |
+| Decline button | `aria-label="Decline invitation to {org name}"` |
+| Dismiss button | `aria-label="Dismiss invitation banner"` |
+
+Copy contract:
+
+| Element | Copy |
+|---------|------|
+| Banner message | "{inviter name} invited you to join {org name}." |
+| Accept button | "Accept" |
+| Decline button | "Decline" |
+| Success toast | "You joined {org name}" |
+
+### MembersTable — Error State
+
+When the members page fails to load data:
+
+```
+┌───────────────────────────────────────────────────┐
+│                                                   │
+│        Failed to load members. Try again.         │
+│                  [Retry]                          │
+│                                                   │
+└───────────────────────────────────────────────────┘
+```
+
+- Container: same `bg-zinc-900 rounded-lg border border-zinc-800` as the table
+- Message: `text-zinc-400 text-sm` centered
+- "Retry" button: `bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 text-sm`
+- Padding: `py-16 px-4` to give vertical breathing room
+- Replaces the table entirely (no header row shown)
+
+### InvitePanel — Loading State
+
+When the "Send Invitation" request is in-flight:
+
+- "Send Invitation" button text changes to "Sending..." with a spinner icon (16px, `animate-spin`) to the left of the text
+- Button remains `bg-blue-600` but adds `opacity-80 cursor-not-allowed`
+- All form fields (email input, role select) become `disabled` with `opacity-50`
+- Close button (✕) remains active so the user can dismiss the panel
+
+### AdminKpiCards — Empty and Error States
+
+Empty state (no data yet, e.g., new org):
+
+- Each KPI card displays `0` as the stat value in `text-zinc-400` (muted)
+- Label text unchanged (e.g., "Members", "Active Keys")
+- No trend arrow shown
+
+Error state (API call failed):
+
+- Each KPI card displays `--` as the stat value in `text-zinc-400` (muted)
+- Below the value, muted helper text: `text-xs text-zinc-400` reading "Error loading"
+- No trend arrow shown
+
+### OrgSettingsForm — Loading and Error States
+
+Loading state (save request in-flight):
+
+- "Save Settings" button text changes to "Saving..." with a spinner icon (16px, `animate-spin`) to the left of the text
+- Button remains `bg-blue-600` but adds `opacity-80 cursor-not-allowed`
+- RPM and TPM inputs become `disabled` with `opacity-50`
+
+Error state (save failed):
+
+- Toast notification appears: "Failed to save settings. Try again."
+- Toast style: `bg-red-900/20 border border-red-500/30 text-red-400 text-sm rounded-lg px-4 py-3`
+- Toast auto-dismisses after 5 seconds
+- Form remains editable so the user can retry
+
 ---
 
 ## Interaction Patterns
@@ -387,8 +492,8 @@ Admin KPI section added at top:
 ### Member Removal Confirmation
 - Admin clicks "Remove Member" from action menu
 - Confirmation dialog (inline or modal): "Remove {name} from {org}? Their API keys will be deactivated."
-- Confirm button: `bg-red-600 hover:bg-red-700 text-white`
-- Cancel button: `bg-zinc-800 hover:bg-zinc-700 text-zinc-300`
+- Confirm button: `bg-red-500 hover:bg-red-500/90 text-white`
+- Cancel button: `bg-zinc-800 hover:bg-zinc-800 text-zinc-300`
 - On confirm: member row removed, their keys deactivated
 
 ### Admin Key Revocation
