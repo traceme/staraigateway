@@ -27,10 +27,9 @@
 		},
 		{
 			label: 'Members',
-			href: '#',
+			href: `/org/${currentOrg.slug}/members`,
 			icon: 'users',
-			active: false,
-			tooltip: 'Coming in Phase 4'
+			active: true
 		},
 		{
 			label: 'Usage',
@@ -46,10 +45,9 @@
 		},
 		{
 			label: 'Settings',
-			href: '#',
+			href: `/org/${currentOrg.slug}/settings`,
 			icon: 'gear',
-			active: false,
-			tooltip: 'Coming soon'
+			active: true
 		}
 	];
 
