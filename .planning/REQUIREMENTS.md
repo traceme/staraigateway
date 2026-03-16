@@ -55,10 +55,10 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Usage & Cost Tracking
 
 - [x] **TRACK-01**: Every request logs tokens (input/output), cost, model, and timestamp
-- [ ] **TRACK-02**: Dashboard shows per-member cost breakdown
-- [ ] **TRACK-03**: Dashboard shows per-team cost breakdown
-- [ ] **TRACK-04**: Dashboard shows daily and monthly usage trends with charts
-- [ ] **TRACK-05**: Dashboard displays model pricing and context window info
+- [x] **TRACK-02**: Dashboard shows per-member cost breakdown
+- [x] **TRACK-03**: Dashboard shows per-team cost breakdown
+- [x] **TRACK-04**: Dashboard shows daily and monthly usage trends with charts
+- [x] **TRACK-05**: Dashboard displays model pricing and context window info
 
 ### Budget Controls
 
@@ -156,10 +156,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GW-09 | Phase 5 | Pending |
 | GW-10 | Phase 5 | Pending |
 | TRACK-01 | Phase 3 | Complete |
-| TRACK-02 | Phase 3 | Pending |
-| TRACK-03 | Phase 3 | Pending |
-| TRACK-04 | Phase 3 | Pending |
-| TRACK-05 | Phase 3 | Pending |
+| TRACK-02 | Phase 3 | Complete |
+| TRACK-03 | Phase 3 | Complete |
+| TRACK-04 | Phase 3 | Complete |
+| TRACK-05 | Phase 3 | Complete |
 | BUDG-01 | Phase 3 | Complete |
 | BUDG-02 | Phase 3 | Complete |
 | BUDG-03 | Phase 3 | Pending |
