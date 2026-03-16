@@ -35,8 +35,9 @@ The app will be available at `http://localhost:3000`.
 | `REDIS_URL` | No | `redis://redis:6379` | Redis connection string for response caching. Set automatically in Docker Compose. |
 | `ENCRYPTION_KEY` | Yes | — | 32-byte hex string (64 characters) for AES-256-GCM encryption of provider API keys. Generate with: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 | `BASE_URL` | No | `http://localhost:3000` | Public URL of your LLMTokenHub instance. Used for OAuth callbacks and email links. |
-| `LITELLM_API_URL` | No | `http://localhost:4000` | LiteLLM proxy URL (if running separately). |
-| `LITELLM_MASTER_KEY` | No | — | LiteLLM master API key (if running separately). |
+| `LITELLM_API_URL` | No | `http://litellm:4000` | LiteLLM proxy URL. Set automatically in Docker Compose. |
+| `LITELLM_MASTER_KEY` | No | `sk-litellm-master-key` | Master API key for LiteLLM admin operations. Change in production. |
+| `CRON_SECRET` | No | — | Secret token for authenticating cron job requests (e.g., `/api/cron/digest`). Generate with: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 | `SMTP_HOST` | No | — | SMTP server hostname for sending emails (invitations, budget alerts). |
 | `SMTP_PORT` | No | `587` | SMTP server port. |
 | `SMTP_USER` | No | — | SMTP authentication username. |
@@ -52,7 +53,7 @@ The app will be available at `http://localhost:3000`.
 After starting the services, verify everything is working:
 
 ```bash
-# 1. Check all containers are running
+# 1. Check all 4 containers are running (app, postgres, redis, litellm)
 docker compose ps
 
 # 2. Test the app is responding
