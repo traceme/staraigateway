@@ -2,6 +2,8 @@ import nodemailer from 'nodemailer';
 import { env } from '$env/dynamic/private';
 import { verificationEmail } from './emails/verification';
 import { passwordResetEmail } from './emails/password-reset';
+import { budgetWarningEmail } from './emails/budget-warning';
+import { adminDigestEmail } from './emails/admin-digest';
 
 function getTransport() {
 	return nodemailer.createTransport({
@@ -57,4 +59,27 @@ export async function sendPasswordResetEmail(
 		html,
 		text
 	});
+}
+
+export async function sendBudgetWarningEmail(
+	email: string,
+	memberName: string,
+	currentSpend: string,
+	limit: string,
+	orgName: string
+): Promise<void> {
+	const { subject, html, text } = budgetWarningEmail(memberName, currentSpend, limit, orgName);
+	const transport = getTransport();
+	await transport.sendMail({ from: getFromAddress(), to: email, subject, html, text });
+}
+
+export async function sendAdminDigestEmail(
+	adminEmail: string,
+	orgName: string,
+	date: string,
+	members: Array<{ name: string; spend: string; limit: string; percentage: number }>
+): Promise<void> {
+	const { subject, html, text } = adminDigestEmail(orgName, date, members);
+	const transport = getTransport();
+	await transport.sendMail({ from: getFromAddress(), to: adminEmail, subject, html, text });
 }

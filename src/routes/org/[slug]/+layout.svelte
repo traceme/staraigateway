@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 	import TopBar from '$lib/components/layout/TopBar.svelte';
+	import BudgetBanner from '$lib/components/budget/BudgetBanner.svelte';
 	import { page } from '$app/stores';
 
 	let { data, children } = $props();
@@ -40,6 +41,11 @@
 
 		<!-- Page content -->
 		<main class="flex-1 p-6 pt-20">
+			{#if data.budgetWarning}
+				<div class="mb-4">
+					<BudgetBanner currentSpend={data.budgetWarning.currentSpend} limit={data.budgetWarning.limit} />
+				</div>
+			{/if}
 			{@render children()}
 		</main>
 	</div>

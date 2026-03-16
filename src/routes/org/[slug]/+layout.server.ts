@@ -1,8 +1,18 @@
 import { redirect, error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
-import { appOrganizations, appOrgMembers } from '$lib/server/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { appOrganizations, appOrgMembers, appBudgets, appUsageLogs } from '$lib/server/db/schema';
+import { eq, and, gte, sql, isNull, or } from 'drizzle-orm';
 import type { LayoutServerLoad } from './$types';
+
+function getBudgetResetDate(resetDay: number): Date {
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = now.getMonth();
+	if (now.getDate() < resetDay) {
+		return new Date(year, month - 1, resetDay);
+	}
+	return new Date(year, month, resetDay);
+}
 
 export const load: LayoutServerLoad = async ({ locals, params }) => {
 	if (!locals.user) {
@@ -46,6 +56,55 @@ export const load: LayoutServerLoad = async ({ locals, params }) => {
 		.innerJoin(appOrganizations, eq(appOrgMembers.orgId, appOrganizations.id))
 		.where(eq(appOrgMembers.userId, locals.user.id));
 
+	// Check if user has a budget and is approaching limit
+	const userRole = membership.role;
+
+	// Find user's budget using cascade: individual > role default > org default
+	const userBudgets = await db
+		.select()
+		.from(appBudgets)
+		.where(
+			and(
+				eq(appBudgets.orgId, currentOrg.id),
+				or(
+					eq(appBudgets.userId, locals.user.id), // individual
+					and(isNull(appBudgets.userId), eq(appBudgets.role, userRole)), // role default
+					and(isNull(appBudgets.userId), isNull(appBudgets.role), eq(appBudgets.isOrgDefault, true)) // org default
+				)
+			)
+		);
+
+	const budget =
+		userBudgets.find((b) => b.userId === locals.user.id) ??
+		userBudgets.find((b) => b.userId === null && b.role === userRole) ??
+		userBudgets.find((b) => b.isOrgDefault);
+
+	let budgetWarning: { currentSpend: number; limit: number } | null = null;
+
+	if (budget && (budget.hardLimitCents || budget.softLimitCents)) {
+		const resetDate = getBudgetResetDate(budget.resetDay);
+		const spendResult = await db
+			.select({
+				total: sql<string>`COALESCE(SUM(CAST(${appUsageLogs.cost} AS numeric)), 0)`
+			})
+			.from(appUsageLogs)
+			.where(
+				and(
+					eq(appUsageLogs.orgId, currentOrg.id),
+					eq(appUsageLogs.userId, locals.user.id),
+					gte(appUsageLogs.createdAt, resetDate)
+				)
+			);
+
+		const currentSpendDollars = parseFloat(spendResult[0]?.total ?? '0');
+		const limitCents = budget.hardLimitCents ?? budget.softLimitCents;
+		const limitDollars = limitCents ? limitCents / 100 : null;
+
+		if (limitDollars && currentSpendDollars >= limitDollars * 0.9) {
+			budgetWarning = { currentSpend: currentSpendDollars, limit: limitDollars };
+		}
+	}
+
 	return {
 		currentOrg,
 		userOrgs,
@@ -54,6 +113,7 @@ export const load: LayoutServerLoad = async ({ locals, params }) => {
 			id: locals.user.id,
 			name: locals.user.name,
 			email: locals.user.email
-		}
+		},
+		budgetWarning
 	};
 };
