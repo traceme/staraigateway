@@ -1,4 +1,13 @@
-import { pgTable, text, boolean, timestamp, unique, index } from 'drizzle-orm/pg-core';
+import {
+	pgTable,
+	text,
+	boolean,
+	timestamp,
+	unique,
+	index,
+	integer,
+	numeric
+} from 'drizzle-orm/pg-core';
 
 // All tables use app_ prefix to coexist with LiteLLM's Prisma-managed tables
 
@@ -123,5 +132,60 @@ export const appApiKeys = pgTable(
 	(table) => [
 		index('app_api_keys_key_hash_idx').on(table.keyHash),
 		index('app_api_keys_org_user_idx').on(table.orgId, table.userId)
+	]
+);
+
+export const appUsageLogs = pgTable(
+	'app_usage_logs',
+	{
+		id: text('id').primaryKey(),
+		orgId: text('org_id')
+			.notNull()
+			.references(() => appOrganizations.id),
+		userId: text('user_id')
+			.notNull()
+			.references(() => appUsers.id),
+		apiKeyId: text('api_key_id')
+			.notNull()
+			.references(() => appApiKeys.id),
+		model: text('model').notNull(),
+		provider: text('provider').notNull(),
+		endpoint: text('endpoint').notNull(), // '/v1/chat/completions' or '/v1/embeddings'
+		inputTokens: integer('input_tokens').notNull().default(0),
+		outputTokens: integer('output_tokens').notNull().default(0),
+		cost: numeric('cost', { precision: 12, scale: 6 }).notNull().default('0'),
+		latencyMs: integer('latency_ms'),
+		status: text('status').notNull().default('success'), // 'success' | 'error'
+		isStreaming: boolean('is_streaming').notNull().default(false),
+		errorMessage: text('error_message'),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(table) => [
+		index('app_usage_logs_org_created_idx').on(table.orgId, table.createdAt),
+		index('app_usage_logs_user_created_idx').on(table.userId, table.createdAt),
+		index('app_usage_logs_org_model_idx').on(table.orgId, table.model)
+	]
+);
+
+export const appBudgets = pgTable(
+	'app_budgets',
+	{
+		id: text('id').primaryKey(),
+		orgId: text('org_id')
+			.notNull()
+			.references(() => appOrganizations.id),
+		userId: text('user_id').references(() => appUsers.id), // null = default (org-wide or role-scoped)
+		role: text('role'), // null = individual or org-wide; 'owner' | 'admin' | 'member' = role-scoped default
+		hardLimitCents: integer('hard_limit_cents'), // in cents for precision, null = no hard limit
+		softLimitCents: integer('soft_limit_cents'), // in cents, null = no soft limit
+		resetDay: integer('reset_day').notNull().default(1), // 1-28
+		isOrgDefault: boolean('is_org_default').notNull().default(false),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(table) => [
+		unique('app_budgets_org_user_unique').on(table.orgId, table.userId),
+		index('app_budgets_org_default_idx').on(table.orgId, table.isOrgDefault),
+		unique('app_budgets_org_role_unique').on(table.orgId, table.role)
 	]
 );
