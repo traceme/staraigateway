@@ -64,9 +64,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **BUDG-01**: Admin can set hard spend limit per member (reject when exceeded)
 - [x] **BUDG-02**: Admin can set soft spend limit per member (alert but allow)
-- [ ] **BUDG-03**: Admin can set per-team monthly budget
+- [x] **BUDG-03**: Admin can set per-team monthly budget
 - [x] **BUDG-04**: Budgets reset on configurable monthly cycle
-- [ ] **BUDG-05**: Members receive notification when approaching budget limit
+- [x] **BUDG-05**: Members receive notification when approaching budget limit
 
 ### Dashboard
 
@@ -162,9 +162,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRACK-05 | Phase 3 | Complete |
 | BUDG-01 | Phase 3 | Complete |
 | BUDG-02 | Phase 3 | Complete |
-| BUDG-03 | Phase 3 | Pending |
+| BUDG-03 | Phase 3 | Complete |
 | BUDG-04 | Phase 3 | Complete |
-| BUDG-05 | Phase 3 | Pending |
+| BUDG-05 | Phase 3 | Complete |
 | DASH-01 | Phase 4 | Pending |
 | DASH-02 | Phase 4 | Pending |
 | DASH-03 | Phase 4 | Pending |
