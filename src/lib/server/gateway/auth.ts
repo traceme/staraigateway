@@ -7,6 +7,8 @@ export interface GatewayAuth {
 	userId: string;
 	orgId: string;
 	apiKeyId: string;
+	effectiveRpmLimit: number | null;
+	effectiveTpmLimit: number | null;
 	org: {
 		id: string;
 		name: string;
@@ -18,7 +20,7 @@ export interface GatewayAuth {
 /**
  * Authenticate an API request using a Bearer sk-th-* API key.
  * Extracts the token from the Authorization header, hashes it with SHA-256,
- * and looks it up in appApiKeys. Returns user/org info or null.
+ * and looks it up in appApiKeys. Returns user/org info with effective rate limits or null.
  */
 export async function authenticateApiKey(request: Request): Promise<GatewayAuth | null> {
 	const authHeader = request.headers.get('Authorization');
@@ -30,15 +32,19 @@ export async function authenticateApiKey(request: Request): Promise<GatewayAuth 
 	// SHA-256 hash (same as api-keys.ts uses)
 	const keyHash = createHash('sha256').update(token).digest('hex');
 
-	// Look up the key with user and org joins
+	// Look up the key with org join, including rate limit fields
 	const rows = await db
 		.select({
 			keyId: appApiKeys.id,
 			userId: appApiKeys.userId,
 			orgId: appApiKeys.orgId,
+			rpmLimit: appApiKeys.rpmLimit,
+			tpmLimit: appApiKeys.tpmLimit,
 			orgName: appOrganizations.name,
 			orgSlug: appOrganizations.slug,
-			litellmOrgId: appOrganizations.litellmOrgId
+			litellmOrgId: appOrganizations.litellmOrgId,
+			defaultRpmLimit: appOrganizations.defaultRpmLimit,
+			defaultTpmLimit: appOrganizations.defaultTpmLimit
 		})
 		.from(appApiKeys)
 		.innerJoin(appOrganizations, eq(appApiKeys.orgId, appOrganizations.id))
@@ -56,10 +62,16 @@ export async function authenticateApiKey(request: Request): Promise<GatewayAuth 
 		.then(() => {})
 		.catch(() => {});
 
+	// Effective limits: per-key override ?? org default ?? null
+	const effectiveRpmLimit = row.rpmLimit ?? row.defaultRpmLimit ?? null;
+	const effectiveTpmLimit = row.tpmLimit ?? row.defaultTpmLimit ?? null;
+
 	return {
 		userId: row.userId,
 		orgId: row.orgId,
 		apiKeyId: row.keyId,
+		effectiveRpmLimit,
+		effectiveTpmLimit,
 		org: {
 			id: row.orgId,
 			name: row.orgName,

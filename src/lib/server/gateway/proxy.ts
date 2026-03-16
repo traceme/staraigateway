@@ -11,6 +11,12 @@ import {
 	extractUsageFromSSEText,
 	calculateCost
 } from './usage';
+import {
+	checkRateLimit,
+	recordRequest,
+	rateLimitResponse,
+	addRateLimitHeaders
+} from './rate-limit';
 
 const LITELLM_API_URL = env.LITELLM_API_URL ?? 'http://localhost:4000';
 
@@ -19,6 +25,7 @@ const LITELLM_API_URL = env.LITELLM_API_URL ?? 'http://localhost:4000';
  * Selects the first active provider key that supports the requested model.
  * Supports both streaming (SSE pass-through) and non-streaming responses.
  * Logs usage data (token counts, cost) fire-and-forget after response.
+ * Enforces per-key rate limits (RPM/TPM) before forwarding.
  */
 export async function proxyToLiteLLM(
 	request: Request,
@@ -28,6 +35,14 @@ export async function proxyToLiteLLM(
 	apiKeyId?: string
 ): Promise<Response> {
 	const startTime = Date.now();
+
+	// Rate limit check BEFORE forwarding to LiteLLM
+	if (auth && apiKeyId) {
+		const rlResult = checkRateLimit(apiKeyId, auth.effectiveRpmLimit, auth.effectiveTpmLimit);
+		if (!rlResult.allowed) {
+			return rateLimitResponse(rlResult);
+		}
+	}
 
 	// Parse the request body to get the model
 	let body: Record<string, unknown>;
@@ -100,6 +115,11 @@ export async function proxyToLiteLLM(
 	const litellmUrl = `${LITELLM_API_URL}${path}`;
 	const isStreaming = body.stream === true;
 
+	// Get rate limit snapshot for response headers
+	const rlSnapshot = auth
+		? checkRateLimit(apiKeyId ?? '', auth.effectiveRpmLimit, auth.effectiveTpmLimit)
+		: null;
+
 	try {
 		const litellmResponse = await fetch(litellmUrl, {
 			method: 'POST',
@@ -157,6 +177,11 @@ export async function proxyToLiteLLM(
 							if (auth && apiKeyId) {
 								const sseText = recentLines.join('\n');
 								const usage = extractUsageFromSSEText(sseText);
+								const totalTokens = usage
+									? usage.inputTokens + usage.outputTokens
+									: 0;
+								// Record tokens for rate limiting
+								recordRequest(apiKeyId, totalTokens);
 								if (usage) {
 									const cost = calculateCost(
 										usage.model || model,
@@ -235,7 +260,8 @@ export async function proxyToLiteLLM(
 				}
 			});
 
-			return new Response(stream, {
+			// Add rate limit headers to the initial SSE response
+			const sseResponse = new Response(stream, {
 				status: 200,
 				headers: {
 					'Content-Type': 'text/event-stream',
@@ -243,6 +269,8 @@ export async function proxyToLiteLLM(
 					Connection: 'keep-alive'
 				}
 			});
+
+			return rlSnapshot ? addRateLimitHeaders(sseResponse, rlSnapshot) : sseResponse;
 		}
 
 		// Non-streaming: return JSON response with usage logging
@@ -251,6 +279,9 @@ export async function proxyToLiteLLM(
 
 		if (auth && apiKeyId) {
 			const usage = extractUsageFromJSON(responseBody);
+			const totalTokens = usage ? usage.inputTokens + usage.outputTokens : 0;
+			// Record tokens for rate limiting
+			recordRequest(apiKeyId, totalTokens);
 			if (usage) {
 				const cost = calculateCost(
 					usage.model || model,
@@ -288,12 +319,14 @@ export async function proxyToLiteLLM(
 			}
 		}
 
-		return new Response(responseBody, {
+		const jsonResponse = new Response(responseBody, {
 			status: 200,
 			headers: {
 				'Content-Type': 'application/json'
 			}
 		});
+
+		return rlSnapshot ? addRateLimitHeaders(jsonResponse, rlSnapshot) : jsonResponse;
 	} catch (err) {
 		const message = err instanceof Error ? err.message : 'Unknown proxy error';
 		const latencyMs = Date.now() - startTime;
