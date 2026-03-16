@@ -342,6 +342,7 @@
 {#if showCreateModal}
 	<CreateKeyModal
 		orgSlug={data.currentOrg.slug}
+		orgHasRouting={data.orgHasRouting}
 		onclose={() => (showCreateModal = false)}
 		oncreated={handleKeyCreated}
 	/>

@@ -1,16 +1,19 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import SmartRoutingToggle from './SmartRoutingToggle.svelte';
 
 	type Props = {
 		orgSlug: string;
+		orgHasRouting?: boolean;
 		onclose: () => void;
 		oncreated: (fullKey: string) => void;
 	};
 
-	let { orgSlug, onclose, oncreated }: Props = $props();
+	let { orgSlug, orgHasRouting = false, onclose, oncreated }: Props = $props();
 	let name = $state('');
 	let error = $state('');
 	let submitting = $state(false);
+	let smartRoutingEnabled = $state(false);
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') onclose();
@@ -62,6 +65,8 @@
 			{#if error}
 				<p class="mt-2 text-sm text-red-400">{error}</p>
 			{/if}
+
+			<SmartRoutingToggle bind:enabled={smartRoutingEnabled} {orgHasRouting} />
 
 			<div class="mt-4 flex justify-end gap-3">
 				<button

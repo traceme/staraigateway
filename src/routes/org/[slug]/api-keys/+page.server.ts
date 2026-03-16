@@ -79,7 +79,8 @@ export const load: PageServerLoad = async ({ parent }) => {
 		orgDefaults: {
 			defaultRpmLimit: currentOrg.defaultRpmLimit ?? null,
 			defaultTpmLimit: currentOrg.defaultTpmLimit ?? null
-		}
+		},
+		orgHasRouting: Boolean(currentOrg.smartRoutingCheapModel && currentOrg.smartRoutingExpensiveModel)
 	};
 };
 
@@ -118,19 +119,23 @@ export const actions: Actions = {
 			return fail(400, { error: parsed.error.errors[0].message });
 		}
 
+		const smartRouting = formData.get('smartRouting') === 'true';
+
 		try {
 			const { key, fullKey } = await createApiKey(org.id, userId, parsed.data.name);
 
-			// Update rate limits if provided
+			// Update rate limits and smart routing if provided
 			const rpm = typeof parsed.data.rpmLimit === 'number' ? parsed.data.rpmLimit : null;
 			const tpm = typeof parsed.data.tpmLimit === 'number' ? parsed.data.tpmLimit : null;
-			if (rpm !== null || tpm !== null) {
+			const updates: Record<string, unknown> = {};
+			if (rpm !== null) updates.rpmLimit = rpm;
+			if (tpm !== null) updates.tpmLimit = tpm;
+			if (smartRouting) updates.smartRouting = true;
+
+			if (Object.keys(updates).length > 0) {
 				await db
 					.update(appApiKeys)
-					.set({
-						...(rpm !== null ? { rpmLimit: rpm } : {}),
-						...(tpm !== null ? { tpmLimit: tpm } : {})
-					})
+					.set(updates)
 					.where(eq(appApiKeys.id, key.id));
 			}
 
