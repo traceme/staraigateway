@@ -16,7 +16,7 @@ export const appUsers = pgTable(
 	{
 		id: text('id').primaryKey(),
 		email: text('email').notNull().unique(),
-		passwordHash: text('password_hash').notNull(),
+		passwordHash: text('password_hash'), // nullable for OAuth-only users
 		name: text('name').notNull(),
 		emailVerified: boolean('email_verified').notNull().default(false),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -47,6 +47,8 @@ export const appOrganizations = pgTable(
 		description: text('description'),
 		litellmOrgId: text('litellm_org_id'),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+		defaultRpmLimit: integer('default_rpm_limit'),
+		defaultTpmLimit: integer('default_tpm_limit'),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 	},
 	(table) => [index('app_organizations_slug_idx').on(table.slug)]
@@ -125,6 +127,8 @@ export const appApiKeys = pgTable(
 		name: text('name').notNull(), // e.g., 'Cursor', 'Claude Code CLI'
 		keyPrefix: text('key_prefix').notNull(), // first 12 chars for display (e.g., 'sk-th-abc123')
 		keyHash: text('key_hash').notNull(), // SHA-256 hash of full key
+		rpmLimit: integer('rpm_limit'),
+		tpmLimit: integer('tpm_limit'),
 		isActive: boolean('is_active').notNull().default(true),
 		lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
@@ -164,6 +168,46 @@ export const appUsageLogs = pgTable(
 		index('app_usage_logs_org_created_idx').on(table.orgId, table.createdAt),
 		index('app_usage_logs_user_created_idx').on(table.userId, table.createdAt),
 		index('app_usage_logs_org_model_idx').on(table.orgId, table.model)
+	]
+);
+
+export const appOauthAccounts = pgTable(
+	'app_oauth_accounts',
+	{
+		id: text('id').primaryKey(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => appUsers.id),
+		provider: text('provider').notNull(), // 'google' | 'github'
+		providerUserId: text('provider_user_id').notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(table) => [
+		unique('app_oauth_accounts_provider_user_unique').on(table.provider, table.providerUserId),
+		index('app_oauth_accounts_user_id_idx').on(table.userId)
+	]
+);
+
+export const appOrgInvitations = pgTable(
+	'app_org_invitations',
+	{
+		id: text('id').primaryKey(),
+		orgId: text('org_id')
+			.notNull()
+			.references(() => appOrganizations.id),
+		email: text('email').notNull(),
+		role: text('role').notNull(), // 'admin' | 'member'
+		token: text('token').notNull().unique(),
+		invitedBy: text('invited_by')
+			.notNull()
+			.references(() => appUsers.id),
+		expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+		acceptedAt: timestamp('accepted_at', { withTimezone: true }),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(table) => [
+		index('app_org_invitations_token_idx').on(table.token),
+		index('app_org_invitations_org_email_idx').on(table.orgId, table.email)
 	]
 );
 

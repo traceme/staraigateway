@@ -40,7 +40,13 @@ export const actions = {
 
 		const user = users[0];
 
-		// Verify password
+		// Verify password (OAuth-only users have null passwordHash)
+		if (!user.passwordHash) {
+			return fail(400, {
+				errors: { email: ['This account uses social login. Please sign in with Google or GitHub.'] },
+				email
+			});
+		}
 		const valid = await verifyPassword(user.passwordHash, password);
 		if (!valid) {
 			return fail(400, {
