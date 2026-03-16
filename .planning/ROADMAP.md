@@ -83,9 +83,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
-- [ ] 04-03: TBD
+- [ ] 04-01-PLAN.md — DB schema additions + Google/GitHub OAuth login with Arctic
+- [ ] 04-02-PLAN.md — Member management (invite, roles, remove), invitation flow, admin dashboard KPIs
+- [ ] 04-03-PLAN.md — Rate limiting (RPM/TPM), admin API keys view, org settings page
 
 ### Phase 5: Advanced Gateway & Launch
 **Goal**: The gateway is production-hardened with smart routing, fallbacks, and caching; the product is packaged for self-hosting and has a landing page
