@@ -79,6 +79,27 @@ Additional semantic colors for this phase:
 | OAuth Google | `#ffffff` on `#18181b` | Google OAuth button (white Google "G" logo on dark bg) |
 | OAuth GitHub | `#ffffff` on `#18181b` | GitHub OAuth button (white GitHub mark on dark bg) |
 
+Extended tokens (declared for classes used in this phase):
+
+| Role | Value | Usage |
+|------|-------|-------|
+| Primary hover | `hover:bg-blue-700` | Primary button hover state |
+| Backdrop | `bg-black/50` | Overlay for slide-out panels and modals |
+| High-contrast text | `text-zinc-100` | Text on dark backgrounds (OAuth buttons, banners) |
+| Secondary button text | `text-zinc-300` | Text for secondary/cancel buttons |
+| Helper text | `text-zinc-500` | Description text, helper hints below inputs |
+| Error text | `text-red-400` | Error text in toasts and banners (lighter than red-500 for dark bg readability) |
+| Error background | `bg-red-900/20` | Error background tint for toasts and banners |
+
+Badge token pattern:
+
+| Role | Background | Text |
+|------|-----------|------|
+| Owner | `bg-green-900/40` | `text-green-400` |
+| Admin | `bg-blue-900/40` | `text-blue-400` |
+| Member | `bg-zinc-800` | `text-zinc-400` |
+| Pending | `bg-amber-900/40` | `text-amber-400` |
+
 Accent reserved for: primary CTA buttons ("Send Invite", "Save Settings", "Create Key"), active sidebar nav item, admin dashboard KPI trend arrows (positive).
 
 ---
@@ -576,6 +597,8 @@ Error state (save failed):
 | Role badge: Owner | "Owner" |
 | Role badge: Admin | "Admin" |
 | Role badge: Member | "Member" |
+| Section header (Members page) | "Pending Invitations" |
+| Subheading (API key form) | "Rate Limits (optional)" |
 
 ---
 
@@ -618,7 +641,7 @@ Button style: matches existing email template pattern — table-based HTML butto
 | Member | `bg-zinc-800` | `text-zinc-400` | none |
 | Pending | `bg-amber-900/40` | `text-amber-400` | none |
 
-All badges: `text-xs font-medium px-2 py-0.5 rounded-full`
+All badges: `text-xs font-bold px-2 py-0.5 rounded-full`
 
 ---
 
@@ -638,6 +661,13 @@ All interactive elements must include appropriate aria attributes:
 | Tab toggle (My Keys / All Keys) | `role="tablist"` with `role="tab"` children, `aria-selected` |
 | Revoke pending invite | `aria-label="Revoke invitation for {email}"` |
 | Confirmation dialogs | `role="alertdialog"` `aria-describedby` |
+
+### MemberActionMenu — Interaction Specification
+
+- **Open state:** Dropdown appears below the trigger button, positioned `absolute right-0` (right-aligned to trigger).
+- **Keyboard:** Arrow keys (`ArrowUp`/`ArrowDown`) navigate menu items, `Enter`/`Space` selects the focused item, `Escape` closes the menu.
+- **Focus:** First menu item receives focus on open. When the menu closes, focus returns to the trigger button.
+- **Accessibility:** Trigger button gets `aria-expanded="true"` when open, `"false"` when closed. The dropdown container gets `role="menu"`. Each menu item gets `role="menuitem"` and `tabindex="-1"` (focus managed programmatically).
 
 ---
 
