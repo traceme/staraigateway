@@ -83,38 +83,38 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TEST-01 | — | Pending |
-| TEST-02 | — | Pending |
-| TEST-03 | — | Pending |
-| TEST-04 | — | Pending |
-| TEST-05 | — | Pending |
-| TEST-06 | — | Pending |
-| TEST-07 | — | Pending |
-| TEST-08 | — | Pending |
-| SEC-01 | — | Pending |
-| SEC-02 | — | Pending |
-| SEC-03 | — | Pending |
-| SEC-04 | — | Pending |
-| SEC-05 | — | Pending |
-| SEC-06 | — | Pending |
-| PERF-01 | — | Pending |
-| PERF-02 | — | Pending |
-| PERF-03 | — | Pending |
-| PERF-04 | — | Pending |
-| PERF-05 | — | Pending |
-| DEBT-01 | — | Pending |
-| DEBT-02 | — | Pending |
-| DEBT-03 | — | Pending |
-| DEBT-04 | — | Pending |
-| DEBT-05 | — | Pending |
-| DEBT-06 | — | Pending |
-| DEBT-07 | — | Pending |
+| DEBT-01 | Phase 7 | Pending |
+| DEBT-02 | Phase 7 | Pending |
+| DEBT-03 | Phase 7 | Pending |
+| DEBT-04 | Phase 7 | Pending |
+| DEBT-05 | Phase 7 | Pending |
+| DEBT-06 | Phase 7 | Pending |
+| DEBT-07 | Phase 7 | Pending |
+| SEC-01 | Phase 8 | Pending |
+| SEC-02 | Phase 8 | Pending |
+| SEC-03 | Phase 8 | Pending |
+| SEC-04 | Phase 8 | Pending |
+| SEC-05 | Phase 8 | Pending |
+| SEC-06 | Phase 8 | Pending |
+| PERF-01 | Phase 9 | Pending |
+| PERF-02 | Phase 9 | Pending |
+| PERF-03 | Phase 9 | Pending |
+| PERF-04 | Phase 9 | Pending |
+| PERF-05 | Phase 9 | Pending |
+| TEST-01 | Phase 10 | Pending |
+| TEST-02 | Phase 10 | Pending |
+| TEST-03 | Phase 10 | Pending |
+| TEST-04 | Phase 11 | Pending |
+| TEST-05 | Phase 11 | Pending |
+| TEST-06 | Phase 11 | Pending |
+| TEST-07 | Phase 11 | Pending |
+| TEST-08 | Phase 11 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 26 total
-- Mapped to phases: 0
-- Unmapped: 26
+- Mapped to phases: 26
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-16*
-*Last updated: 2026-03-16 after initial definition*
+*Last updated: 2026-03-16 after roadmap creation*
