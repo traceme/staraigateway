@@ -2,6 +2,7 @@ import type { RequestHandler } from './$types';
 import { authenticateApiKey } from '$lib/server/gateway/auth';
 import { proxyToLiteLLM } from '$lib/server/gateway/proxy';
 import { checkBudget } from '$lib/server/gateway/budget';
+import { checkAndNotifyBudgets } from '$lib/server/budget/notifications';
 
 const CORS_HEADERS = {
 	'Access-Control-Allow-Origin': '*',
@@ -47,6 +48,11 @@ export const POST: RequestHandler = async ({ request }) => {
 				headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
 			}
 		);
+	}
+
+	// Fire-and-forget: notify if soft limit hit
+	if (budgetResult.softLimitHit) {
+		checkAndNotifyBudgets(auth.orgId).catch(() => {});
 	}
 
 	const response = await proxyToLiteLLM(
