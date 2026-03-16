@@ -17,6 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 3: Usage & Budget Controls** - Request logging, cost tracking dashboards, spend limits and alerts
 - [ ] **Phase 4: Dashboard & Team Management** - Full admin dashboard, member invitations, roles, OAuth providers
 - [x] **Phase 5: Advanced Gateway & Launch** - Smart routing, fallbacks, caching, self-host package, landing page (completed 2026-03-16)
+- [ ] **Phase 6: Gap Closure — Notification Triggers & Docker Fix** - Wire budget email notifications, add cron digest endpoint, add LiteLLM to docker-compose
 
 ## Phase Details
 
@@ -105,15 +106,30 @@ Plans:
 - [ ] 05-03-PLAN.md — Landing page with hero, features grid, cost comparison, self-host CTA, and footer
 - [ ] 05-04-PLAN.md — Integration docs, Docker packaging, self-host guide
 
+### Phase 6: Gap Closure — Notification Triggers & Docker Fix
+**Goal**: Budget email notifications fire on soft limit hits, admin digest is schedulable via cron, and docker-compose bundles LiteLLM for a complete self-hosted deployment
+**Depends on**: Phase 5
+**Requirements**: BUDG-03, BUDG-05, SHIP-01
+**Gap Closure**: Closes gaps from v1.0 milestone audit
+**Success Criteria** (what must be TRUE):
+  1. Gateway calls `checkAndNotifyBudgets()` when `softLimitHit` is true (fire-and-forget)
+  2. A `/api/cron/digest` endpoint exists that triggers `sendAdminDigest()` for all orgs
+  3. `docker-compose.yml` includes LiteLLM service and self-host guide is updated
+**Plans**: 1 plan
+
+Plans:
+- [ ] 06-01-PLAN.md — Wire notification triggers, cron digest endpoint, LiteLLM in docker-compose
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 2/3 | In progress | - |
-| 2. Core Gateway | 1/3 | In Progress|  |
-| 3. Usage & Budget Controls | 2/3 | In Progress|  |
-| 4. Dashboard & Team Management | 0/3 | Not started | - |
-| 5. Advanced Gateway & Launch | 4/4 | Complete   | 2026-03-16 |
+| 1. Foundation | 3/3 | Complete | 2026-03-15 |
+| 2. Core Gateway | 3/3 | Complete | 2026-03-15 |
+| 3. Usage & Budget Controls | 3/3 | Complete | 2026-03-16 |
+| 4. Dashboard & Team Management | 3/3 | Complete | 2026-03-16 |
+| 5. Advanced Gateway & Launch | 4/4 | Complete | 2026-03-16 |
+| 6. Gap Closure | 0/1 | Not started | - |
