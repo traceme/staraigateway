@@ -6,10 +6,10 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) {
-		redirect(302, '/auth/login');
+		return { authenticated: false };
 	}
 
-	// Check if user has any organizations
+	// Authenticated user — redirect to their org dashboard
 	const memberships = await db
 		.select({
 			orgSlug: appOrganizations.slug
