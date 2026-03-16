@@ -78,7 +78,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Self-Host & Launch
 
-- [ ] **SHIP-01**: Docker-compose package for self-hosted deployment
+- [x] **SHIP-01**: Docker-compose package for self-hosted deployment
 - [ ] **SHIP-02**: Landing page explaining the product and value proposition
 - [ ] **SHIP-03**: Integration docs for Cursor, Continue.dev, and Claude Code setup
 - [ ] **SHIP-04**: Self-host configuration guide
@@ -170,7 +170,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DASH-03 | Phase 4 | Complete |
 | DASH-04 | Phase 4 | Complete |
 | DASH-05 | Phase 4 | Complete |
-| SHIP-01 | Phase 5 | Pending |
+| SHIP-01 | Phase 5 | Complete |
 | SHIP-02 | Phase 5 | Pending |
 | SHIP-03 | Phase 5 | Pending |
 | SHIP-04 | Phase 5 | Pending |

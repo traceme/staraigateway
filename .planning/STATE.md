@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Phase 5 UI-SPEC approved
-last_updated: "2026-03-16T06:19:21.593Z"
+stopped_at: Completed 05-03-PLAN.md
+last_updated: "2026-03-16T07:06:08.130Z"
 last_activity: 2026-03-16 -- Plan 03-03 executed (budget config UI, warning banner, email notifications)
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 12
-  completed_plans: 12
+  total_plans: 16
+  completed_plans: 13
   percent: 100
 ---
 
@@ -58,6 +58,7 @@ Progress: [██████████] 100%
 | Phase 04 P01 | 4 | 2 tasks | 12 files |
 | Phase 04 P03 | 5 | 2 tasks | 11 files |
 | Phase 04 P02 | 5 | 3 tasks | 15 files |
+| Phase 05 P03 | 2 | 1 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,7 @@ Recent decisions affecting current work:
 - [Phase 04]: Graceful SMTP failure on invitation email (invitation still created)
 - [Phase 04]: Member removal cascades to deactivate all API keys (soft delete)
 - [Phase 04]: Only owner can change roles; admins and owners can invite/remove
+- [Phase 05]: Landing page as standalone public page outside app sidebar layout
 
 ### Pending Todos
 
@@ -118,6 +120,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T06:19:21.589Z
-Stopped at: Phase 5 UI-SPEC approved
-Resume file: .planning/phases/05-advanced-gateway-launch/05-UI-SPEC.md
+Last session: 2026-03-16T07:06:08.127Z
+Stopped at: Completed 05-03-PLAN.md
+Resume file: None
