@@ -11,7 +11,7 @@ interface UsageData {
 
 // Model pricing: input/output per 1M tokens in dollars
 // Source: LiteLLM model_cost_map defaults, can be overridden later
-const MODEL_PRICING: Record<string, { input: number; output: number }> = {
+export const MODEL_PRICING: Record<string, { input: number; output: number }> = {
 	'gpt-4o': { input: 2.5, output: 10.0 },
 	'gpt-4o-mini': { input: 0.15, output: 0.6 },
 	'gpt-4-turbo': { input: 10.0, output: 30.0 },
