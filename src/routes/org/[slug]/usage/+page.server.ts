@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
-import { appUsageLogs, appUsers, appOrgMembers } from '$lib/server/db/schema';
+import { appUsageLogs, appUsers, appOrgMembers, appBudgets } from '$lib/server/db/schema';
 import { eq, and, gte, lte, sql, desc } from 'drizzle-orm';
 
 export const load: PageServerLoad = async ({ parent, url }) => {
@@ -104,6 +104,15 @@ export const load: PageServerLoad = async ({ parent, url }) => {
 		.groupBy(appUsageLogs.model, appUsageLogs.provider)
 		.orderBy(desc(sql`SUM(CAST(${appUsageLogs.cost} AS numeric))`));
 
+	// Load all budgets for this org
+	const budgets = await db
+		.select()
+		.from(appBudgets)
+		.where(eq(appBudgets.orgId, currentOrg.id));
+
+	const orgDefault = budgets.find((b) => b.isOrgDefault) ?? null;
+	const roleBudgets = budgets.filter((b) => b.role !== null && b.userId === null);
+
 	// Per-role aggregation for TRACK-03 (per-team cost breakdown by role)
 	const roleBreakdown = memberBreakdown.reduce(
 		(acc, m) => {
@@ -116,6 +125,43 @@ export const load: PageServerLoad = async ({ parent, url }) => {
 		},
 		{} as Record<string, { role: string; cost: number; requests: number; members: number }>
 	);
+
+	// Annotate members with budget info using cascade: individual > role > org default
+	const annotatedMembers = memberBreakdown.map((m) => {
+		const memberRole = m.role ?? 'member';
+		const individual = budgets.find((b) => b.userId === m.userId);
+		const roleDefault = roleBudgets.find((b) => b.role === memberRole);
+
+		let budget: (typeof budgets)[0] | null = null;
+		let budgetSource: 'individual' | 'role' | 'org-default' | null = null;
+
+		if (individual) {
+			budget = individual;
+			budgetSource = 'individual';
+		} else if (roleDefault) {
+			budget = roleDefault;
+			budgetSource = 'role';
+		} else if (orgDefault) {
+			budget = orgDefault;
+			budgetSource = 'org-default';
+		}
+
+		const costDollars = parseFloat(m.cost ?? '0');
+
+		return {
+			userId: m.userId,
+			name: m.userName,
+			role: memberRole,
+			cost: costDollars,
+			requests: m.requests,
+			inputTokens: m.inputTokens,
+			outputTokens: m.outputTokens,
+			hardLimitCents: budget?.hardLimitCents ?? null,
+			softLimitCents: budget?.softLimitCents ?? null,
+			currentSpendCents: Math.round(costDollars * 100),
+			budgetSource
+		};
+	});
 
 	return {
 		tab,
@@ -134,15 +180,7 @@ export const load: PageServerLoad = async ({ parent, url }) => {
 			cost: parseFloat(d.cost ?? '0'),
 			requests: d.requests
 		})),
-		memberBreakdown: memberBreakdown.map((m) => ({
-			userId: m.userId,
-			name: m.userName,
-			role: m.role ?? 'member',
-			cost: parseFloat(m.cost ?? '0'),
-			requests: m.requests,
-			inputTokens: m.inputTokens,
-			outputTokens: m.outputTokens
-		})),
+		memberBreakdown: annotatedMembers,
 		roleBreakdown: Object.values(roleBreakdown),
 		modelBreakdown: modelBreakdown.map((m) => ({
 			model: m.model,
@@ -151,6 +189,20 @@ export const load: PageServerLoad = async ({ parent, url }) => {
 			requests: m.requests,
 			inputTokens: m.inputTokens,
 			outputTokens: m.outputTokens
-		}))
+		})),
+		budgets: {
+			orgDefault: orgDefault
+				? {
+						hardLimitCents: orgDefault.hardLimitCents,
+						softLimitCents: orgDefault.softLimitCents,
+						resetDay: orgDefault.resetDay
+					}
+				: null,
+			roleBudgets: roleBudgets.map((rb) => ({
+				role: rb.role!,
+				hardLimitCents: rb.hardLimitCents,
+				softLimitCents: rb.softLimitCents
+			}))
+		}
 	};
 };

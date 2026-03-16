@@ -1,15 +1,21 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
+	import { page } from '$app/stores';
 	import KpiCard from '$lib/components/usage/KpiCard.svelte';
 	import UsageTabs from '$lib/components/usage/UsageTabs.svelte';
 	import TimeRangePicker from '$lib/components/usage/TimeRangePicker.svelte';
 	import CostTrendChart from '$lib/components/usage/CostTrendChart.svelte';
 	import BreakdownBarChart from '$lib/components/usage/BreakdownBarChart.svelte';
 	import UsageTable from '$lib/components/usage/UsageTable.svelte';
+	import BudgetPanel from '$lib/components/budget/BudgetPanel.svelte';
+	import BudgetDefaultsForm from '$lib/components/budget/BudgetDefaultsForm.svelte';
 
 	let { data } = $props();
 
 	let activeTab = $state(data.tab);
+	let selectedMember = $state<any>(null);
+
+	const orgSlug = $derived($page.params.slug);
 
 	function formatCost(v: number): string {
 		return `$${v.toFixed(2)}`;
@@ -45,7 +51,13 @@
 		{ key: 'requests', label: 'Requests', sortable: true, format: formatNumber },
 		{ key: 'inputTokens', label: 'Input Tokens', sortable: true, format: formatNumber },
 		{ key: 'outputTokens', label: 'Output Tokens', sortable: true, format: formatNumber },
-		{ key: 'cost', label: 'Cost', sortable: true, format: formatCost }
+		{ key: 'cost', label: 'Cost', sortable: true, format: formatCost },
+		{
+			key: '_budget',
+			label: 'Budget',
+			sortable: false,
+			render: (row: any) => row.budgetSource ? 'Edit Budget' : 'Set Budget'
+		}
 	];
 
 	// Model table columns
@@ -123,7 +135,49 @@
 				{#if memberBarData.length > 0}
 					<BreakdownBarChart data={memberBarData} />
 				{/if}
-				<UsageTable columns={memberColumns} rows={data.memberBreakdown} />
+
+				<!-- Member table with budget actions -->
+				<div class="overflow-x-auto rounded-lg border border-zinc-800">
+					<table class="w-full text-left text-sm">
+						<thead>
+							<tr class="border-b border-zinc-800 bg-zinc-900/50">
+								{#each memberColumns as col}
+									<th class="px-4 py-3 text-xs font-normal uppercase tracking-wider text-zinc-500">
+										{col.label}
+									</th>
+								{/each}
+							</tr>
+						</thead>
+						<tbody>
+							{#each data.memberBreakdown as member}
+								<tr class="border-b border-zinc-800/50 hover:bg-zinc-900/30">
+									<td class="px-4 py-3 text-zinc-200">{member.name}</td>
+									<td class="px-4 py-3 text-zinc-400">{member.role}</td>
+									<td class="px-4 py-3 text-zinc-300">{formatNumber(member.requests)}</td>
+									<td class="px-4 py-3 text-zinc-300">{formatNumber(member.inputTokens)}</td>
+									<td class="px-4 py-3 text-zinc-300">{formatNumber(member.outputTokens)}</td>
+									<td class="px-4 py-3 text-zinc-200">{formatCost(member.cost)}</td>
+									<td class="px-4 py-3">
+										<button
+											class="text-xs text-blue-400 hover:text-blue-300"
+											onclick={() => (selectedMember = member)}
+										>
+											{member.budgetSource ? 'Edit Budget' : 'Set Budget'}
+										</button>
+									</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+
+				<!-- Budget Defaults Form -->
+				<BudgetDefaultsForm
+					orgDefault={data.budgets.orgDefault}
+					roleBudgets={data.budgets.roleBudgets}
+					{orgSlug}
+					onSaved={() => invalidateAll()}
+				/>
 			</div>
 		{:else if activeTab === 'model'}
 			<div class="space-y-6">
@@ -144,3 +198,16 @@
 		</div>
 	{/if}
 </div>
+
+<!-- Budget Panel (slide-out) -->
+{#if selectedMember}
+	<BudgetPanel
+		member={selectedMember}
+		{orgSlug}
+		onClose={() => (selectedMember = null)}
+		onSaved={() => {
+			selectedMember = null;
+			invalidateAll();
+		}}
+	/>
+{/if}
