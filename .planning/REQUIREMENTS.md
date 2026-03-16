@@ -54,7 +54,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Usage & Cost Tracking
 
-- [ ] **TRACK-01**: Every request logs tokens (input/output), cost, model, and timestamp
+- [x] **TRACK-01**: Every request logs tokens (input/output), cost, model, and timestamp
 - [ ] **TRACK-02**: Dashboard shows per-member cost breakdown
 - [ ] **TRACK-03**: Dashboard shows per-team cost breakdown
 - [ ] **TRACK-04**: Dashboard shows daily and monthly usage trends with charts
@@ -62,10 +62,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Budget Controls
 
-- [ ] **BUDG-01**: Admin can set hard spend limit per member (reject when exceeded)
-- [ ] **BUDG-02**: Admin can set soft spend limit per member (alert but allow)
+- [x] **BUDG-01**: Admin can set hard spend limit per member (reject when exceeded)
+- [x] **BUDG-02**: Admin can set soft spend limit per member (alert but allow)
 - [ ] **BUDG-03**: Admin can set per-team monthly budget
-- [ ] **BUDG-04**: Budgets reset on configurable monthly cycle
+- [x] **BUDG-04**: Budgets reset on configurable monthly cycle
 - [ ] **BUDG-05**: Members receive notification when approaching budget limit
 
 ### Dashboard
@@ -155,15 +155,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GW-08 | Phase 5 | Pending |
 | GW-09 | Phase 5 | Pending |
 | GW-10 | Phase 5 | Pending |
-| TRACK-01 | Phase 3 | Pending |
+| TRACK-01 | Phase 3 | Complete |
 | TRACK-02 | Phase 3 | Pending |
 | TRACK-03 | Phase 3 | Pending |
 | TRACK-04 | Phase 3 | Pending |
 | TRACK-05 | Phase 3 | Pending |
-| BUDG-01 | Phase 3 | Pending |
-| BUDG-02 | Phase 3 | Pending |
+| BUDG-01 | Phase 3 | Complete |
+| BUDG-02 | Phase 3 | Complete |
 | BUDG-03 | Phase 3 | Pending |
-| BUDG-04 | Phase 3 | Pending |
+| BUDG-04 | Phase 3 | Complete |
 | BUDG-05 | Phase 3 | Pending |
 | DASH-01 | Phase 4 | Pending |
 | DASH-02 | Phase 4 | Pending |

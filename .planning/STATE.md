@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Phase 3 UI-SPEC approved
-last_updated: "2026-03-16T00:23:15.534Z"
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-03-16T01:43:21.137Z"
 last_activity: "2026-03-15 -- Plan 02-03 executed (gateway proxy endpoints: /v1/chat/completions, /v1/embeddings, /v1/models)"
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
-  percent: 100
+  total_plans: 9
+  completed_plans: 7
+  percent: 78
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Any company can sign up, plug in their LLM API keys, and immediately give their entire team controlled, budget-tracked access to AI models.
-**Current focus:** Phase 2: Core Gateway
+**Current focus:** Phase 3: Usage & Budget Controls
 
 ## Current Position
 
-Phase: 2 of 5 (Core Gateway)
-Plan: 3 of 3 in current phase
-Status: Phase 02 complete (all 3 plans done: provider keys, API keys, gateway endpoints)
-Last activity: 2026-03-15 -- Plan 02-03 executed (gateway proxy endpoints: /v1/chat/completions, /v1/embeddings, /v1/models)
+Phase: 3 of 5 (Usage & Budget Controls)
+Plan: 1 of 3 in current phase
+Status: Plan 03-01 complete (usage logging + budget enforcement)
+Last activity: 2026-03-16 -- Plan 03-01 executed (usage logging, budget enforcement with role-aware cascade)
 
-Progress: [██████████] 100%
+Progress: [████████░░] 78%
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Progress: [██████████] 100%
 
 *Updated after each plan completion*
 | Phase 02 P03 | 2 min | 2 tasks | 7 files |
+| Phase 03 P01 | 4 min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,10 @@ Recent decisions affecting current work:
 - [Phase 02]: Duplicated key hash lookup in gateway/auth.ts (Plan 02 and 03 run in parallel)
 - [Phase 02]: Fire-and-forget lastUsedAt update to avoid blocking API responses
 - [Phase 02]: Pure SSE pass-through for streaming (no buffering or transformation)
+- [Phase 03]: MODEL_PRICING built-in table for cost calculation (admin override planned later)
+- [Phase 03]: Ring buffer (last 10 SSE lines) for streaming usage extraction without full buffering
+- [Phase 03]: Budget cascade: individual > role default > org default in single query
+- [Phase 03]: Cents-based budget storage for integer precision
 
 ### Pending Todos
 
@@ -94,6 +99,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T00:23:15.531Z
-Stopped at: Phase 3 UI-SPEC approved
-Resume file: .planning/phases/03-usage-budget-controls/03-UI-SPEC.md
+Last session: 2026-03-16T01:43:21.135Z
+Stopped at: Completed 03-01-PLAN.md
+Resume file: None
