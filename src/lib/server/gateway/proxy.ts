@@ -150,12 +150,8 @@ export async function proxyToLiteLLM(
 	// Find all keys whose models array contains the effective model
 	let matchingKeys = providerKeys.filter((key) => {
 		if (!key.models) return false;
-		try {
-			const modelList = JSON.parse(key.models) as string[];
-			return modelList.includes(effectiveModel);
-		} catch {
-			return false;
-		}
+		const modelList = key.models as string[];
+		return modelList.includes(effectiveModel);
 	});
 
 	// If smart routing substituted the model but no keys match, fall back to requested model
@@ -164,12 +160,8 @@ export async function proxyToLiteLLM(
 		effectiveBody = body;
 		matchingKeys = providerKeys.filter((key) => {
 			if (!key.models) return false;
-			try {
-				const modelList = JSON.parse(key.models) as string[];
-				return modelList.includes(requestedModel);
-			} catch {
-				return false;
-			}
+			const modelList = key.models as string[];
+			return modelList.includes(requestedModel);
 		});
 	}
 

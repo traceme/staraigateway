@@ -7,7 +7,7 @@
 		provider: string;
 		label: string;
 		baseUrl: string | null;
-		models: string | null;
+		models: string[] | null;
 		isActive: boolean;
 		createdAt: Date;
 		updatedAt: Date;
@@ -285,7 +285,7 @@
 							</div>
 						</div>
 						{#if key.models}
-							{@const modelList = JSON.parse(key.models) as string[]}
+							{@const modelList = key.models as string[]}
 							<p class="mt-1 text-xs text-zinc-500">
 								{modelList.length} models available
 							</p>

@@ -29,12 +29,7 @@ export async function getAvailableModels(orgId: string): Promise<ModelEntry[]> {
 	for (const key of keys) {
 		if (!key.models) continue;
 
-		let modelList: string[];
-		try {
-			modelList = JSON.parse(key.models) as string[];
-		} catch {
-			continue;
-		}
+		const modelList = key.models as string[];
 
 		for (const modelId of modelList) {
 			if (seen.has(modelId)) continue;

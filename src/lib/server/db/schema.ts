@@ -6,7 +6,8 @@ import {
 	unique,
 	index,
 	integer,
-	numeric
+	numeric,
+	jsonb
 } from 'drizzle-orm/pg-core';
 
 // All tables use app_ prefix to coexist with LiteLLM's Prisma-managed tables
@@ -102,7 +103,7 @@ export const appProviderKeys = pgTable(
 		label: text('label').notNull(), // e.g., 'Production', 'Dev team'
 		encryptedKey: text('encrypted_key').notNull(), // IV:ciphertext:authTag as hex
 		baseUrl: text('base_url'), // nullable, for custom OpenAI-compatible endpoints
-		models: text('models'), // nullable, JSON string of discovered model names
+		models: jsonb('models').$type<string[]>(), // nullable, discovered model names
 		isActive: boolean('is_active').notNull().default(true),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()

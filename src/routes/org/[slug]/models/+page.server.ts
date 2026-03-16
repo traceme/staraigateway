@@ -17,12 +17,8 @@ export const load: PageServerLoad = async ({ parent }) => {
 	const availableModels = new Set<string>();
 	for (const key of providerKeys) {
 		if (key.models) {
-			try {
-				const modelList = JSON.parse(key.models) as string[];
-				modelList.forEach((m) => availableModels.add(m));
-			} catch {
-				/* skip */
-			}
+			const modelList = key.models as string[];
+			modelList.forEach((m) => availableModels.add(m));
 		}
 	}
 
