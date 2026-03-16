@@ -52,17 +52,17 @@ Source: Derived from existing component patterns (`px-4` = 16px, `py-3` = 12px i
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px | 400 (regular) | 1.5 |
-| Label | 12px | 500 (medium) | 1.4 |
+| Label | 12px | 400 (regular) | 1.4 |
 | Heading | 24px | 700 (bold) | 1.2 |
 | Stat display | 32px | 700 (bold) | 1.1 |
 
 Notes:
 - Body (`text-sm`) is the dominant size across tables, descriptions, and chart labels.
-- Label (`text-xs`) is used for table headers, badges, axis labels, and secondary metadata.
+- Label (`text-xs`) is used for table headers, badges, axis labels, and secondary metadata. Uses weight 400 (regular); table headers achieve visual distinction via `uppercase tracking-wider` rather than a heavier weight.
 - Heading (`text-2xl font-bold`) matches the existing page title pattern from dashboard and api-keys pages.
 - Stat display (`text-3xl font-bold`) is new for this phase — used in KPI summary cards (total spend, request count).
 
-Source: Existing patterns use `text-2xl font-bold` for page titles, `text-sm` for body, `text-xs font-medium uppercase` for table headers.
+Source: Existing patterns use `text-2xl font-bold` for page titles, `text-sm` for body, `text-xs uppercase tracking-wider` for table headers.
 
 ---
 
@@ -188,7 +188,7 @@ Alternative if `svelte-chartjs` has compatibility issues with Svelte 5: use Char
 
 ```
 ┌────────────────────────────────────┐
-│ Budget: Jane Smith           [✕]  │
+│ Budget: Jane Smith    [✕ aria-label="Close"]  │
 ├────────────────────────────────────┤
 │                                    │
 │  Hard Limit (monthly)              │
@@ -220,13 +220,14 @@ Alternative if `svelte-chartjs` has compatibility issues with Svelte 5: use Char
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ ⚠ You've used $90.00 of your $100.00 monthly limit.    │
-│   Contact your admin to increase your budget.     [✕]  │
+│   Contact your admin to increase your budget.  [✕ aria-label="Close"]  │
 └─────────────────────────────────────────────────────────┘
 ```
 
 - Background: `bg-amber-900/30` with `border-amber-700/50` border
 - Text: `text-amber-200`
 - Positioned at top of main content area, below TopBar
+- Dismiss button: icon-only `[✕]` with `aria-label="Close"`
 - Dismissable per session (reappears on next page load)
 
 ---
@@ -251,12 +252,12 @@ Alternative if `svelte-chartjs` has compatibility issues with Svelte 5: use Char
 - Click column header to sort ascending; click again for descending
 - Sort indicator: small arrow icon (▲/▼) next to active sort column header
 - Default sort: cost descending (highest spender/model first)
-- Table headers use existing pattern: `text-xs font-medium uppercase tracking-wider text-zinc-500`
+- Table headers use existing pattern: `text-xs uppercase tracking-wider text-zinc-500`
 
 ### Budget Panel (slide-out)
 - Trigger: "Set Budget" button on member row in the members list (or usage by-member tab)
 - Animation: slide from right, 200ms ease-out
-- Close: click X, click backdrop, or press Escape
+- Close: click X (`aria-label="Close"`), click backdrop, or press Escape
 - Save: SvelteKit form action with `use:enhance` (matches existing pattern)
 - Validation: hard limit must be >= soft limit (if both set), minimum $1
 
