@@ -35,9 +35,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **AKEY-01**: Member can create personal API keys for their org
 - [x] **AKEY-02**: Member can revoke their own API keys
-- [ ] **AKEY-03**: Admin can revoke any member's API keys
+- [x] **AKEY-03**: Admin can revoke any member's API keys
 - [x] **AKEY-04**: Each API key is scoped to one organization
-- [ ] **AKEY-05**: Admin can set per-key rate limits (RPM/TPM)
+- [x] **AKEY-05**: Admin can set per-key rate limits (RPM/TPM)
 
 ### API Gateway
 
@@ -72,8 +72,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **DASH-01**: Admin dashboard shows org-wide usage and cost overview
 - [ ] **DASH-02**: Member management page (invite, roles, remove)
-- [ ] **DASH-03**: Provider key management page (add, validate, remove)
-- [ ] **DASH-04**: API key management page (create, revoke, view usage)
+- [x] **DASH-03**: Provider key management page (add, validate, remove)
+- [x] **DASH-04**: API key management page (create, revoke, view usage)
 - [ ] **DASH-05**: Budget configuration page
 
 ### Self-Host & Launch
@@ -142,9 +142,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PKEY-05 | Phase 2 | Complete |
 | AKEY-01 | Phase 2 | Complete |
 | AKEY-02 | Phase 2 | Complete |
-| AKEY-03 | Phase 4 | Pending |
+| AKEY-03 | Phase 4 | Complete |
 | AKEY-04 | Phase 2 | Complete |
-| AKEY-05 | Phase 4 | Pending |
+| AKEY-05 | Phase 4 | Complete |
 | GW-01 | Phase 2 | Complete |
 | GW-02 | Phase 2 | Complete |
 | GW-03 | Phase 2 | Complete |
@@ -167,8 +167,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BUDG-05 | Phase 3 | Complete |
 | DASH-01 | Phase 4 | Pending |
 | DASH-02 | Phase 4 | Pending |
-| DASH-03 | Phase 4 | Pending |
-| DASH-04 | Phase 4 | Pending |
+| DASH-03 | Phase 4 | Complete |
+| DASH-04 | Phase 4 | Complete |
 | DASH-05 | Phase 4 | Pending |
 | SHIP-01 | Phase 5 | Pending |
 | SHIP-02 | Phase 5 | Pending |
