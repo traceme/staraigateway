@@ -2,17 +2,8 @@ import { redirect, error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { appOrganizations, appOrgMembers, appBudgets, appUsageLogs } from '$lib/server/db/schema';
 import { eq, and, gte, sql, isNull, or } from 'drizzle-orm';
+import { getBudgetResetDate } from '$lib/server/budget/utils';
 import type { LayoutServerLoad } from './$types';
-
-function getBudgetResetDate(resetDay: number): Date {
-	const now = new Date();
-	const year = now.getFullYear();
-	const month = now.getMonth();
-	if (now.getDate() < resetDay) {
-		return new Date(year, month - 1, resetDay);
-	}
-	return new Date(year, month, resetDay);
-}
 
 export const load: LayoutServerLoad = async ({ locals, params }) => {
 	if (!locals.user) {
