@@ -1,465 +1,139 @@
 # External Integrations
 
-**Analysis Date:** 2026-03-15
-
----
-
-## LibreChat
-
-### APIs & External Services
-
-**LLM Providers:**
-- OpenAI - GPT models
-  - SDK: `openai` npm package
-  - Auth: `OPENAI_API_KEY` environment variable
-  - Implementation: `api/server/routes/` and `packages/api/` provider handlers
-
-- Anthropic (Claude) - Claude models
-  - SDK: `@anthropic-ai/sdk` (v0.73.0, pinned with overrides)
-  - Auth: `ANTHROPIC_API_KEY` environment variable
-  - Implementation: Provider-specific handlers in backend
-
-- Google (Gemini, PaLM) - Vertex AI/Gemini models
-  - SDK: Multiple Google Cloud SDKs
-  - Auth: Google Cloud credentials
-
-- Azure OpenAI - OpenAI-compatible endpoint
-  - SDK: `openai` with custom endpoints
-  - Auth: `AZURE_OPENAI_API_KEY`
-
-**Model Context Protocol (MCP):**
-- Server integration for LLM function calling
-- MCP client in `packages/api/` (TypeScript)
-- Supports HTTP, SSE, and stdio transports
-
-**File Storage & Upload:**
-- Local filesystem - Default storage in `api/data/` and `data/`
-- No cloud storage integration detected in core
-- Upload handling via multipart form data
-
-### Data Storage
-
-**Primary Database:**
-- MongoDB
-  - Connection: `MONGODB_URI` environment variable
-  - Client: Mongoose (ODM for schema validation)
-  - Purpose: User accounts, conversations, messages, settings
-  - Location: `packages/data-schemas/` contains MongoDB schema definitions
-
-**Session Management:**
-- In-memory + Redis (optional)
-- Socket.IO state management for active connections
-- Authentication tokens via JWT in headers
-
-**Caching:**
-- Redis (optional) - For session/data caching
-- In-memory cache - Default fallback
-
-### Authentication & Identity
-
-**Auth Provider:**
-- Custom JWT-based authentication
-  - Implementation: `api/server/routes/auth/` and `packages/api/auth/`
-  - Token generation and validation
-  - Social login adapters available (OAuth2)
-
-**Third-party OAuth:**
-- Google OAuth2 - User signup/login
-- GitHub OAuth2 - User signup/login
-- Discord OAuth - User signup/login
-- Microsoft Azure AD - Enterprise SSO
-
-**Token Storage:**
-- JWT access tokens stored in secure cookies (HttpOnly, Secure flags)
-- Frontend stores tokens in session storage (not localStorage)
-
-### Monitoring & Observability
-
-**Error Tracking:**
-- Sentry (optional integration)
-- Custom error logging to MongoDB
-
-**Logs:**
-- Console logging during development
-- Structured logs to MongoDB in production
-- Socket.IO connection logging for debugging
-
-### Webhooks & Callbacks
-
-**Incoming:**
-- No webhook endpoints detected
-
-**Outgoing:**
-- None detected in core integration
-
----
-
-## litellm
-
-### APIs & External Services
-
-**LLM Provider SDKs:**
-- **OpenAI** - GPT models
-  - SDK: `openai` (>= 2.8.0)
-  - Auth: `OPENAI_API_KEY` env var, stored in Prisma DB (proxy)
-  - Implementation: `litellm/llms/openai/chat/transformation.py`
-  - HTTP Handler: `litellm/llms/custom_httpx/llm_http_handler.py`
-
-- **Anthropic** - Claude models
-  - SDK: Built-in via httpx client
-  - Auth: `ANTHROPIC_API_KEY` env var or DB-stored key
-  - Implementation: `litellm/llms/anthropic/` transformation layer
-
-- **Google** - Vertex AI, Gemini
-  - SDK: `google-cloud-aiplatform` (>= 1.38.0, optional)
-  - Auth: Google Cloud credentials, OAuth2
-  - Implementation: Vertex AI endpoint handlers
-
-- **Azure OpenAI** - OpenAI-compatible
-  - SDK: `openai` with custom base URL
-  - Auth: Azure API key + deployment name
-  - Implementation: Custom endpoint routing in proxy
-
-- **Cohere, Hugging Face, Replicate, Together AI** - 100+ provider support
-  - SDK: Provider-specific or httpx-based
-  - Auth: Per-provider API keys
-  - Implementation: `litellm/llms/{provider}/` with transform classes
-
-**Provider Pattern:**
-- Each provider in `litellm/llms/{provider}/` directory
-- `Config` class inherits `BaseConfig` with:
-  - `transform_request()` - Normalize input to provider format
-  - `transform_response()` - Normalize output to OpenAI format
-- Central orchestration: `litellm/llms/custom_httpx/llm_http_handler.py`
-
-**Model Context Protocol (MCP):**
-- MCP server support in `litellm/integrations/`
-- Tools and resource integration
-- OAuth2 support for MCP credentials
-
-### Data Storage
-
-**Proxy Database:**
-- **PostgreSQL** (production) or **SQLite** (development)
-  - ORM: Prisma (^0.11.0)
-  - Client: `prisma` Python client
-  - Schema: `litellm/proxy/schema.prisma`
-  - Migrations: `litellm/proxy/migrations/`
-  - Purpose: API keys, models, teams, spend tracking, budgets
-
-- **Key Tables:**
-  - `litellm_keytable` - API key management with spend limits
-  - `litellm_usertable` - User accounts
-  - `litellm_teamtable` - Team/org grouping
-  - `litellm_tooltable` - Function/tool definitions
-  - `litellm_spendlogs` - Request cost tracking
-  - `litellm_spendlogs_extended` - Detailed spend analytics
-  - `litellm_mcpusercredentials` - MCP OAuth and BYOK credentials
-
-**Caching Layers:**
-- Redis (optional) - Distributed cache for key/user lookups via `redisvl`
-- In-memory cache - Default (InternalUsageCache)
-- Disk cache - `diskcache` (optional) for local deployments
-- Model routing cache - Router caches in `litellm/router.py`
-
-**Configuration:**
-- YAML config files in `litellm/proxy/example_config_yaml/`
-- Environment variables override config
-- Database-backed model registry (dynamic model add/remove)
-
-### Authentication & Identity
-
-**Auth Provider:**
-- Custom API key system with per-key rate limits and budgets
-  - Key generation and validation in `litellm/proxy/auth/`
-  - Key cache in `InternalUsageCache` (in-memory + Redis)
-
-**Third-party Auth:**
-- OAuth2/OpenID Connect via Authlib (^1.6.9)
-  - Azure AD, Google, GitHub providers
-  - SSO integration in `litellm/proxy/auth/oauth.py`
-  - fastapi-sso (^0.16.0) for provider-specific flows
-
-**MCP OAuth:**
-- OAuth2 credential flow for MCP servers
-  - Credentials stored in `litellm_mcpusercredentials` table
-  - `"type"` field distinguishes OAuth2 vs. BYOK credentials
-  - Auto-refresh for expired tokens
-
-**Token Format:**
-- Custom prefix format (e.g., `sk-1234...`) for API keys
-- JWT tokens for SSO/OAuth flows
-- Bearer token authentication in proxy requests
-
-### Cloud Integration
-
-**AWS:**
-- boto3 (^1.40.76, optional) - S3 access
-- IAM role support for proxy authentication
-
-**Azure:**
-- azure-identity (^1.15.0) - Azure authentication
-- azure-keyvault-secrets (^4.8.0) - Secure credential storage
-- azure-storage-blob (^12.25.1) - Blob storage
-- azure-ai-documentintelligence - Document processing
-
-**Google Cloud:**
-- google-cloud-aiplatform (>= 1.38.0) - Vertex AI
-- google-cloud-kms (^2.21.3) - Key management
-- google-cloud-iam (^2.19.1) - IAM controls
-
-### Monitoring & Observability
-
-**Distributed Tracing:**
-- OpenTelemetry (API/SDK/OTLP exporter, v1.28.0+)
-  - Auto-instrumentation for FastAPI, SQLAlchemy, Redis, requests, httpx
-  - OTLP exporter for external tracing backends
-
-**LLM Observability:**
-- Langfuse (^2.45.0) - LLM request tracking and evals
-  - Integration via callback in `litellm/integrations/langfuse.py`
-
-**Metrics:**
-- Prometheus client (0.20.0) - Metrics collection
-  - Proxy exposes `/metrics` endpoint for Prometheus scraping
-
-**Profiling:**
-- Pyroscope (^0.8, optional, not Windows) - Continuous profiling
-  - Used for performance analysis in production
-
-**Logging:**
-- Structured logging via Python logging module
-- Loguru (^0.7.3, open-webui) - Alternative structured logging
-
-### Webhooks & Callbacks
-
-**Incoming:**
-- Webhook ingestion for provider events (not fully implemented)
-
-**Outgoing:**
-- Callback system for async LLM responses
-  - Implemented in `litellm/integrations/callbacks/` (async off main thread)
-  - Custom logger implementations can subscribe to request/response events
-
----
-
-## open-webui
-
-### APIs & External Services
-
-**LLM Provider SDKs:**
-- **OpenAI** - GPT models
-  - SDK: `openai` (from requirements.txt)
-  - Auth: `OPENAI_API_KEY` env var
-  - Backend: `backend/routes/openai_routes.py`
-
-- **Anthropic** - Claude models
-  - SDK: `anthropic` (from requirements.txt)
-  - Auth: `ANTHROPIC_API_KEY` env var
-  - Backend: Direct API calls via httpx
-
-- **Google** - Gemini, Vertex AI
-  - SDK: `google-genai` (^1.66.0)
-  - Auth: `GOOGLE_API_KEY` env var
-  - Backend: Native Gemini API integration
-
-- **100+ Other Providers** - Via LangChain integration
-  - SDK: `langchain` (^1.2.10), `langchain-community` (^0.4.1)
-  - Auth: Per-provider configuration
-  - Purpose: Universal LLM abstraction
-
-**Web Scraping & Document Processing:**
-- Firecrawl (^4.18.0) - Web scraping
-  - Auth: `FIRECRAWL_API_KEY` env var
-  - Purpose: URL content extraction for RAG
-
-**Speech & Audio:**
-- faster-whisper (^1.2.1) - Speech-to-text
-  - Model: Downloaded and cached locally
-  - Purpose: Audio transcription
-
-**Document Intelligence:**
-- azure-ai-documentintelligence (^1.0.2) - Intelligent document parsing
-  - Auth: Azure subscription key
-  - Purpose: Extract text from complex documents
+**Analysis Date:** 2026-03-16
+
+## APIs & External Services
+
+**LiteLLM Proxy (core LLM gateway):**
+- LiteLLM - Upstream API gateway that handles actual LLM provider routing
+  - SDK/Client: Raw `fetch` calls in `src/lib/server/litellm.ts` and `src/lib/server/gateway/proxy.ts`
+  - Auth: `LITELLM_MASTER_KEY` env var, sent as `Authorization: Bearer` header
+  - Endpoints used: `POST /organization/new`, `GET /health`, `POST /v1/chat/completions`, `POST /v1/embeddings`, `GET /v1/models`
+  - Default URL: `http://localhost:4000` (Docker: `http://litellm:4000`)
+  - Integration is optional — app gracefully degrades if LiteLLM is unavailable
+
+**LLM Provider APIs (via LiteLLM proxy):**
+- The app stores and manages provider API keys for these services; actual calls pass through LiteLLM
+- Supported providers defined in `src/lib/server/providers.ts`:
+  - OpenAI (`https://api.openai.com`) — GPT-4o, GPT-4o-mini, o1, o3
+  - Anthropic (`https://api.anthropic.com`) — Claude Opus, Sonnet, Haiku
+  - Google AI (`https://generativelanguage.googleapis.com`) — Gemini 2.5 Pro, Flash
+  - Azure OpenAI (`https://YOUR_RESOURCE.openai.azure.com`) — GPT-4o via Azure
+  - Mistral AI (`https://api.mistral.ai`) — Mistral Large, Medium, Small
+  - Cohere (`https://api.cohere.ai`) — Command R+, Embed, Rerank
+  - DeepSeek (`https://api.deepseek.com`) — DeepSeek-V3, DeepSeek-R1
+  - Qwen/Alibaba (`https://dashscope.aliyuncs.com/compatible-mode`) — Qwen-Max, Plus, Turbo
+  - GLM/Zhipu AI (`https://open.bigmodel.cn`) — GLM-4, GLM-4-Flash
+  - Doubao/ByteDance (`https://ark.cn-beijing.volces.com`) — Doubao-Pro, Lite
+  - Custom OpenAI-compatible endpoints (user-configured base URL)
+- Provider keys are stored AES-256-GCM encrypted in the database (`src/lib/server/crypto.ts`)
+- Discovery: app hits each provider's `/v1/models` (or equivalent) endpoint to enumerate available models (`src/routes/org/[slug]/provider-keys/validate/+server.ts`)
+
+**OAuth Providers:**
+- Google OAuth 2.0 — "Sign in with Google"
+  - SDK/Client: `arctic` library (`Google` class)
+  - Auth: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` env vars
+  - Callback: `BASE_URL/auth/oauth/google/callback`
+  - Implementation: `src/lib/server/auth/oauth.ts`, routes in `src/routes/auth/oauth/google/`
+  - Optional: disabled if env vars not set
+
+- GitHub OAuth — "Sign in with GitHub"
+  - SDK/Client: `arctic` library (`GitHub` class)
+  - Auth: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` env vars
+  - Callback: `BASE_URL/auth/oauth/github/callback`
+  - Implementation: `src/lib/server/auth/oauth.ts`, routes in `src/routes/auth/oauth/github/`
+  - Optional: disabled if env vars not set
+
+## Data Storage
+
+**Databases:**
+- PostgreSQL 16
+  - Connection: `DATABASE_URL` env var (format: `postgresql://user:pass@host:port/db`)
+  - Client: `postgres` npm package (low-level driver), wrapped by Drizzle ORM
+  - Schema file: `src/lib/server/db/schema.ts`
+  - All app tables use `app_` prefix to coexist with LiteLLM's Prisma-managed tables in the same database
+  - Tables: `app_users`, `app_sessions`, `app_organizations`, `app_org_members`, `app_email_verifications`, `app_password_resets`, `app_provider_keys`, `app_api_keys`, `app_usage_logs`, `app_oauth_accounts`, `app_org_invitations`, `app_budgets`
+  - Migrations: `drizzle-kit` generates SQL to `drizzle/` directory
 
 **File Storage:**
-- Local filesystem - Default storage in `backend/data/`
-- Azure Blob Storage (optional) - Cloud storage via `azure-storage-blob`
-- Google Cloud Storage (optional) - Via `google-cloud-storage` (^3.9.0)
-- S3 (optional) - AWS storage via `boto3`
+- None — no file uploads or object storage
 
-### Data Storage
+**Caching:**
+- Redis 7 (optional)
+  - Connection: `REDIS_URL` env var (format: `redis://host:port`)
+  - Client: `ioredis` npm package, lazy singleton in `src/lib/server/redis.ts`
+  - Usage: Response caching for non-streaming LLM completions in `src/lib/server/gateway/cache.ts`
+  - Cache key format: `cache:{orgId}:{sha256(model+messages)}`
+  - TTL: configurable per-organization via `cacheTtlSeconds` (default 3600 seconds)
+  - Silently disabled if `REDIS_URL` not set; app functions without it
 
-**Supported Databases:**
-- **MongoDB** - Primary for document storage
-  - Client: `pymongo`
-  - Purpose: Conversations, messages, documents, settings
-
-- **PostgreSQL** - Alternative relational DB
-  - Adapter: `psycopg2-binary` (^2.9.11)
-  - ORM: SQLAlchemy (^2.0.48)
-  - Purpose: Users, sessions, embeddings metadata
-
-- **SQLite** - Lightweight development/edge deployment
-  - Purpose: Single-file database
-  - Location: `data/` directory
-
-- **MySQL / MariaDB** - Legacy support
-  - Adapters: `PyMySQL` (^1.1.2), `mariadb` (^1.1.14)
-
-**Vector Databases (RAG):**
-- **ChromaDB** (^1.5.2) - Embedded vector store
-  - Purpose: Semantic search on documents
-  - Default option
-
-- **Weaviate** (^4.20.3) - Self-hosted vector DB
-  - Auth: API key configuration
-
-- **Qdrant** (^1.17.0) - Vector search engine
-  - Auth: URL + optional API key
-
-- **Pinecone** (^6.0.2) - Cloud vector DB
-  - Auth: API key + index name
-
-- **Milvus** (^2.6.9) - Open-source vector DB
-  - Purpose: Scalable embeddings
-
-- **OpenSearch** (^3.1.0) - Elasticsearch alternative
-  - Purpose: Full-text + vector search
-
-**Embedding Models:**
-- sentence-transformers (^5.2.3) - Local embedding generation
-  - Models: Downloaded and cached locally
-  - Purpose: Document embeddings for RAG
-
-**Session Management:**
-- Redis (optional) - Session storage via `starsessions[redis]`
-- In-memory - Default fallback
-- Auth: Redis connection string
-
-### Authentication & Identity
+## Authentication & Identity
 
 **Auth Provider:**
-- Custom user system with JWT tokens
-  - Token generation: `PyJWT[crypto]` (^2.11.0)
-  - Password hashing: `bcrypt` (^5.0.0) or `argon2-cffi`
-  - Implementation: `backend/routes/auth_routes.py`
+- Custom (no third-party auth service like Auth0/Supabase)
+  - Password auth: Argon2id hashing via `@node-rs/argon2` (`src/lib/server/auth/password.ts`)
+  - Sessions: SHA-256 hashed tokens stored in `app_sessions` table, 30-day sliding window
+  - Session cookie: `auth_session` (httpOnly, secure, sameSite=lax)
+  - Token format: 32 random bytes, base32-encoded (unhashed in cookie, SHA-256 hash in DB)
+  - Implementation: `src/lib/server/auth/session.ts`
+  - Middleware: `src/hooks.server.ts` — validates session on every non-`/v1/` request
 
-**Enterprise SSO:**
-- LDAP/Active Directory
-  - Library: `ldap3` (^2.9.1)
-  - Purpose: Enterprise user sync
+**API Key Auth (gateway routes):**
+- Bearer token authentication for `/v1/chat/completions`, `/v1/embeddings`, `/v1/models`
+- Keys stored as SHA-256 hashes in `app_api_keys` table; first 12 chars kept as display prefix
+- Implementation: `src/lib/server/gateway/auth.ts`
 
-**Cloud Auth:**
-- Azure Entra ID (Microsoft)
-  - SDK: `@azure/msal-browser` (^4.5.0, frontend)
-  - Backend: Authlib integration
+## Monitoring & Observability
 
-- Google OAuth2
-  - Purpose: User signup/login
+**Error Tracking:**
+- None — no Sentry or similar service integrated
 
-**Social Login:**
-- OpenID Connect compatible providers
-- Authlib (^1.6.9) - OAuth2/OIDC abstraction
+**Logs:**
+- `console.warn` / `console.error` to stdout; no structured logging library
+- Usage events written to `app_usage_logs` table for in-app analytics dashboard
 
-### File Upload & Processing
+## CI/CD & Deployment
 
-**Document Parsing:**
-- **PDF**: PyPDF (^6.7.5)
-- **Word (.docx)**: `python-pptx` (^1.0.2), `docx2txt` (^0.9)
-- **PowerPoint (.pptx)**: `python-pptx` (^1.0.2)
-- **Excel (.xlsx)**: `openpyxl` (^3.1.5), `xlrd` (^2.0.2)
-- **Generic Office**: `unstructured` (^0.18.31), `fpdf2` (^2.8.7)
-- **HTML/Web**: `beautifulsoup4`, `mammoth` (^1.11.0)
-- **Markdown**: `marked` (^9.1.0, frontend), `Markdown` (^3.10.2, backend)
-- **YAML**: `yaml` (^2.7.1, frontend)
+**Hosting:**
+- Docker — multi-stage `Dockerfile` builds to `node:22-alpine` image, exposes port 3000
+- `docker-compose.yml` — full stack (app + litellm + postgres + redis) for local/self-hosted deployment
 
-**Image Processing:**
-- Pillow (^12.1.1) - Image manipulation
-- opencv-python-headless (^4.13.0.92) - Computer vision
-- rapidocr-onnxruntime (^1.4.4) - OCR
-- @mediapipe/tasks-vision (^0.10.17) - Vision tasks (frontend)
+**CI Pipeline:**
+- None detected — no GitHub Actions, CircleCI, or similar config files in project root
 
-**Text Processing:**
-- NLTK (^3.9.3) - Natural language processing
-- ftfy (^6.3.1) - Unicode text fixes
-- chardet (^5.2.0) - Character encoding detection
+## Environment Configuration
 
-**Code Highlighting:**
-- highlight.js (^11.9.0) - Syntax highlighting (frontend)
-- shiki (^4.0.1) - Alternative code highlighting (frontend)
+**Required env vars:**
+- `DATABASE_URL` — PostgreSQL connection string
+- `ENCRYPTION_KEY` — 64 hex chars (32 bytes) for AES-256-GCM encryption of provider keys
 
-### Monitoring & Observability
+**Optional env vars:**
+- `REDIS_URL` — Redis connection; caching disabled if absent
+- `LITELLM_API_URL` — LiteLLM proxy URL; defaults to `http://localhost:4000`
+- `LITELLM_MASTER_KEY` — LiteLLM admin key for organization management
+- `BASE_URL` — Public app URL for OAuth callbacks and email links; defaults to `http://localhost:3000`
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` — Email sending; emails disabled if not configured
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — Google OAuth; disabled if absent
+- `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` — GitHub OAuth; disabled if absent
+- `CRON_SECRET` — Bearer token for securing the `/api/cron/digest` endpoint
 
-**Distributed Tracing:**
-- OpenTelemetry (v1.40.0)
-  - Auto-instrumentation for FastAPI, SQLAlchemy, Redis, requests, httpx
-  - OTLP exporter for centralized tracing
+**Secrets location:**
+- `.env` file (gitignored); `.env.example` documents all variables
 
-**Logging:**
-- Loguru (^0.7.3) - Structured logging
-  - Purpose: Application and request logging
-
-**System Metrics:**
-- psutil - System resource monitoring
-- Memory/CPU tracking for health checks
-
-### Real-time Communication
-
-**WebSockets:**
-- Socket.IO Client (^4.2.0, frontend) - Real-time updates
-- python-socketio (^5.16.1, backend) - Server-side Socket.IO
-- Purpose: Live streaming, message updates, presence
-
-### Webhooks & Callbacks
+## Webhooks & Callbacks
 
 **Incoming:**
-- None detected in core
+- OAuth callbacks:
+  - `GET /auth/oauth/google/callback` — Google OAuth return URL
+  - `GET /auth/oauth/github/callback` — GitHub OAuth return URL
+- Cron trigger:
+  - `GET /api/cron/digest` — Admin budget digest email sender; secured with `CRON_SECRET` Bearer token; intended to be called by an external scheduler (e.g., cron job, Vercel Cron, cloud scheduler)
 
 **Outgoing:**
-- None detected in core
+- SMTP email via `nodemailer` for: email verification, password reset, team invitations, budget warnings, admin digests
+- LiteLLM REST API calls for org management and LLM proxying
+- LLM provider REST APIs (OpenAI-compatible) via LiteLLM for model discovery on key validation
 
 ---
 
-## Cross-Project Integration Points
-
-### Shared Dependencies
-
-| Package | LibreChat | litellm | open-webui |
-|---------|-----------|---------|-----------|
-| OpenAI SDK | ✓ | ✓ | ✓ |
-| Anthropic SDK | ✓ | ✓ | ✓ |
-| Google APIs | ✓ | ✓ | ✓ |
-| LangChain | ✓ | ✓ | ✓ |
-| MongoDB | ✓ | - | ✓ |
-| PostgreSQL | - | ✓ | ✓ |
-| Redis | optional | optional | optional |
-| JWT/Auth | ✓ | ✓ | ✓ |
-
-### Integration Patterns
-
-**API Key Management:**
-- LibreChat: Per-user API key storage (env vars or MongoDB)
-- litellm: Proxy manages keys in PostgreSQL, distributes via API
-- open-webui: Per-user API key storage (env vars or database)
-
-**LLM Routing:**
-- LibreChat: Direct provider calls or via litellm proxy
-- litellm: Central proxy with load balancing and fallback
-- open-webui: Direct provider calls or via external proxy
-
-**Vector Search:**
-- LibreChat: N/A (chat-only)
-- litellm: No built-in RAG
-- open-webui: ChromaDB or external vector DB (full RAG support)
-
-**Authentication:**
-- All three support JWT + custom auth
-- All three support OAuth2 for SSO
-- open-webui supports LDAP
-- litellm supports MCP-specific OAuth
-
----
-
-*Integration audit: 2026-03-15*
+*Integration audit: 2026-03-16*
