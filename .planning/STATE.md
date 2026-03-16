@@ -46,6 +46,7 @@ Progress: [███░░░░░░░] 33%
 | v1.0 (1-6) | 17 | — | — |
 
 *Updated after each plan completion*
+| Phase 07 P01 | 2min | 2 tasks | 7 files |
 | Phase 07 P02 | 1min | 2 tasks | 3 files |
 
 ## Accumulated Context
@@ -54,6 +55,7 @@ Progress: [███░░░░░░░] 33%
 
 Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 07]: Used process.env for DB pool config to match existing pattern
+- [Phase 07]: Extracted getBudgetResetDate to budget/utils.ts for domain cohesion
 
 ### Pending Todos
 

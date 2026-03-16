@@ -37,10 +37,10 @@ Requirements for production hardening release. Each maps to roadmap phases.
 
 ### Tech Debt
 
-- [ ] **DEBT-01**: Remove dead exports (`validateApiKeyFromHash`, `decryptProviderKeyById`, `checkLiteLLMHealth`)
-- [ ] **DEBT-02**: Extract shared `getBudgetResetDate` to `budget/utils.ts`
+- [x] **DEBT-01**: Remove dead exports (`validateApiKeyFromHash`, `decryptProviderKeyById`, `checkLiteLLMHealth`)
+- [x] **DEBT-02**: Extract shared `getBudgetResetDate` to `budget/utils.ts`
 - [x] **DEBT-03**: Invitation acceptance wrapped in DB transaction
-- [ ] **DEBT-04**: Env var names standardized (`APP_URL` vs `BASE_URL`), `CRON_SECRET` added to `.env.example`
+- [x] **DEBT-04**: Env var names standardized (`APP_URL` vs `BASE_URL`), `CRON_SECRET` added to `.env.example`
 - [ ] **DEBT-05**: `models` field migrated from JSON text to proper `jsonb` column
 - [x] **DEBT-06**: Session cleanup cron (prune expired sessions)
 - [x] **DEBT-07**: DB connection pool explicitly configured (pool size, timeouts)
@@ -83,10 +83,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEBT-01 | Phase 7 | Pending |
-| DEBT-02 | Phase 7 | Pending |
+| DEBT-01 | Phase 7 | Complete |
+| DEBT-02 | Phase 7 | Complete |
 | DEBT-03 | Phase 7 | Complete |
-| DEBT-04 | Phase 7 | Pending |
+| DEBT-04 | Phase 7 | Complete |
 | DEBT-05 | Phase 7 | Pending |
 | DEBT-06 | Phase 7 | Complete |
 | DEBT-07 | Phase 7 | Complete |
