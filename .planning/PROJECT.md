@@ -29,7 +29,15 @@ Any company can sign up, plug in their LLM API keys, and immediately give their 
 
 ### Active
 
-(None yet — define with `/gsd:new-milestone`)
+- [ ] Comprehensive test coverage (unit + integration + E2E + load testing)
+- [ ] Security audit and fixes (auth, encryption, API endpoints, input validation)
+- [ ] Gateway performance optimization (minimize proxy overhead, p95 latency)
+- [ ] Dashboard performance optimization (fast page loads with large datasets)
+- [ ] Tech debt cleanup (dead exports, DRY fixes, code quality)
+
+## Current Milestone: v1.1 Production Hardening
+
+**Goal:** Make LLMTokenHub production-ready with comprehensive test coverage, security audit, performance optimization, and tech debt cleanup before real users arrive.
 
 ### Out of Scope
 
@@ -90,4 +98,4 @@ Target market: 20-100 person teams, especially in China where domestic model sup
 - Minor DRY: `getBudgetResetDate` logic duplicated in gateway/budget.ts and budget/notifications.ts
 
 ---
-*Last updated: 2026-03-16 after v1.0 milestone*
+*Last updated: 2026-03-16 after v1.1 milestone started*
