@@ -4,6 +4,13 @@ import { appProviderKeys } from '$lib/server/db/schema';
 import { decrypt } from '$lib/server/crypto';
 import { getProvider } from '$lib/server/providers';
 import { eq, and } from 'drizzle-orm';
+import type { GatewayAuth } from './auth';
+import {
+	logUsage,
+	extractUsageFromJSON,
+	extractUsageFromSSEText,
+	calculateCost
+} from './usage';
 
 const LITELLM_API_URL = env.LITELLM_API_URL ?? 'http://localhost:4000';
 
@@ -11,12 +18,17 @@ const LITELLM_API_URL = env.LITELLM_API_URL ?? 'http://localhost:4000';
  * Proxy a request to LiteLLM with the org's decrypted provider key.
  * Selects the first active provider key that supports the requested model.
  * Supports both streaming (SSE pass-through) and non-streaming responses.
+ * Logs usage data (token counts, cost) fire-and-forget after response.
  */
 export async function proxyToLiteLLM(
 	request: Request,
 	orgId: string,
-	path: string
+	path: string,
+	auth?: GatewayAuth,
+	apiKeyId?: string
 ): Promise<Response> {
+	const startTime = Date.now();
+
 	// Parse the request body to get the model
 	let body: Record<string, unknown>;
 	try {
@@ -86,6 +98,7 @@ export async function proxyToLiteLLM(
 
 	// Forward to LiteLLM
 	const litellmUrl = `${LITELLM_API_URL}${path}`;
+	const isStreaming = body.stream === true;
 
 	try {
 		const litellmResponse = await fetch(litellmUrl, {
@@ -97,17 +110,132 @@ export async function proxyToLiteLLM(
 		if (!litellmResponse.ok) {
 			// Pass through LiteLLM error response
 			const errorBody = await litellmResponse.text();
+			const latencyMs = Date.now() - startTime;
+
+			// Log error usage if auth is available
+			if (auth && apiKeyId) {
+				logUsage(
+					auth,
+					apiKeyId,
+					path,
+					model,
+					matchingKey.provider,
+					0,
+					0,
+					0,
+					latencyMs,
+					'error',
+					isStreaming,
+					`LiteLLM returned ${litellmResponse.status}`
+				);
+			}
+
 			return new Response(errorBody, {
 				status: litellmResponse.status,
 				headers: {
-					'Content-Type': litellmResponse.headers.get('Content-Type') ?? 'application/json'
+					'Content-Type':
+						litellmResponse.headers.get('Content-Type') ?? 'application/json'
 				}
 			});
 		}
 
-		// Streaming response: pass through SSE directly
-		if (body.stream === true && litellmResponse.body) {
-			return new Response(litellmResponse.body, {
+		// Streaming response: pass through SSE with usage extraction
+		if (isStreaming && litellmResponse.body) {
+			const reader = litellmResponse.body.getReader();
+			const decoder = new TextDecoder();
+			// Ring buffer to keep the last few SSE lines for usage extraction
+			const recentLines: string[] = [];
+			const MAX_RECENT = 10;
+
+			const stream = new ReadableStream({
+				async pull(controller) {
+					try {
+						const { done, value } = await reader.read();
+						if (done) {
+							// Stream ended - extract usage from buffered lines
+							const latencyMs = Date.now() - startTime;
+							if (auth && apiKeyId) {
+								const sseText = recentLines.join('\n');
+								const usage = extractUsageFromSSEText(sseText);
+								if (usage) {
+									const cost = calculateCost(
+										usage.model || model,
+										usage.inputTokens,
+										usage.outputTokens
+									);
+									logUsage(
+										auth,
+										apiKeyId,
+										path,
+										usage.model || model,
+										matchingKey.provider,
+										usage.inputTokens,
+										usage.outputTokens,
+										cost,
+										latencyMs,
+										'success',
+										true
+									);
+								} else {
+									// No usage data found in stream - log with zero tokens
+									logUsage(
+										auth,
+										apiKeyId,
+										path,
+										model,
+										matchingKey.provider,
+										0,
+										0,
+										0,
+										latencyMs,
+										'success',
+										true
+									);
+								}
+							}
+							controller.close();
+							return;
+						}
+
+						// Pass through the chunk unchanged
+						controller.enqueue(value);
+
+						// Buffer recent lines for usage extraction
+						const text = decoder.decode(value, { stream: true });
+						const lines = text.split('\n').filter((l) => l.trim().length > 0);
+						for (const line of lines) {
+							recentLines.push(line);
+							if (recentLines.length > MAX_RECENT) {
+								recentLines.shift();
+							}
+						}
+					} catch (err) {
+						const latencyMs = Date.now() - startTime;
+						if (auth && apiKeyId) {
+							logUsage(
+								auth,
+								apiKeyId,
+								path,
+								model,
+								matchingKey.provider,
+								0,
+								0,
+								0,
+								latencyMs,
+								'error',
+								true,
+								err instanceof Error ? err.message : 'Stream read error'
+							);
+						}
+						controller.error(err);
+					}
+				},
+				cancel() {
+					reader.cancel();
+				}
+			});
+
+			return new Response(stream, {
 				status: 200,
 				headers: {
 					'Content-Type': 'text/event-stream',
@@ -117,8 +245,49 @@ export async function proxyToLiteLLM(
 			});
 		}
 
-		// Non-streaming: return JSON response
+		// Non-streaming: return JSON response with usage logging
 		const responseBody = await litellmResponse.text();
+		const latencyMs = Date.now() - startTime;
+
+		if (auth && apiKeyId) {
+			const usage = extractUsageFromJSON(responseBody);
+			if (usage) {
+				const cost = calculateCost(
+					usage.model || model,
+					usage.inputTokens,
+					usage.outputTokens
+				);
+				logUsage(
+					auth,
+					apiKeyId,
+					path,
+					usage.model || model,
+					matchingKey.provider,
+					usage.inputTokens,
+					usage.outputTokens,
+					cost,
+					latencyMs,
+					'success',
+					false
+				);
+			} else {
+				// No usage data in response - log with zero tokens
+				logUsage(
+					auth,
+					apiKeyId,
+					path,
+					model,
+					matchingKey.provider,
+					0,
+					0,
+					0,
+					latencyMs,
+					'success',
+					false
+				);
+			}
+		}
+
 		return new Response(responseBody, {
 			status: 200,
 			headers: {
@@ -127,6 +296,25 @@ export async function proxyToLiteLLM(
 		});
 	} catch (err) {
 		const message = err instanceof Error ? err.message : 'Unknown proxy error';
+		const latencyMs = Date.now() - startTime;
+
+		if (auth && apiKeyId) {
+			logUsage(
+				auth,
+				apiKeyId,
+				path,
+				model,
+				matchingKey.provider,
+				0,
+				0,
+				0,
+				latencyMs,
+				'error',
+				isStreaming,
+				message
+			);
+		}
+
 		return errorResponse(502, `LiteLLM proxy error: ${message}`, 'server_error');
 	}
 }

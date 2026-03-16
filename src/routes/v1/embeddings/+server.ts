@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types';
 import { authenticateApiKey } from '$lib/server/gateway/auth';
 import { proxyToLiteLLM } from '$lib/server/gateway/proxy';
+import { checkBudget } from '$lib/server/gateway/budget';
 
 const CORS_HEADERS = {
 	'Access-Control-Allow-Origin': '*',
@@ -26,7 +27,35 @@ export const POST: RequestHandler = async ({ request }) => {
 		);
 	}
 
-	const response = await proxyToLiteLLM(request, auth.orgId, '/v1/embeddings');
+	// Pre-request budget check
+	const budgetResult = await checkBudget(auth);
+	if (!budgetResult.allowed) {
+		const currentSpend = (budgetResult.currentSpendCents / 100).toFixed(2);
+		const hardLimit = budgetResult.hardLimitCents
+			? (budgetResult.hardLimitCents / 100).toFixed(2)
+			: '0.00';
+		return new Response(
+			JSON.stringify({
+				error: {
+					message: `Monthly budget exceeded ($${currentSpend}/$${hardLimit}). Contact your admin.`,
+					type: 'budget_exceeded',
+					code: 'budget_exceeded'
+				}
+			}),
+			{
+				status: 429,
+				headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+			}
+		);
+	}
+
+	const response = await proxyToLiteLLM(
+		request,
+		auth.orgId,
+		'/v1/embeddings',
+		auth,
+		auth.apiKeyId
+	);
 
 	const headers = new Headers(response.headers);
 	for (const [key, value] of Object.entries(CORS_HEADERS)) {

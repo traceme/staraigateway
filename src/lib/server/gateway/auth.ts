@@ -6,6 +6,7 @@ import { eq, and } from 'drizzle-orm';
 export interface GatewayAuth {
 	userId: string;
 	orgId: string;
+	apiKeyId: string;
 	org: {
 		id: string;
 		name: string;
@@ -58,6 +59,7 @@ export async function authenticateApiKey(request: Request): Promise<GatewayAuth 
 	return {
 		userId: row.userId,
 		orgId: row.orgId,
+		apiKeyId: row.keyId,
 		org: {
 			id: row.orgId,
 			name: row.orgName,
