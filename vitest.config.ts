@@ -9,6 +9,19 @@ export default defineConfig({
 		}
 	},
 	test: {
-		include: ['src/**/*.test.ts']
+		include: ['src/**/*.test.ts'],
+		coverage: {
+			provider: 'v8',
+			include: ['src/lib/server/**/*.ts'],
+			exclude: [
+				'src/lib/server/**/*.test.ts',
+				'src/lib/server/__mocks__/**',
+				'src/lib/server/__integration__/**'
+			],
+			thresholds: {
+				lines: 80,
+				functions: 80
+			}
+		}
 	}
 });
