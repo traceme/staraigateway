@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import { t } from 'svelte-i18n';
 	import { Chart, BarController, BarElement, LinearScale, CategoryScale, Tooltip } from 'chart.js';
 
 	Chart.register(BarController, BarElement, LinearScale, CategoryScale, Tooltip);
@@ -83,7 +84,7 @@
 </script>
 
 <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-	<h3 class="mb-4 text-sm font-medium text-zinc-400">Cost Breakdown</h3>
+	<h3 class="mb-4 text-sm font-medium text-zinc-400">{$t('usage.breakdown.title')}</h3>
 	<div>
 		<canvas bind:this={canvas}></canvas>
 	</div>

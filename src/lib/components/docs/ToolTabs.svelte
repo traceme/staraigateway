@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import { t } from 'svelte-i18n';
 
 	type Tab = {
 		id: string;

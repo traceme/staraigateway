@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { t } from 'svelte-i18n';
 
 	type Props = {
 		orgSlug: string;
@@ -43,7 +44,7 @@
 	<div class="flex h-full flex-col overflow-y-auto p-6">
 		<!-- Header -->
 		<div class="mb-6 flex items-center justify-between">
-			<h2 id="invite-panel-title" class="text-lg font-semibold text-zinc-50">Invite Member</h2>
+			<h2 id="invite-panel-title" class="text-lg font-semibold text-zinc-50">{$t('members.invite')}</h2>
 			<button
 				class="rounded p-1 text-zinc-400 hover:text-zinc-200"
 				aria-label="Close"
@@ -64,7 +65,7 @@
 				return async ({ result, update }) => {
 					submitting = false;
 					if (result.type === 'failure') {
-						error = (result.data as { error?: string })?.error ?? 'Failed to send invitation';
+						error = (result.data as { errorKey?: string })?.errorKey ?? 'errors.invite_failed';
 					} else {
 						await update();
 						onClose();
@@ -74,7 +75,7 @@
 		>
 			<!-- Email -->
 			<label class="mb-1 block text-sm font-medium text-zinc-300" for="invite-email">
-				Email address
+				{$t('members.invite_email')}
 			</label>
 			<input
 				id="invite-email"
@@ -87,7 +88,7 @@
 
 			<!-- Role -->
 			<label class="mb-1 block text-sm font-medium text-zinc-300" for="invite-role">
-				Role
+				{$t('members.invite_role')}
 			</label>
 			<select
 				id="invite-role"
@@ -102,7 +103,7 @@
 
 			<!-- Error -->
 			{#if error}
-				<p class="mb-4 text-sm text-red-400">{error}</p>
+				<p class="mb-4 text-sm text-red-400">{$t(error)}</p>
 			{/if}
 
 			<!-- Submit -->
@@ -117,10 +118,10 @@
 							<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25" />
 							<path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" class="opacity-75" />
 						</svg>
-						Sending...
+						{$t('members.invite_sending')}
 					</span>
 				{:else}
-					Send Invitation
+					{$t('members.invite_submit')}
 				{/if}
 			</button>
 		</form>

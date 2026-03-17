@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { t } from 'svelte-i18n';
+
 	type Props = {
 		currentOrg: { id: string; name: string; slug: string };
 		userOrgs: { id: string; name: string; slug: string }[];
@@ -61,7 +63,7 @@
 					onclick={() => (open = false)}
 				>
 					<span class="flex h-6 w-6 items-center justify-center rounded border border-dashed border-zinc-600 text-xs text-zinc-500">+</span>
-					Create new organization
+					{$t('org_switcher.create_new')}
 				</a>
 			</div>
 		</div>

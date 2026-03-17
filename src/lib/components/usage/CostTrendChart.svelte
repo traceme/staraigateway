@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import { t } from 'svelte-i18n';
 	import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Filler, Tooltip } from 'chart.js';
 
 	Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Filler, Tooltip);
@@ -83,7 +84,7 @@
 </script>
 
 <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-	<h3 class="mb-4 text-sm font-medium text-zinc-400">Daily Cost Trend</h3>
+	<h3 class="mb-4 text-sm font-medium text-zinc-400">{$t('usage.cost_trend.title')}</h3>
 	<div style="height: 280px;">
 		<canvas bind:this={canvas}></canvas>
 	</div>

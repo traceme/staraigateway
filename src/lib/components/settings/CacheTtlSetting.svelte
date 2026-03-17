@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { t } from 'svelte-i18n';
 
 	let {
 		cacheTtlSeconds = 3600,
@@ -48,9 +49,9 @@
 	class="space-y-6"
 >
 	<div>
-		<h2 class="text-lg font-bold text-zinc-100">Response Caching</h2>
+		<h2 class="text-lg font-bold text-zinc-100">{$t('settings.cache_ttl.title')}</h2>
 		<p class="mt-1 text-sm text-zinc-400">
-			Cache identical non-streaming responses to reduce API calls. Requires Redis.
+			{$t('settings.cache_ttl.description')}
 		</p>
 	</div>
 
@@ -62,7 +63,7 @@
 
 	<div>
 		<label for="cacheTtlSeconds" class="block text-sm font-medium text-zinc-300">
-			Cache TTL (seconds)
+			{$t('settings.cache_ttl.title')} ({$t('settings.cache_ttl.seconds')})
 		</label>
 		<input
 			id="cacheTtlSeconds"
@@ -91,9 +92,9 @@
 			class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
 		>
 			{#if saving}
-				Saving...
+				{$t('common.loading')}
 			{:else}
-				Save Cache Settings
+				{$t('common.save')}
 			{/if}
 		</button>
 

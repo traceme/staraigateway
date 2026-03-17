@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { t } from 'svelte-i18n';
 
 	type Props = {
 		range: string;
@@ -44,7 +45,7 @@
 			: 'bg-transparent text-zinc-400 hover:text-zinc-300'}"
 		onclick={() => selectRange('7')}
 	>
-		7d
+		{$t('usage.time_range.7d')}
 	</button>
 	<button
 		type="button"
@@ -53,7 +54,7 @@
 			: 'bg-transparent text-zinc-400 hover:text-zinc-300'}"
 		onclick={() => selectRange('30')}
 	>
-		30d
+		{$t('usage.time_range.30d')}
 	</button>
 	<button
 		type="button"

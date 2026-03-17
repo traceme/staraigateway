@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
+	import { t } from 'svelte-i18n';
 
 	interface BudgetDefault {
 		hardLimitCents?: number | null;
@@ -154,12 +155,12 @@
 
 <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
 	<!-- Section 1: Org-Wide Default -->
-	<h3 class="text-base font-semibold text-zinc-50">Org-Wide Default</h3>
-	<p class="mb-4 text-xs text-zinc-500">Applies to members without an individual or role budget</p>
+	<h3 class="text-base font-semibold text-zinc-50">{$t('budget.defaults.org_default')}</h3>
+	<p class="mb-4 text-xs text-zinc-500">{$t('budget.defaults.description')}</p>
 
 	<div class="space-y-3">
 		<div>
-			<label class="mb-1 block text-sm text-zinc-300">Hard Limit ($)</label>
+			<label class="mb-1 block text-sm text-zinc-300">{$t('budget.hard_limit')} ($)</label>
 			<div class="flex items-center rounded-md border border-zinc-700 bg-zinc-800">
 				<span class="px-3 text-sm text-zinc-500">$</span>
 				<input
@@ -173,7 +174,7 @@
 			</div>
 		</div>
 		<div>
-			<label class="mb-1 block text-sm text-zinc-300">Soft Limit ($)</label>
+			<label class="mb-1 block text-sm text-zinc-300">{$t('budget.soft_limit')} ($)</label>
 			<div class="flex items-center rounded-md border border-zinc-700 bg-zinc-800">
 				<span class="px-3 text-sm text-zinc-500">$</span>
 				<input
@@ -187,7 +188,7 @@
 			</div>
 		</div>
 		<div>
-			<label class="mb-1 block text-sm text-zinc-300">Budget Reset Day</label>
+			<label class="mb-1 block text-sm text-zinc-300">{$t('budget.reset_day')}</label>
 			<select
 				class="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 outline-none"
 				bind:value={resetDay}
@@ -212,13 +213,13 @@
 		onclick={saveOrgDefault}
 		disabled={orgSaving}
 	>
-		{orgSaving ? 'Saving...' : 'Save Org Default'}
+		{orgSaving ? $t('common.loading') : $t('common.save')}
 	</button>
 
 	<!-- Section 2: Per-Role Defaults -->
 	<div class="mt-6 border-t border-zinc-800 pt-6">
-		<h3 class="text-base font-semibold text-zinc-50">Role Defaults</h3>
-		<p class="mb-4 text-xs text-zinc-500">Override the org default for specific roles. Cascade: individual &gt; role &gt; org default.</p>
+		<h3 class="text-base font-semibold text-zinc-50">{$t('budget.defaults.role_default')}</h3>
+		<p class="mb-4 text-xs text-zinc-500">{$t('budget.defaults.description')}</p>
 
 		{#each roles as role}
 			{@const hasExisting = getRoleBudget(role) != null}
@@ -244,7 +245,7 @@
 				{#if expandedRoles[role]}
 					<div class="space-y-3 border-t border-zinc-800 px-4 pb-4 pt-3">
 						<div>
-							<label class="mb-1 block text-sm text-zinc-300">Hard Limit ($)</label>
+							<label class="mb-1 block text-sm text-zinc-300">{$t('budget.hard_limit')} ($)</label>
 							<div class="flex items-center rounded-md border border-zinc-700 bg-zinc-800">
 								<span class="px-3 text-sm text-zinc-500">$</span>
 								<input
@@ -258,7 +259,7 @@
 							</div>
 						</div>
 						<div>
-							<label class="mb-1 block text-sm text-zinc-300">Soft Limit ($)</label>
+							<label class="mb-1 block text-sm text-zinc-300">{$t('budget.soft_limit')} ($)</label>
 							<div class="flex items-center rounded-md border border-zinc-700 bg-zinc-800">
 								<span class="px-3 text-sm text-zinc-500">$</span>
 								<input
@@ -284,7 +285,7 @@
 							onclick={() => saveRoleDefault(role)}
 							disabled={roleSaving[role]}
 						>
-							{roleSaving[role] ? 'Saving...' : `Save ${roleLabel(role)} Default`}
+							{roleSaving[role] ? $t('common.loading') : $t('common.save')}
 						</button>
 
 						{#if hasExisting}

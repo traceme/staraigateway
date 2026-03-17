@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { t } from 'svelte-i18n';
+
 	let {
 		enabled = $bindable(false),
 		orgHasRouting = false
@@ -39,7 +41,7 @@
 	</button>
 
 	<div>
-		<span class="text-sm font-bold text-zinc-200">Enable smart routing</span>
+		<span class="text-sm font-bold text-zinc-200">{$t('api_keys.smart_routing')}</span>
 		{#if orgHasRouting}
 			<p class="text-xs text-zinc-500 mt-1">Automatically route simple queries to cheaper models.</p>
 		{:else}

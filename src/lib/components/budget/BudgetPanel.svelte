@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
+	import { t } from 'svelte-i18n';
 
 	interface MemberBudgetInfo {
 		userId: string;
@@ -133,7 +134,7 @@
 	<div class="flex h-full flex-col overflow-y-auto p-6">
 		<!-- Header -->
 		<div class="mb-6 flex items-center justify-between">
-			<h2 class="text-lg font-semibold text-zinc-50">Budget: {member.name}</h2>
+			<h2 class="text-lg font-semibold text-zinc-50">{$t('budget.title')}: {member.name}</h2>
 			<button
 				class="rounded p-1 text-zinc-400 hover:text-zinc-200"
 				aria-label="Close"
@@ -153,7 +154,7 @@
 		{/if}
 
 		<!-- Hard Limit -->
-		<label class="mb-1 block text-sm font-medium text-zinc-300">Hard Limit (monthly)</label>
+		<label class="mb-1 block text-sm font-medium text-zinc-300">{$t('budget.hard_limit')}</label>
 		<div class="mb-1 flex items-center rounded-md border border-zinc-700 bg-zinc-800">
 			<span class="px-3 text-sm text-zinc-500">$</span>
 			<input
@@ -168,7 +169,7 @@
 		<p class="mb-4 text-xs text-zinc-500">Requests rejected when exceeded</p>
 
 		<!-- Soft Limit -->
-		<label class="mb-1 block text-sm font-medium text-zinc-300">Soft Limit (monthly)</label>
+		<label class="mb-1 block text-sm font-medium text-zinc-300">{$t('budget.soft_limit')}</label>
 		<div class="mb-1 flex items-center rounded-md border border-zinc-700 bg-zinc-800">
 			<span class="px-3 text-sm text-zinc-500">$</span>
 			<input
@@ -186,7 +187,7 @@
 		{#if limitDollars != null && limitDollars > 0}
 			<div class="mb-4">
 				<p class="mb-1 text-sm text-zinc-300">
-					Current Spend: ${currentSpendDollars.toFixed(2)} / ${limitDollars.toFixed(2)}
+					{$t('budget.spend_label')}: ${currentSpendDollars.toFixed(2)} / ${limitDollars.toFixed(2)}
 				</p>
 				<div class="h-2 w-full rounded-full bg-zinc-700">
 					<div class="h-2 rounded-full {barColor}" style="width: {percentage}%"></div>
@@ -206,7 +207,7 @@
 			onclick={save}
 			disabled={saving}
 		>
-			{saving ? 'Saving...' : 'Save Budget'}
+			{saving ? $t('common.loading') : $t('common.save')}
 		</button>
 
 		<!-- Remove -->
@@ -217,7 +218,7 @@
 						class="text-sm text-red-400 hover:text-red-300"
 						onclick={() => (confirmRemove = true)}
 					>
-						Remove Budget
+						{$t('common.delete')}
 					</button>
 				{:else}
 					<p class="mb-2 text-xs text-zinc-400">
@@ -229,13 +230,13 @@
 							onclick={removeBudget}
 							disabled={saving}
 						>
-							Yes, remove
+							{$t('common.confirm')}
 						</button>
 						<button
 							class="text-sm text-zinc-400 hover:text-zinc-300"
 							onclick={() => (confirmRemove = false)}
 						>
-							Cancel
+							{$t('common.cancel')}
 						</button>
 					</div>
 				{/if}

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { t } from 'svelte-i18n';
+
 	type Props = {
 		currentOrg: { slug: string; name: string };
 		currentPath: string;
@@ -6,45 +8,45 @@
 
 	let { currentOrg, currentPath }: Props = $props();
 
-	const navItems = [
+	const navItems: Array<{ labelKey: string; href: string; icon: string; active: boolean; tooltip?: string }> = [
 		{
-			label: 'Dashboard',
+			labelKey: 'nav.dashboard',
 			href: `/org/${currentOrg.slug}/dashboard`,
 			icon: 'grid',
 			active: true
 		},
 		{
-			label: 'Provider Keys',
+			labelKey: 'nav.provider_keys',
 			href: `/org/${currentOrg.slug}/provider-keys`,
 			icon: 'key',
 			active: true
 		},
 		{
-			label: 'API Keys',
+			labelKey: 'nav.api_keys',
 			href: `/org/${currentOrg.slug}/api-keys`,
 			icon: 'code',
 			active: true
 		},
 		{
-			label: 'Members',
+			labelKey: 'nav.members',
 			href: `/org/${currentOrg.slug}/members`,
 			icon: 'users',
 			active: true
 		},
 		{
-			label: 'Usage',
+			labelKey: 'nav.usage',
 			href: `/org/${currentOrg.slug}/usage`,
 			icon: 'chart',
 			active: true
 		},
 		{
-			label: 'Models',
+			labelKey: 'nav.models',
 			href: `/org/${currentOrg.slug}/models`,
 			icon: 'cpu',
 			active: true
 		},
 		{
-			label: 'Settings',
+			labelKey: 'nav.settings',
 			href: `/org/${currentOrg.slug}/settings`,
 			icon: 'gear',
 			active: true
@@ -74,7 +76,7 @@
 						: 'text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800'}"
 				>
 					<span class="w-5 text-center">{@html getIcon(item.icon)}</span>
-					{item.label}
+					{$t(item.labelKey)}
 				</a>
 			{:else}
 				<div
@@ -82,7 +84,7 @@
 					title={item.tooltip}
 				>
 					<span class="w-5 text-center">{@html getIcon(item.icon)}</span>
-					{item.label}
+					{$t(item.labelKey)}
 					<span
 						class="pointer-events-none absolute left-full ml-2 hidden whitespace-nowrap rounded bg-zinc-700 px-2 py-1 text-xs text-zinc-300 group-hover:block"
 					>

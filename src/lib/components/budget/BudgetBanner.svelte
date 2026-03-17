@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { t } from 'svelte-i18n';
+
 	let {
 		currentSpend,
 		limit
@@ -20,7 +22,7 @@
 				<circle cx="8" cy="11.5" r="0.75" fill="currentColor" />
 			</svg>
 			<p class="text-sm text-amber-200">
-				You've used ${currentSpend.toFixed(2)} of your ${limit.toFixed(2)} monthly limit. Contact your admin to increase your budget.
+				{$t('budget.warning_banner')}
 			</p>
 		</div>
 		<button

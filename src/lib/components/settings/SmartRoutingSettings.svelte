@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { t } from 'svelte-i18n';
 
 	let {
 		cheapModel = null as string | null,
@@ -32,16 +33,16 @@
 	class="space-y-6"
 >
 	<div>
-		<h2 class="text-lg font-bold text-zinc-100">Smart Routing</h2>
+		<h2 class="text-lg font-bold text-zinc-100">{$t('settings.smart_routing.title')}</h2>
 		<p class="mt-1 text-sm text-zinc-400">
-			Configure which models are used for simple and complex queries when smart routing is enabled.
+			{$t('settings.smart_routing.description')}
 		</p>
 	</div>
 
 	<div class="space-y-4">
 		<div>
 			<label for="cheapModel" class="block text-sm font-medium text-zinc-300">
-				Cheap model (simple queries)
+				{$t('settings.smart_routing.cheap_model')}
 			</label>
 			<input
 				id="cheapModel"
@@ -58,7 +59,7 @@
 
 		<div>
 			<label for="expensiveModel" class="block text-sm font-medium text-zinc-300">
-				Expensive model (complex queries)
+				{$t('settings.smart_routing.expensive_model')}
 			</label>
 			<input
 				id="expensiveModel"
@@ -81,9 +82,9 @@
 			class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
 		>
 			{#if saving}
-				Saving...
+				{$t('common.loading')}
 			{:else}
-				Save Routing Settings
+				{$t('common.save')}
 			{/if}
 		</button>
 

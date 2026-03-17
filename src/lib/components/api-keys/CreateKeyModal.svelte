@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { t } from 'svelte-i18n';
 	import SmartRoutingToggle from './SmartRoutingToggle.svelte';
 
 	type Props = {
@@ -28,9 +29,9 @@
 	onclick={(e) => { if (e.target === e.currentTarget) onclose(); }}
 >
 	<div class="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-900 p-6 shadow-xl">
-		<h2 class="text-lg font-semibold text-zinc-100">Create API Key</h2>
+		<h2 class="text-lg font-semibold text-zinc-100">{$t('api_keys.create')}</h2>
 		<p class="mt-1 text-sm text-zinc-400">
-			Create a personal API key for use with Cursor, Continue.dev, Claude Code, or other tools.
+			{$t('api_keys.description')}
 		</p>
 
 		<form
@@ -44,13 +45,13 @@
 					if (result.type === 'success' && result.data?.fullKey) {
 						oncreated(result.data.fullKey as string);
 					} else if (result.type === 'failure') {
-						error = (result.data?.error as string) ?? 'Failed to create key';
+						error = (result.data?.errorKey as string) ?? 'errors.create_key_failed';
 					}
 				};
 			}}
 			class="mt-4"
 		>
-			<label for="key-name" class="block text-sm font-medium text-zinc-300">Name</label>
+			<label for="key-name" class="block text-sm font-medium text-zinc-300">{$t('common.name')}</label>
 			<input
 				id="key-name"
 				type="text"
@@ -63,7 +64,7 @@
 			/>
 
 			{#if error}
-				<p class="mt-2 text-sm text-red-400">{error}</p>
+				<p class="mt-2 text-sm text-red-400">{$t(error)}</p>
 			{/if}
 
 			<SmartRoutingToggle bind:enabled={smartRoutingEnabled} {orgHasRouting} />
@@ -74,14 +75,14 @@
 					onclick={onclose}
 					class="rounded-md px-3 py-2 text-sm font-medium text-zinc-400 hover:text-zinc-300"
 				>
-					Cancel
+					{$t('common.cancel')}
 				</button>
 				<button
 					type="submit"
 					disabled={submitting || !name.trim()}
 					class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
 				>
-					{submitting ? 'Creating...' : 'Create Key'}
+					{submitting ? $t('common.loading') : $t('api_keys.create')}
 				</button>
 			</div>
 		</form>

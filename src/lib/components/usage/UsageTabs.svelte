@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { t } from 'svelte-i18n';
+
 	type Props = {
 		activeTab: string;
 		onTabChange: (tab: string) => void;
@@ -7,9 +9,9 @@
 	let { activeTab, onTabChange }: Props = $props();
 
 	const tabs = [
-		{ id: 'overview', label: 'Overview' },
-		{ id: 'member', label: 'By Member' },
-		{ id: 'model', label: 'By Model' }
+		{ id: 'overview', labelKey: 'usage.tabs.overview' },
+		{ id: 'member', labelKey: 'usage.tabs.by_user' },
+		{ id: 'model', labelKey: 'usage.tabs.by_model' }
 	];
 </script>
 
@@ -22,7 +24,7 @@
 				: 'text-zinc-400 hover:text-zinc-300'}"
 			onclick={() => onTabChange(tab.id)}
 		>
-			{tab.label}
+			{$t(tab.labelKey)}
 		</button>
 	{/each}
 </div>

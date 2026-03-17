@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { t } from 'svelte-i18n';
+
 	type Props = {
 		fullKey: string;
 		onclose: () => void;
@@ -29,12 +31,12 @@
 <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
 	<div class="w-full max-w-lg rounded-lg border border-zinc-700 bg-zinc-900 p-6 shadow-xl">
-		<h2 class="text-lg font-semibold text-zinc-100">API Key Created</h2>
+		<h2 class="text-lg font-semibold text-zinc-100">{$t('api_keys.key_created.title')}</h2>
 
 		<!-- Warning banner -->
 		<div class="mt-3 rounded-md border border-amber-700/50 bg-amber-900/30 px-4 py-3">
 			<p class="text-sm font-medium text-amber-300">
-				Make sure to copy your API key now. You won't be able to see it again!
+				{$t('api_keys.key_created.warning')}
 			</p>
 		</div>
 
@@ -59,8 +61,7 @@
 		</div>
 
 		<p class="mt-3 text-xs text-zinc-500">
-			Use this key as your API key in Cursor, Continue.dev, Claude Code CLI, or any OpenAI-compatible client.
-			Point the base URL to your LiteLLM proxy endpoint.
+			{$t('api_keys.key_created.description')}
 		</p>
 
 		<div class="mt-5 flex justify-end">
@@ -68,7 +69,7 @@
 				onclick={onclose}
 				class="rounded-md bg-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 hover:bg-zinc-600"
 			>
-				Done
+				{$t('common.close')}
 			</button>
 		</div>
 	</div>

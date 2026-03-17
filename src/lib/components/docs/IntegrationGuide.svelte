@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from 'svelte-i18n';
 	import CodeBlock from './CodeBlock.svelte';
 
 	type Step = {

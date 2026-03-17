@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { t } from 'svelte-i18n';
+
 	type Model = {
 		name: string;
 		provider: string;
@@ -48,13 +50,13 @@
 		});
 	});
 
-	const columns: { key: SortKey; label: string }[] = [
-		{ key: 'provider', label: 'Provider' },
-		{ key: 'name', label: 'Model' },
-		{ key: 'inputPrice', label: 'Input ($/1M)' },
-		{ key: 'outputPrice', label: 'Output ($/1M)' },
-		{ key: 'contextWindow', label: 'Context' },
-		{ key: 'hasKey', label: 'Status' }
+	const columns: { key: SortKey; labelKey: string }[] = [
+		{ key: 'provider', labelKey: 'models.table.provider' },
+		{ key: 'name', labelKey: 'models.table.name' },
+		{ key: 'inputPrice', labelKey: 'models.table.input_price' },
+		{ key: 'outputPrice', labelKey: 'models.table.output_price' },
+		{ key: 'contextWindow', labelKey: 'common.name' },
+		{ key: 'hasKey', labelKey: 'common.status' }
 	];
 </script>
 
@@ -67,7 +69,7 @@
 						class="cursor-pointer select-none px-4 py-3 text-left text-xs uppercase tracking-wider text-zinc-500 hover:text-zinc-400"
 						onclick={() => toggleSort(col.key)}
 					>
-						{col.label}
+						{$t(col.labelKey)}
 						{#if sortKey === col.key}
 							<span class="ml-1">{sortDir === 'asc' ? '\u25B2' : '\u25BC'}</span>
 						{/if}
@@ -87,7 +89,7 @@
 						{#if model.hasKey}
 							<span class="inline-flex items-center gap-1.5">
 								<span class="inline-block h-2 w-2 rounded-full bg-green-500"></span>
-								Active
+								{$t('common.active')}
 							</span>
 						{:else}
 							<span class="inline-flex items-center gap-1.5 text-zinc-500">

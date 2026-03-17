@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { t } from 'svelte-i18n';
 
 	let {
 		defaultRpmLimit = null as number | null,
@@ -32,7 +33,7 @@
 	class="space-y-6"
 >
 	<div>
-		<h2 class="text-lg font-semibold text-zinc-100">Default Rate Limits</h2>
+		<h2 class="text-lg font-semibold text-zinc-100">{$t('settings.org_name')}</h2>
 		<p class="mt-1 text-sm text-zinc-400">
 			Applied to API keys that don't have custom limits.
 		</p>
@@ -83,9 +84,9 @@
 			class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
 		>
 			{#if saving}
-				Saving...
+				{$t('common.loading')}
 			{:else}
-				Save Settings
+				{$t('settings.save_settings')}
 			{/if}
 		</button>
 

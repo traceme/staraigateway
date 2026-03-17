@@ -1,22 +1,24 @@
 <script lang="ts">
+	import { t } from 'svelte-i18n';
+
 	const items = [
 		{
-			title: 'Add your first LLM provider key',
+			titleKey: 'onboarding.add_provider_key',
 			subtitle: 'Coming in Phase 2'
 		},
 		{
-			title: 'Invite team members',
+			titleKey: 'onboarding.invite_members',
 			subtitle: 'Coming in Phase 4'
 		},
 		{
-			title: 'Create an API key',
+			titleKey: 'onboarding.create_api_key',
 			subtitle: 'Coming in Phase 2'
 		}
 	];
 </script>
 
 <div class="rounded-lg bg-zinc-800 p-6">
-	<h2 class="mb-4 text-lg font-semibold text-zinc-50">Get Started</h2>
+	<h2 class="mb-4 text-lg font-semibold text-zinc-50">{$t('onboarding.get_started')}</h2>
 
 	<div class="space-y-3">
 		{#each items as item}
@@ -40,7 +42,7 @@
 				</div>
 
 				<div>
-					<p class="text-sm font-medium text-zinc-500">{item.title}</p>
+					<p class="text-sm font-medium text-zinc-500">{$t(item.titleKey)}</p>
 					<p class="text-xs text-zinc-600">{item.subtitle}</p>
 				</div>
 			</div>

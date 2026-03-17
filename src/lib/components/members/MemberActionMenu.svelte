@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { t } from 'svelte-i18n';
 
 	type Member = {
 		userId: string;
@@ -73,7 +74,7 @@
 								class="rounded bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700"
 								role="menuitem"
 							>
-								Confirm
+								{$t('common.confirm')}
 							</button>
 						</form>
 						<button
@@ -81,14 +82,14 @@
 							onclick={() => (confirmRemove = false)}
 							role="menuitem"
 						>
-							Cancel
+							{$t('common.cancel')}
 						</button>
 					</div>
 				</div>
 			{:else if confirmRoleChange}
 				<div class="px-3 py-2">
 					<p class="text-xs text-zinc-300">
-						Change {member.name}'s role to {newRole}?
+						{$t('members.change_role')}: {member.name} → {newRole}?
 					</p>
 					<div class="mt-2 flex gap-2">
 						<form method="POST" action="/org/{orgSlug}/members?/changeRole" use:enhance>
@@ -99,7 +100,7 @@
 								class="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700"
 								role="menuitem"
 							>
-								Confirm
+								{$t('common.confirm')}
 							</button>
 						</form>
 						<button
@@ -107,7 +108,7 @@
 							onclick={() => (confirmRoleChange = false)}
 							role="menuitem"
 						>
-							Cancel
+							{$t('common.cancel')}
 						</button>
 					</div>
 				</div>
@@ -118,7 +119,7 @@
 						role="menuitem"
 						onclick={() => (confirmRoleChange = true)}
 					>
-						Change Role to {newRole}
+						{$t('members.change_role')}
 					</button>
 				{/if}
 				<a
@@ -134,7 +135,7 @@
 						role="menuitem"
 						onclick={() => (confirmRemove = true)}
 					>
-						Remove Member
+						{$t('members.remove_member')}
 					</button>
 				{/if}
 			{/if}

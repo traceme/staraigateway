@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { t } from 'svelte-i18n';
+
 	let {
 		rpmLimit = $bindable<number | null>(null),
 		tpmLimit = $bindable<number | null>(null),
@@ -10,7 +12,7 @@
 <div class="space-y-4">
 	<div>
 		<label for="rpmLimit" class="block text-sm font-medium text-zinc-300">
-			Requests per minute (RPM)
+			{$t('api_keys.rate_limits.rpm')}
 		</label>
 		<input
 			id="rpmLimit"
@@ -38,7 +40,7 @@
 
 	<div>
 		<label for="tpmLimit" class="block text-sm font-medium text-zinc-300">
-			Tokens per minute (TPM)
+			{$t('api_keys.rate_limits.tpm')}
 		</label>
 		<input
 			id="tpmLimit"

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { t } from 'svelte-i18n';
+
 	type Props = {
 		role: 'owner' | 'admin' | 'member' | 'pending';
 	};
