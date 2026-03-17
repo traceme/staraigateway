@@ -1,4 +1,4 @@
-# LLMTokenHub
+# StarAIGateway (企业AI中台)
 
 ## What This Is
 
@@ -35,7 +35,18 @@ Any company can sign up, plug in their LLM API keys, and immediately give their 
 
 ### Active
 
-(None — next milestone not yet planned)
+- [ ] Full i18n (Chinese + English) across all UI pages, landing page, and email templates with user language preference
+- [ ] Org admin audit logs (activity log: key created, member invited, settings changed)
+- [ ] Model catalog auto-populated from LiteLLM with pricing and capabilities
+
+## Current Milestone: v1.2 Feature Expansion
+
+**Goal:** Add internationalization (Chinese/English), org-level audit logs, and a browsable model catalog to make StarAIGateway ready for Chinese enterprise teams.
+
+**Target features:**
+- Complete bilingual UI (Chinese + English) with user language preference in account settings
+- Org admin audit logs tracking all significant actions
+- Auto-populated model catalog from LiteLLM showing available models per org
 
 ## Completed Milestones
 
@@ -108,4 +119,4 @@ Security hardened: CORS allowlist, secure cookies, body limits, invitation token
 (None known — all v1.0 tech debt resolved in v1.1)
 
 ---
-*Last updated: 2026-03-17 after v1.1 milestone*
+*Last updated: 2026-03-17 after v1.2 milestone start*
