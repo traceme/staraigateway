@@ -3,11 +3,17 @@ import { validateSession, SESSION_COOKIE_NAME } from '$lib/server/auth/session';
 import { isSecureContext } from '$lib/server/auth/cookies';
 
 export const handle: Handle = async ({ event, resolve }) => {
+	const resolveWithLang = (e: typeof event) =>
+		resolve(e, {
+			transformPageChunk: ({ html }) =>
+				html.replace('%lang%', e.locals.user?.language ?? 'en')
+		});
+
 	// /v1/* routes use API key auth (Bearer token), not session cookies
 	if (event.url.pathname.startsWith('/v1/')) {
 		event.locals.user = null;
 		event.locals.session = null;
-		return resolve(event);
+		return resolveWithLang(event);
 	}
 
 	const token = event.cookies.get(SESSION_COOKIE_NAME);
@@ -15,7 +21,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (!token) {
 		event.locals.user = null;
 		event.locals.session = null;
-		return resolve(event);
+		return resolveWithLang(event);
 	}
 
 	const result = await validateSession(token);
@@ -41,5 +47,5 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.cookies.delete(SESSION_COOKIE_NAME, { path: '/' });
 	}
 
-	return resolve(event);
+	return resolveWithLang(event);
 };

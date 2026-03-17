@@ -1,5 +1,6 @@
 <script lang="ts">
 	import OrgSwitcher from './OrgSwitcher.svelte';
+	import LanguageSwitcher from './LanguageSwitcher.svelte';
 
 	type Props = {
 		currentOrg: { id: string; name: string; slug: string };
@@ -38,8 +39,10 @@
 		<OrgSwitcher {currentOrg} {userOrgs} />
 	</div>
 
-	<!-- Right: user menu -->
-	<div class="relative">
+	<!-- Right: language switcher + user menu -->
+	<div class="flex items-center gap-2">
+		<LanguageSwitcher />
+		<div class="relative">
 		<button
 			class="flex items-center gap-2 rounded-md px-2 py-1 text-sm text-zinc-300 hover:bg-zinc-800"
 			onclick={() => (userMenuOpen = !userMenuOpen)}
@@ -73,5 +76,6 @@
 				</form>
 			</div>
 		{/if}
+		</div>
 	</div>
 </header>
