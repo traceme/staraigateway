@@ -1,251 +1,285 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-03-16
+**Analysis Date:** 2026-03-17
 
 ## Directory Layout
 
 ```
-llmtokenhub/
-├── src/
-│   ├── app.css                     # Global Tailwind CSS entry
-│   ├── app.d.ts                    # SvelteKit ambient type declarations (App.Locals)
-│   ├── app.html                    # HTML shell template
-│   ├── hooks.server.ts             # Request interceptor: session auth + locals population
+llmtokenhub/                        # Project root (StarAIGateway)
+├── src/                            # All application source code
+│   ├── app.html                    # SvelteKit HTML shell
+│   ├── app.css                     # Global CSS (Tailwind entry)
+│   ├── app.d.ts                    # TypeScript ambient declarations (locals, etc.)
+│   ├── hooks.server.ts             # Global server middleware (session auth)
 │   ├── lib/
-│   │   ├── components/             # Svelte UI components (domain-grouped)
-│   │   │   ├── api-keys/           # API key management UI
-│   │   │   ├── auth/               # OAuth buttons
-│   │   │   ├── budget/             # Budget banners, panels, forms
-│   │   │   ├── dashboard/          # KPI cards, onboarding checklist
-│   │   │   ├── docs/               # Integration guide, code blocks
-│   │   │   ├── landing/            # Public marketing page sections
-│   │   │   ├── layout/             # Sidebar, TopBar, OrgSwitcher
-│   │   │   ├── members/            # Members table, invite panel, role badge
-│   │   │   ├── models/             # Model pricing table
-│   │   │   ├── provider-keys/      # Provider key cards and panel
-│   │   │   ├── settings/           # Org settings forms
-│   │   │   └── usage/              # Charts, tables, time pickers
-│   │   ├── server/                 # Server-only modules (never imported by browser)
-│   │   │   ├── api-keys.ts         # API key CRUD and SHA-256 hashing
-│   │   │   ├── crypto.ts           # AES-256-GCM encrypt/decrypt
-│   │   │   ├── litellm.ts          # LiteLLM admin API client
-│   │   │   ├── members.ts          # Org membership helpers
-│   │   │   ├── provider-keys.ts    # Provider key CRUD
-│   │   │   ├── providers.ts        # Static PROVIDERS registry (ProviderDef[])
-│   │   │   ├── redis.ts            # Lazy Redis singleton (optional)
-│   │   │   ├── auth/               # Web auth: sessions, OAuth, password, email
-│   │   │   │   ├── email.ts        # Nodemailer transport wrapper
-│   │   │   │   ├── oauth.ts        # Arctic OAuth provider setup
-│   │   │   │   ├── password.ts     # Argon2 hash/verify
-│   │   │   │   ├── session.ts      # Session create/validate/invalidate
-│   │   │   │   ├── validation.ts   # Zod schemas for auth forms
-│   │   │   │   └── emails/         # Email template functions
-│   │   │   │       ├── admin-digest.ts
-│   │   │   │       ├── budget-warning.ts
-│   │   │   │       ├── invitation.ts
-│   │   │   │       ├── password-reset.ts
-│   │   │   │       └── verification.ts
-│   │   │   ├── budget/
-│   │   │   │   └── notifications.ts  # Budget soft-limit alerts + admin digest
+│   │   ├── components/             # Svelte UI components, grouped by feature
+│   │   │   ├── api-keys/           # CreateKeyModal, KeyCreatedModal, RateLimitFields, SmartRoutingToggle
+│   │   │   ├── auth/               # OAuthButtons
+│   │   │   ├── budget/             # BudgetBanner, BudgetDefaultsForm, BudgetPanel
+│   │   │   ├── dashboard/          # AdminKpiCards, OnboardingChecklist
+│   │   │   ├── docs/               # CodeBlock, IntegrationGuide, ToolTabs
+│   │   │   ├── landing/            # LandingNav, LandingHero, FeaturesGrid, CostComparison, SelfHostCta, LandingFooter
+│   │   │   ├── layout/             # OrgSwitcher, Sidebar, TopBar
+│   │   │   ├── members/            # InvitePanel, MemberActionMenu, MembersTable, RoleBadge
+│   │   │   ├── models/             # ModelPricingTable
+│   │   │   ├── provider-keys/      # ProviderCard, ProviderPanel
+│   │   │   ├── settings/           # CacheTtlSetting, OrgSettingsForm, SmartRoutingSettings
+│   │   │   └── usage/              # BreakdownBarChart, CostTrendChart, KpiCard, TimeRangePicker, UsageTable, UsageTabs
+│   │   ├── server/                 # Server-only code (never imported by .svelte files)
 │   │   │   ├── db/
-│   │   │   │   ├── index.ts          # Drizzle singleton (lazy proxy)
-│   │   │   │   ├── schema.ts         # All table definitions (app_ prefix)
-│   │   │   │   └── migrations/       # Raw SQL migration files
-│   │   │   ├── gateway/              # LLM API gateway pipeline
-│   │   │   │   ├── auth.ts           # Bearer key auth → GatewayAuth
-│   │   │   │   ├── budget.ts         # Pre-request budget check
-│   │   │   │   ├── cache.ts          # Redis cache get/set
-│   │   │   │   ├── load-balancer.ts  # Round-robin key selection
-│   │   │   │   ├── models.ts         # Aggregate models from provider keys
-│   │   │   │   ├── proxy.ts          # Core proxy: retry, fallback, streaming
-│   │   │   │   ├── rate-limit.ts     # In-memory sliding window RPM/TPM
-│   │   │   │   ├── routing.ts        # Smart routing: token estimation, model tier
-│   │   │   │   ├── usage.ts          # Usage extraction, cost calculation, log write
-│   │   │   │   ├── cache.test.ts     # Unit tests
-│   │   │   │   ├── load-balancer.test.ts
-│   │   │   │   ├── proxy.test.ts
-│   │   │   │   └── routing.test.ts
-│   │   │   └── __mocks__/
-│   │   │       └── env.ts            # Vitest mock for $env/dynamic/private
+│   │   │   │   ├── index.ts        # Drizzle connection singleton + proxy
+│   │   │   │   ├── schema.ts       # All table definitions (app_ prefix)
+│   │   │   │   └── migrations/     # Supplementary SQL migration files
+│   │   │   ├── auth/
+│   │   │   │   ├── session.ts      # Session create/validate/invalidate
+│   │   │   │   ├── password.ts     # Argon2 hash/verify
+│   │   │   │   ├── email.ts        # Nodemailer send functions
+│   │   │   │   ├── oauth.ts        # Arctic Google/GitHub clients
+│   │   │   │   ├── validation.ts   # Zod schemas for auth forms
+│   │   │   │   ├── cookies.ts      # isSecureContext helper
+│   │   │   │   └── emails/         # Email templates: verification, invitation, password-reset, budget-warning, admin-digest
+│   │   │   ├── gateway/
+│   │   │   │   ├── auth.ts         # Bearer token auth, GatewayAuth interface, Redis cache-aside
+│   │   │   │   ├── budget.ts       # Budget cascade check, BudgetCheckResult
+│   │   │   │   ├── proxy.ts        # Core proxy pipeline (smart routing, cache, load balance, retry, usage log)
+│   │   │   │   ├── usage.ts        # logUsage, calculateCost, MODEL_PRICING, updateSpendSnapshot
+│   │   │   │   ├── rate-limit.ts   # In-memory sliding window RPM/TPM limiter
+│   │   │   │   ├── routing.ts      # estimateTokenCount, selectModelTier
+│   │   │   │   ├── load-balancer.ts # Round-robin key selection
+│   │   │   │   ├── cache.ts        # Redis response cache (generateCacheKey, get/set)
+│   │   │   │   ├── models.ts       # getAvailableModels (aggregates from provider keys)
+│   │   │   │   └── cors.ts         # getCorsHeaders
+│   │   │   ├── budget/
+│   │   │   │   ├── notifications.ts # checkAndNotifyBudgets, sendAdminDigest
+│   │   │   │   └── utils.ts         # getBudgetResetDate
+│   │   │   ├── __integration__/     # Integration test fixtures and tests
+│   │   │   │   ├── setup.ts
+│   │   │   │   └── db.integration.test.ts
+│   │   │   ├── __mocks__/           # Vitest module mocks
+│   │   │   │   └── env.ts
+│   │   │   ├── api-keys.ts          # generateApiKey, createApiKey, getUserApiKeys, revokeApiKey
+│   │   │   ├── members.ts           # Member invite/list/remove operations
+│   │   │   ├── provider-keys.ts     # Provider key CRUD
+│   │   │   ├── providers.ts         # PROVIDERS registry, ProviderDef, getProvider
+│   │   │   ├── litellm.ts           # createLiteLLMOrganization (LiteLLM admin API)
+│   │   │   ├── redis.ts             # getRedis lazy singleton
+│   │   │   └── crypto.ts            # encrypt/decrypt (AES-256-GCM)
 │   │   └── types/
-│   │       └── index.ts              # Drizzle-inferred TypeScript types + OrgRole
-│   └── routes/
-│       ├── +layout.server.ts         # Root layout: passes user to all pages
-│       ├── +layout.svelte            # Root layout component
-│       ├── +page.server.ts           # Root: redirect authenticated → org dashboard
-│       ├── +page.svelte              # Landing page (unauthenticated)
-│       ├── api/
-│       │   └── cron/digest/
-│       │       └── +server.ts        # Admin digest cron endpoint
-│       ├── auth/                     # All authentication pages
-│       │   ├── +layout.svelte        # Auth layout wrapper
-│       │   ├── forgot-password/
-│       │   ├── invite/[token]/
-│       │   ├── login/
-│       │   ├── logout/
-│       │   ├── oauth/
-│       │   │   ├── github/           # GitHub OAuth initiation + callback
-│       │   │   └── google/           # Google OAuth initiation + callback
-│       │   ├── reset-password/
-│       │   ├── signup/
-│       │   └── verify-email/
-│       ├── docs/
-│       │   └── integrations/
-│       │       └── +page.svelte      # Integration guide page
-│       ├── org/
-│       │   ├── create/               # Org creation flow
-│       │   └── [slug]/               # Org-scoped pages (require membership)
-│       │       ├── +layout.server.ts # Org auth guard + shared org context
-│       │       ├── +layout.svelte    # Org layout (sidebar + topbar)
-│       │       ├── api-keys/         # API key management page
-│       │       ├── dashboard/        # Org overview dashboard
-│       │       ├── members/          # Member management + invites
-│       │       ├── models/           # Model pricing table
-│       │       ├── provider-keys/    # Provider key management + validation endpoint
-│       │       ├── settings/         # Org settings (smart routing, cache TTL)
-│       │       └── usage/            # Usage analytics + budget endpoint
-│       └── v1/                       # OpenAI-compatible API gateway
-│           ├── chat/completions/
-│           │   └── +server.ts        # POST /v1/chat/completions
-│           ├── embeddings/
-│           │   └── +server.ts        # POST /v1/embeddings
-│           └── models/
-│               └── +server.ts        # GET /v1/models
-├── .env.example                      # Environment variable template (safe to read)
-├── docker-compose.yml                # Full-stack deployment config
-├── Dockerfile                        # Node.js app container
-├── drizzle.config.ts                 # Drizzle Kit config (schema path, migrations out)
-├── package.json                      # Dependencies and scripts
-├── svelte.config.js                  # SvelteKit + adapter-node config
-├── tsconfig.json                     # TypeScript config
-├── vite.config.ts                    # Vite config
-└── vitest.config.ts                  # Vitest test runner config
+│   │       └── index.ts             # Drizzle-inferred TS types: User, Session, Organization, etc.
+│   ├── routes/
+│   │   ├── +layout.server.ts        # Root layout load: passes user to all pages
+│   │   ├── +layout.svelte           # Root layout wrapper
+│   │   ├── +page.server.ts          # Landing page server (redirect if logged in)
+│   │   ├── +page.svelte             # Public landing page
+│   │   ├── auth/
+│   │   │   ├── +layout.svelte       # Auth pages wrapper (centered card layout)
+│   │   │   ├── login/               # Email/password + OAuth login
+│   │   │   ├── signup/              # Registration
+│   │   │   ├── logout/              # Session invalidation
+│   │   │   ├── verify-email/        # Email verification token handler
+│   │   │   ├── forgot-password/     # Request reset email
+│   │   │   ├── reset-password/      # Reset with token
+│   │   │   ├── invite/[token]/      # Accept org invitation
+│   │   │   └── oauth/
+│   │   │       ├── google/          # Google OAuth initiation
+│   │   │       │   └── callback/    # Google OAuth callback
+│   │   │       ├── github/          # GitHub OAuth initiation
+│   │   │       │   └── callback/    # GitHub OAuth callback
+│   │   │       └── confirm-link/    # Link OAuth to existing account
+│   │   ├── org/
+│   │   │   ├── create/              # Create new organization
+│   │   │   └── [slug]/
+│   │   │       ├── +layout.server.ts # Org auth guard + budget warning load
+│   │   │       ├── +layout.svelte    # Sidebar + TopBar + BudgetBanner shell
+│   │   │       ├── dashboard/        # Admin KPI cards + onboarding checklist
+│   │   │       ├── api-keys/         # List/create/revoke API keys
+│   │   │       ├── usage/
+│   │   │       │   ├── +page.*       # Usage charts and table
+│   │   │       │   └── budget/+server.ts # Budget CRUD API endpoint
+│   │   │       ├── models/           # Model pricing table
+│   │   │       ├── members/          # Member list, invite, role management
+│   │   │       ├── provider-keys/
+│   │   │       │   ├── +page.*       # Provider key management
+│   │   │       │   └── validate/+server.ts # Validate provider key against provider API
+│   │   │       └── settings/         # Org settings: name, smart routing, cache TTL, rate limits
+│   │   ├── docs/
+│   │   │   └── integrations/         # Integration guide page (Cursor, Continue.dev, etc.)
+│   │   ├── v1/
+│   │   │   ├── chat/completions/+server.ts  # POST /v1/chat/completions (gateway)
+│   │   │   ├── embeddings/+server.ts        # POST /v1/embeddings (gateway)
+│   │   │   └── models/+server.ts            # GET /v1/models (gateway)
+│   │   └── api/
+│   │       └── cron/
+│   │           ├── cleanup/+server.ts  # DELETE expired sessions
+│   │           └── digest/+server.ts   # Send admin budget digest emails
+│   └── __e2e__/                     # End-to-end tests
+│       ├── setup.ts
+│       ├── user-journey.e2e.test.ts
+│       └── budget-enforcement.e2e.test.ts
+├── drizzle/                         # Drizzle migration output
+│   ├── 0000_blue_whiplash.sql       # Initial schema migration
+│   ├── 0001_models_text_to_jsonb.sql
+│   └── meta/                        # Drizzle migration metadata
+├── docs/                            # Project documentation
+├── scripts/                         # Dev tooling scripts (load-test.ts, etc.)
+├── .planning/                       # GSD planning documents
+│   ├── codebase/                    # Codebase analysis documents (this file)
+│   ├── phases/                      # Phase plans
+│   └── ...
+├── build/                           # Compiled adapter-node output (gitignored)
+├── .svelte-kit/                     # SvelteKit generated files (gitignored)
+├── node_modules/                    # Dependencies (gitignored)
+├── package.json
+├── svelte.config.js                 # SvelteKit config (adapter-node)
+├── tsconfig.json
+├── vite.config.ts
+├── vitest.config.ts
+├── drizzle.config.ts                # Drizzle-kit config
+├── Dockerfile
+├── docker-compose.yml
+├── docker-compose.test.yml
+├── .env.example                     # Environment variable documentation
+└── CLAUDE.md
 ```
 
 ## Directory Purposes
 
 **`src/lib/server/gateway/`:**
-- Purpose: The LLM proxy pipeline — all logic that executes on every API request
-- Contains: 9 focused modules, each owning one concern (auth, budget, cache, rate-limit, routing, load-balancer, models, proxy, usage)
-- Key files: `proxy.ts` (orchestrator), `auth.ts` (GatewayAuth type + key lookup)
+- Purpose: All gateway pipeline logic for the OpenAI-compatible `/v1/*` API surface
+- Contains: One file per concern — auth, budget, proxy, usage, rate-limit, routing, load-balancer, cache, models, cors
+- Key files: `proxy.ts` is the core orchestrator; `auth.ts` defines `GatewayAuth`; `usage.ts` holds `MODEL_PRICING`
 
 **`src/lib/server/auth/`:**
-- Purpose: Web session management and all auth flows (password, OAuth, email verification)
-- Contains: Core session/password/OAuth modules + `emails/` subdirectory for transactional email templates
-- Key files: `session.ts` (sliding window sessions), `oauth.ts` (Arctic OAuth setup)
+- Purpose: Web UI user identity — sessions, passwords, email, OAuth
+- Contains: Stateless pure functions for each auth operation; email template functions
+- Key files: `session.ts` (sliding window sessions), `oauth.ts` (Arctic OAuth clients), `validation.ts` (Zod schemas)
 
 **`src/lib/server/db/`:**
-- Purpose: Database access — schema as source of truth, lazy singleton connection
-- Contains: `schema.ts` (all 10 tables), `index.ts` (Drizzle proxy singleton), `migrations/` (SQL files)
-- Key files: `schema.ts` — all types are derived from here via `$lib/types`
+- Purpose: Database access layer
+- Contains: Schema (single file for all tables), connection singleton, supplementary migration SQL
+- Key files: `schema.ts` is the single source of truth for all table shapes; `index.ts` exposes `db` proxy
 
 **`src/lib/components/`:**
-- Purpose: Reusable Svelte UI components, one subdirectory per domain feature
-- Contains: Feature-scoped `.svelte` files (no barrel files — import directly by path)
-- Key files: `layout/Sidebar.svelte`, `layout/TopBar.svelte`, `usage/CostTrendChart.svelte`
-
-**`src/routes/org/[slug]/`:**
-- Purpose: All authenticated org-scoped pages; `[slug]` is the org's URL slug
-- Contains: 7 feature sections, each with a `+page.server.ts` and `+page.svelte`
-- Key files: `+layout.server.ts` (the org auth guard — all child pages inherit verified membership)
+- Purpose: Reusable Svelte 5 UI components, organized by feature domain
+- Contains: PascalCase `.svelte` files. Each folder maps to a page or feature area.
+- Key files: `layout/Sidebar.svelte`, `layout/TopBar.svelte` — persistent chrome for org pages
 
 **`src/routes/v1/`:**
-- Purpose: OpenAI-compatible API surface; these are the endpoints AI tools connect to
-- Contains: 3 endpoints matching OpenAI's API structure
+- Purpose: The externally-accessible OpenAI-compatible API
+- Contains: Only thin handler files that delegate immediately to gateway service modules
+- Key files: `chat/completions/+server.ts` is the primary endpoint
+
+**`src/routes/org/[slug]/`:**
+- Purpose: All authenticated org-scoped web pages
+- Contains: Each subdirectory is one page with a paired `+page.server.ts` and `+page.svelte`
+- Key files: `+layout.server.ts` is the auth guard and data preloader for the entire org section
 
 ## Key File Locations
 
 **Entry Points:**
-- `src/hooks.server.ts`: First code run on every request; establishes auth context
-- `src/app.html`: HTML shell with `%sveltekit.head%` and `%sveltekit.body%` markers
-- `src/routes/+page.svelte`: Landing page / redirect hub
+- `src/hooks.server.ts`: Global middleware — run on every request
+- `src/routes/+layout.server.ts`: Root layout load
+- `src/routes/v1/chat/completions/+server.ts`: Primary API gateway entry
+- `src/routes/org/[slug]/+layout.server.ts`: Org section auth guard
 
 **Configuration:**
-- `drizzle.config.ts`: Points Drizzle Kit at `src/lib/server/db/schema.ts` and `./drizzle` for migrations
-- `svelte.config.js`: Uses `adapter-node` for standalone Node.js deployment
-- `vite.config.ts`: Vite build configuration
-- `vitest.config.ts`: Test runner setup
+- `svelte.config.js`: SvelteKit adapter (adapter-node, no special options)
+- `drizzle.config.ts`: Drizzle-kit pointing to `src/lib/server/db/schema.ts`
+- `vitest.config.ts`: Test runner config with coverage and workspace setup
+- `.env.example`: Documents all required env vars
 
 **Core Logic:**
-- `src/lib/server/gateway/proxy.ts`: Central proxy orchestrator (most complex file)
-- `src/lib/server/db/schema.ts`: Canonical data model — all tables defined here
-- `src/lib/server/providers.ts`: Static list of all supported LLM providers
-- `src/lib/types/index.ts`: All TypeScript types exported from a single location
+- `src/lib/server/gateway/proxy.ts`: Full gateway pipeline
+- `src/lib/server/gateway/auth.ts`: Bearer token resolution + Redis cache
+- `src/lib/server/gateway/budget.ts`: Budget cascade and spend checking
+- `src/lib/server/db/schema.ts`: Authoritative data model
+- `src/lib/server/providers.ts`: Supported LLM provider registry
+- `src/lib/server/crypto.ts`: AES-256-GCM encrypt/decrypt for provider keys
 
 **Testing:**
-- `src/lib/server/gateway/*.test.ts`: Gateway unit tests co-located with source files
-- `src/lib/server/__mocks__/env.ts`: Mock for SvelteKit's `$env/dynamic/private`
+- `src/lib/server/gateway/*.test.ts`: Unit tests co-located with gateway modules
+- `src/lib/server/auth/*.test.ts`: Unit tests co-located with auth modules
+- `src/lib/server/__integration__/`: DB integration tests with real Postgres
+- `src/__e2e__/`: Full end-to-end tests
 
 ## Naming Conventions
 
 **Files:**
-- Svelte components: PascalCase (e.g., `CreateKeyModal.svelte`, `BudgetBanner.svelte`)
-- Server modules: kebab-case (e.g., `api-keys.ts`, `load-balancer.ts`, `rate-limit.ts`)
-- SvelteKit routing files: SvelteKit convention (`+page.svelte`, `+page.server.ts`, `+server.ts`, `+layout.svelte`, `+layout.server.ts`)
+- SvelteKit route files: SvelteKit convention (`+page.svelte`, `+page.server.ts`, `+server.ts`, `+layout.svelte`, `+layout.server.ts`)
+- Server modules: `kebab-case.ts` (e.g., `api-keys.ts`, `rate-limit.ts`, `load-balancer.ts`)
+- Components: `PascalCase.svelte` (e.g., `BudgetPanel.svelte`, `CreateKeyModal.svelte`)
+- Test files: `<module>.test.ts` co-located with the module being tested; integration tests in `__integration__/`; e2e tests in `__e2e__/`
 
-**Directories:**
-- Component subdirs: kebab-case, domain-named (e.g., `api-keys/`, `provider-keys/`, `usage/`)
-- Route subdirs: kebab-case (e.g., `forgot-password/`, `verify-email/`)
-- Dynamic route segment: `[slug]`, `[token]` (SvelteKit convention)
+**Database tables:**
+- All tables prefixed `app_` (e.g., `app_users`, `app_api_keys`) to avoid collisions with LiteLLM's tables in the shared DB
 
-**TypeScript:**
-- Interfaces and types: PascalCase (e.g., `GatewayAuth`, `ProviderDef`, `BudgetCheckResult`)
-- Functions: camelCase (e.g., `authenticateApiKey`, `proxyToLiteLLM`, `checkBudget`)
-- DB table constants: camelCase prefixed with `app` (e.g., `appUsers`, `appApiKeys`)
-- Exported constants: SCREAMING_SNAKE_CASE for static config (e.g., `PROVIDERS`, `MODEL_PRICING`, `RETRYABLE_STATUSES`)
+**Variables/Functions:**
+- camelCase for functions and variables
+- UPPER_SNAKE_CASE for module-level constants (e.g., `MODEL_PRICING`, `RETRYABLE_STATUSES`, `SESSION_DURATION_MS`)
+- `PascalCase` for interfaces and types (e.g., `GatewayAuth`, `BudgetCheckResult`, `ProviderDef`)
+
+**API key format:**
+- User-facing API keys always prefixed `sk-th-` (e.g., `sk-th-<base64url>`)
+- Session cookies named `auth_session`
+- Redis keys: `auth:{keyHash}` (auth cache), `cache:{orgId}:{sha256hex}` (response cache)
 
 ## Where to Add New Code
 
-**New gateway middleware (e.g., IP allowlist, custom header injection):**
-- Implementation: `src/lib/server/gateway/your-feature.ts`
-- Wire-up: Add call in `src/lib/server/gateway/proxy.ts` at the appropriate pipeline step
-- Tests: `src/lib/server/gateway/your-feature.test.ts` (co-locate)
+**New gateway feature (e.g., new enforcement check):**
+- Add module: `src/lib/server/gateway/<feature>.ts`
+- Unit test: `src/lib/server/gateway/<feature>.test.ts`
+- Wire into pipeline: `src/lib/server/gateway/proxy.ts` or the relevant `/v1/*/+server.ts`
 
-**New org-scoped page (e.g., audit logs):**
-- Create: `src/routes/org/[slug]/audit-logs/+page.server.ts` and `+page.svelte`
-- Data loading: Call `await parent()` to inherit org context from layout
-- Navigation: Add entry to `src/lib/components/layout/Sidebar.svelte`
-- Components: `src/lib/components/audit-logs/` (new domain subdirectory)
+**New org page (e.g., `/org/[slug]/billing`):**
+- Page server: `src/routes/org/[slug]/billing/+page.server.ts`
+- Page UI: `src/routes/org/[slug]/billing/+page.svelte`
+- Components: `src/lib/components/billing/` (new folder if needed)
+- Auth guard is inherited from `src/routes/org/[slug]/+layout.server.ts` — no extra work needed
 
-**New API endpoint (e.g., `/v1/completions`):**
-- Create: `src/routes/v1/completions/+server.ts`
-- Pattern: Follow `src/routes/v1/chat/completions/+server.ts` — authenticate, check budget, call `proxyToLiteLLM()`
-
-**New transactional email:**
-- Template function: `src/lib/server/auth/emails/your-email.ts`
-- Sending: Import into relevant server module and call `sendEmail()` from `src/lib/server/auth/email.ts`
+**New API endpoint (REST, not gateway):**
+- Create: `src/routes/api/<name>/+server.ts`
+- Add cron auth if admin-only (see `src/routes/api/cron/cleanup/+server.ts` for pattern)
 
 **New DB table:**
-- Add to `src/lib/server/db/schema.ts` with `app_` prefix
-- Run `npm run db:generate` to generate migration
-- Export types from `src/lib/types/index.ts`
+- Add to: `src/lib/server/db/schema.ts`
+- Generate migration: `npm run db:generate`
+- Add Drizzle-inferred type to: `src/lib/types/index.ts`
 
-**Utility helpers:**
-- Shared server helpers: `src/lib/server/` (domain-appropriate module)
-- No barrel `index.ts` files — import by specific file path using `$lib/server/module-name`
+**New UI component:**
+- Add to appropriate feature folder: `src/lib/components/<feature>/ComponentName.svelte`
+- Use Svelte 5 runes syntax (`$props()`, `$state()`)
+
+**Utilities:**
+- Shared helpers: `src/lib/server/<domain>.ts` (follow existing module pattern)
+- Client-side utilities: not currently needed; all logic is server-side
 
 ## Special Directories
 
+**`build/`:**
+- Purpose: Compiled adapter-node output from `npm run build`
+- Generated: Yes (by SvelteKit build)
+- Committed: No (in `.gitignore`)
+
 **`.svelte-kit/`:**
-- Purpose: SvelteKit build artifacts and generated types
-- Generated: Yes
+- Purpose: SvelteKit generated route types, client bundles, adapter build output
+- Generated: Yes (by SvelteKit dev/build)
 - Committed: No
 
-**`build/`:**
-- Purpose: Production build output from `adapter-node`
-- Generated: Yes
-- Committed: No
+**`drizzle/`:**
+- Purpose: SQL migration files generated by `drizzle-kit generate`
+- Generated: Yes (by drizzle-kit)
+- Committed: Yes — migration files are the DB change history
 
 **`src/lib/server/db/migrations/`:**
-- Purpose: Raw SQL migration files generated by Drizzle Kit
-- Generated: Yes (by `npm run db:generate`)
-- Committed: Yes — migrations are version-controlled
+- Purpose: Supplementary SQL migration files that aren't part of the main drizzle migration sequence (e.g., `0003_usage_budgets.sql`, `0004_budget_snapshot.sql`)
+- Generated: Partially
+- Committed: Yes
 
 **`.planning/`:**
-- Purpose: GSD planning documents (milestones, phases, codebase analysis)
-- Generated: No
+- Purpose: GSD planning documents — milestones, phases, codebase analysis
+- Generated: No (human + AI authored)
 - Committed: Yes
 
 ---
 
-*Structure analysis: 2026-03-16*
+*Structure analysis: 2026-03-17*

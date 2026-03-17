@@ -1,139 +1,201 @@
 # External Integrations
 
-**Analysis Date:** 2026-03-16
+**Analysis Date:** 2026-03-17
 
 ## APIs & External Services
 
-**LiteLLM Proxy (core LLM gateway):**
-- LiteLLM - Upstream API gateway that handles actual LLM provider routing
-  - SDK/Client: Raw `fetch` calls in `src/lib/server/litellm.ts` and `src/lib/server/gateway/proxy.ts`
-  - Auth: `LITELLM_MASTER_KEY` env var, sent as `Authorization: Bearer` header
-  - Endpoints used: `POST /organization/new`, `GET /health`, `POST /v1/chat/completions`, `POST /v1/embeddings`, `GET /v1/models`
-  - Default URL: `http://localhost:4000` (Docker: `http://litellm:4000`)
-  - Integration is optional — app gracefully degrades if LiteLLM is unavailable
+**LLM Providers (proxied via gateway):**
+All provider API keys are stored AES-256-GCM encrypted in `app_provider_keys` table. The proxy layer in `src/lib/server/gateway/proxy.ts` decrypts them at request time and forwards to each provider.
 
-**LLM Provider APIs (via LiteLLM proxy):**
-- The app stores and manages provider API keys for these services; actual calls pass through LiteLLM
-- Supported providers defined in `src/lib/server/providers.ts`:
-  - OpenAI (`https://api.openai.com`) — GPT-4o, GPT-4o-mini, o1, o3
-  - Anthropic (`https://api.anthropic.com`) — Claude Opus, Sonnet, Haiku
-  - Google AI (`https://generativelanguage.googleapis.com`) — Gemini 2.5 Pro, Flash
-  - Azure OpenAI (`https://YOUR_RESOURCE.openai.azure.com`) — GPT-4o via Azure
-  - Mistral AI (`https://api.mistral.ai`) — Mistral Large, Medium, Small
-  - Cohere (`https://api.cohere.ai`) — Command R+, Embed, Rerank
-  - DeepSeek (`https://api.deepseek.com`) — DeepSeek-V3, DeepSeek-R1
-  - Qwen/Alibaba (`https://dashscope.aliyuncs.com/compatible-mode`) — Qwen-Max, Plus, Turbo
-  - GLM/Zhipu AI (`https://open.bigmodel.cn`) — GLM-4, GLM-4-Flash
-  - Doubao/ByteDance (`https://ark.cn-beijing.volces.com`) — Doubao-Pro, Lite
-  - Custom OpenAI-compatible endpoints (user-configured base URL)
-- Provider keys are stored AES-256-GCM encrypted in the database (`src/lib/server/crypto.ts`)
-- Discovery: app hits each provider's `/v1/models` (or equivalent) endpoint to enumerate available models (`src/routes/org/[slug]/provider-keys/validate/+server.ts`)
+- **OpenAI** (`openai`) - GPT-4o, GPT-4o-mini, o1, o3
+  - Base URL: `https://api.openai.com`
+  - Auth header: `Authorization: Bearer <key>`
+  - Models endpoint: `GET /v1/models`
 
-**OAuth Providers:**
-- Google OAuth 2.0 — "Sign in with Google"
-  - SDK/Client: `arctic` library (`Google` class)
-  - Auth: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` env vars
-  - Callback: `BASE_URL/auth/oauth/google/callback`
-  - Implementation: `src/lib/server/auth/oauth.ts`, routes in `src/routes/auth/oauth/google/`
-  - Optional: disabled if env vars not set
+- **Anthropic** (`anthropic`) - Claude Opus, Sonnet, Haiku
+  - Base URL: `https://api.anthropic.com`
+  - Auth header: `x-api-key: <key>` (distinct from all others)
+  - Models endpoint: `GET /v1/models`
 
-- GitHub OAuth — "Sign in with GitHub"
-  - SDK/Client: `arctic` library (`GitHub` class)
-  - Auth: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` env vars
-  - Callback: `BASE_URL/auth/oauth/github/callback`
-  - Implementation: `src/lib/server/auth/oauth.ts`, routes in `src/routes/auth/oauth/github/`
-  - Optional: disabled if env vars not set
+- **Google AI** (`google`) - Gemini 2.5 Pro, Flash, Ultra
+  - Base URL: `https://generativelanguage.googleapis.com`
+  - Auth header: `Authorization: Bearer <key>`
+  - Models endpoint: `GET /v1beta/models`
+
+- **Azure OpenAI** (`azure`) - GPT-4o, GPT-4 Turbo
+  - Base URL: `https://YOUR_RESOURCE.openai.azure.com` (per-org custom)
+  - Auth header: `api-key: <key>`
+  - Models endpoint: `GET /openai/models?api-version=2024-02-01`
+
+- **Mistral AI** (`mistral`) - Mistral Large, Medium, Small
+  - Base URL: `https://api.mistral.ai`
+  - Auth header: `Authorization: Bearer <key>`
+
+- **Cohere** (`cohere`) - Command R+, Embed, Rerank
+  - Base URL: `https://api.cohere.ai`
+  - Auth header: `Authorization: Bearer <key>`
+
+- **DeepSeek** (`deepseek`) - DeepSeek-V3, DeepSeek-R1
+  - Base URL: `https://api.deepseek.com`
+  - Auth header: `Authorization: Bearer <key>`
+  - Models endpoint: `GET /models`
+
+- **Qwen / Alibaba** (`qwen`) - Qwen-Max, Plus, Turbo
+  - Base URL: `https://dashscope.aliyuncs.com/compatible-mode`
+  - Auth header: `Authorization: Bearer <key>`
+
+- **GLM / Zhipu AI** (`glm`) - GLM-4, GLM-4-Flash
+  - Base URL: `https://open.bigmodel.cn`
+  - Auth header: `Authorization: Bearer <key>`
+  - Models endpoint: `GET /api/paas/v4/models`
+
+- **Doubao / ByteDance** (`doubao`) - Doubao-Pro, Doubao-Lite
+  - Base URL: `https://ark.cn-beijing.volces.com`
+  - Auth header: `Authorization: Bearer <key>`
+
+- **Custom / OpenAI-compatible** (`custom`) - Any OpenAI-compatible endpoint
+  - Base URL: per-org configurable (`base_url` column on `app_provider_keys`)
+  - Auth header: `Authorization: Bearer <key>`
+
+Provider definitions live in `src/lib/server/providers.ts`.
+
+**LiteLLM Proxy (internal service):**
+- SDK/Client: Raw `fetch()` calls in `src/lib/server/gateway/proxy.ts` and `src/lib/server/litellm.ts`
+- URL: `LITELLM_API_URL` env var (default: `http://localhost:4000`)
+- Auth: `Authorization: Bearer ${LITELLM_MASTER_KEY}`
+- Endpoints used:
+  - `POST /v1/chat/completions` - Chat inference
+  - `POST /v1/embeddings` - Embeddings
+  - `GET /v1/models` - Model list
+  - `POST /organization/new` - Create LiteLLM org on user org creation
+- The SvelteKit app routes all `/v1/*` requests through LiteLLM after applying auth, budget, rate limit, caching, and smart routing middleware
 
 ## Data Storage
 
 **Databases:**
-- PostgreSQL 16
-  - Connection: `DATABASE_URL` env var (format: `postgresql://user:pass@host:port/db`)
-  - Client: `postgres` npm package (low-level driver), wrapped by Drizzle ORM
-  - Schema file: `src/lib/server/db/schema.ts`
-  - All app tables use `app_` prefix to coexist with LiteLLM's Prisma-managed tables in the same database
+- PostgreSQL 16 (primary data store)
+  - Connection: `DATABASE_URL` env var
+  - Client: `postgres` npm package + `drizzle-orm`
+  - Pool config: `DB_POOL_MAX` (default 20), `DB_IDLE_TIMEOUT` (default 30s), `DB_CONNECT_TIMEOUT` (default 10s)
+  - Connection singleton in `src/lib/server/db/index.ts`
+  - Schema: 11 application tables, all prefixed `app_` to coexist with LiteLLM's Prisma-managed tables on the same database
   - Tables: `app_users`, `app_sessions`, `app_organizations`, `app_org_members`, `app_email_verifications`, `app_password_resets`, `app_provider_keys`, `app_api_keys`, `app_usage_logs`, `app_oauth_accounts`, `app_org_invitations`, `app_budgets`
-  - Migrations: `drizzle-kit` generates SQL to `drizzle/` directory
+  - Migrations output to `drizzle/` directory
 
 **File Storage:**
-- None — no file uploads or object storage
+- None - no file upload or object storage integration
 
 **Caching:**
 - Redis 7 (optional)
-  - Connection: `REDIS_URL` env var (format: `redis://host:port`)
-  - Client: `ioredis` npm package, lazy singleton in `src/lib/server/redis.ts`
-  - Usage: Response caching for non-streaming LLM completions in `src/lib/server/gateway/cache.ts`
-  - Cache key format: `cache:{orgId}:{sha256(model+messages)}`
-  - TTL: configurable per-organization via `cacheTtlSeconds` (default 3600 seconds)
-  - Silently disabled if `REDIS_URL` not set; app functions without it
+  - Connection: `REDIS_URL` env var (absent = caching disabled, app still works)
+  - Client: `ioredis` 5.x, lazy singleton in `src/lib/server/redis.ts`
+  - Use case 1: Response cache for non-streaming LLM calls. Key format: `cache:{orgId}:{sha256(model+messages)}`, TTL configured per-org in `app_organizations.cache_ttl_seconds` (default 3600s)
+  - Use case 2: API key auth cache-aside. Key format: `auth:{keyHash}`, TTL: 60s. Avoids DB lookup on every gateway request.
 
 ## Authentication & Identity
 
-**Auth Provider:**
-- Custom (no third-party auth service like Auth0/Supabase)
-  - Password auth: Argon2id hashing via `@node-rs/argon2` (`src/lib/server/auth/password.ts`)
-  - Sessions: SHA-256 hashed tokens stored in `app_sessions` table, 30-day sliding window
-  - Session cookie: `auth_session` (httpOnly, secure, sameSite=lax)
-  - Token format: 32 random bytes, base32-encoded (unhashed in cookie, SHA-256 hash in DB)
-  - Implementation: `src/lib/server/auth/session.ts`
-  - Middleware: `src/hooks.server.ts` — validates session on every non-`/v1/` request
+**Auth Strategy:** Custom session-based auth — no third-party auth provider
 
-**API Key Auth (gateway routes):**
-- Bearer token authentication for `/v1/chat/completions`, `/v1/embeddings`, `/v1/models`
-- Keys stored as SHA-256 hashes in `app_api_keys` table; first 12 chars kept as display prefix
-- Implementation: `src/lib/server/gateway/auth.ts`
+**Password Auth:**
+- Implementation: `src/lib/server/auth/password.ts`
+- Hashing: argon2id via `@node-rs/argon2` (memoryCost=19456, timeCost=2, outputLen=32)
+
+**Session Management:**
+- Implementation: `src/lib/server/auth/session.ts`
+- Sessions stored in `app_sessions` table
+- Token: 32 random bytes, base32-encoded; stored in cookie
+- Storage: SHA-256 hash of token stored in DB (cookie holds unhashed token)
+- Duration: 30 days with 15-day sliding window renewal
+- Cookie: `auth_session`, httpOnly, sameSite=lax, secure in HTTPS context
+- Session validation runs in `src/hooks.server.ts` on every non-`/v1/*` request
+
+**OAuth Providers (optional):**
+- Library: `arctic` 3.x
+- Config: `src/lib/server/auth/oauth.ts`
+- Google OAuth 2.0
+  - Env vars: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+  - Callback: `{APP_URL}/auth/oauth/google/callback`
+  - Routes: `src/routes/auth/oauth/google/+server.ts`, `src/routes/auth/oauth/google/callback/+server.ts`
+- GitHub OAuth
+  - Env vars: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`
+  - Callback: `{APP_URL}/auth/oauth/github/callback`
+  - Routes: `src/routes/auth/oauth/github/+server.ts`, `src/routes/auth/oauth/github/callback/+server.ts`
+- OAuth accounts stored in `app_oauth_accounts` table; users can link multiple OAuth providers
+
+**API Key Auth (for gateway endpoints):**
+- Keys prefixed `sk-th-`, SHA-256 hashed for DB storage
+- Validated in `src/lib/server/gateway/auth.ts` on all `/v1/*` requests
+- Auth result cached in Redis for 60s to reduce DB load
+
+**Encryption:**
+- Provider API keys encrypted at rest using AES-256-GCM
+- Implementation: `src/lib/server/crypto.ts`
+- Key: `ENCRYPTION_KEY` env var (must be 64 hex chars = 32 bytes)
+- Format stored: `{iv_hex}:{ciphertext_hex}:{authTag_hex}`
 
 ## Monitoring & Observability
 
 **Error Tracking:**
-- None — no Sentry or similar service integrated
+- None detected - no Sentry or similar SDK
 
 **Logs:**
-- `console.warn` / `console.error` to stdout; no structured logging library
-- Usage events written to `app_usage_logs` table for in-app analytics dashboard
+- `console.warn` / `console.error` for non-critical failures (LiteLLM unavailable, SMTP missing, etc.)
+- Usage logs written to `app_usage_logs` table on every gateway request (fire-and-forget, non-blocking)
 
 ## CI/CD & Deployment
 
 **Hosting:**
-- Docker — multi-stage `Dockerfile` builds to `node:22-alpine` image, exposes port 3000
-- `docker-compose.yml` — full stack (app + litellm + postgres + redis) for local/self-hosted deployment
+- Docker Compose (`docker-compose.yml`) - recommended self-hosted deployment
+- Services: `app` (port 3000), `litellm` (port 4000), `postgres`, `redis`
+- `litellm` uses image `ghcr.io/berriai/litellm:main-latest`
 
 **CI Pipeline:**
-- None detected — no GitHub Actions, CircleCI, or similar config files in project root
+- Not detected - no `.github/workflows/` directory
 
 ## Environment Configuration
 
 **Required env vars:**
-- `DATABASE_URL` — PostgreSQL connection string
-- `ENCRYPTION_KEY` — 64 hex chars (32 bytes) for AES-256-GCM encryption of provider keys
+- `DATABASE_URL` - PostgreSQL connection string
+- `ENCRYPTION_KEY` - 64 hex chars, AES-256-GCM key for provider key encryption
+- `CRON_SECRET` - Bearer token for `/api/cron/*` endpoint auth
 
 **Optional env vars:**
-- `REDIS_URL` — Redis connection; caching disabled if absent
-- `LITELLM_API_URL` — LiteLLM proxy URL; defaults to `http://localhost:4000`
-- `LITELLM_MASTER_KEY` — LiteLLM admin key for organization management
-- `BASE_URL` — Public app URL for OAuth callbacks and email links; defaults to `http://localhost:3000`
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` — Email sending; emails disabled if not configured
-- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — Google OAuth; disabled if absent
-- `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` — GitHub OAuth; disabled if absent
-- `CRON_SECRET` — Bearer token for securing the `/api/cron/digest` endpoint
+- `REDIS_URL` - Redis connection; disabling silently turns off caching
+- `LITELLM_API_URL` - LiteLLM proxy URL (default: `http://localhost:4000`)
+- `LITELLM_MASTER_KEY` - LiteLLM admin key
+- `APP_URL` - Public URL (used in OAuth callbacks and email links; default: `http://localhost:3000`)
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` - Transactional email
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` - Google OAuth
+- `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` - GitHub OAuth
+- `CORS_ALLOWED_ORIGINS` - Comma-separated allowed origins for `/v1/*` (default: `APP_URL`)
+- `MAX_REQUEST_BODY_BYTES` - Max gateway request body size (default: 10485760 = 10MB)
+- `DB_POOL_MAX`, `DB_IDLE_TIMEOUT`, `DB_CONNECT_TIMEOUT` - DB pool tuning
 
 **Secrets location:**
-- `.env` file (gitignored); `.env.example` documents all variables
+- `.env` file at project root (not committed; `.env.example` is the template)
 
 ## Webhooks & Callbacks
 
-**Incoming:**
-- OAuth callbacks:
-  - `GET /auth/oauth/google/callback` — Google OAuth return URL
-  - `GET /auth/oauth/github/callback` — GitHub OAuth return URL
-- Cron trigger:
-  - `GET /api/cron/digest` — Admin budget digest email sender; secured with `CRON_SECRET` Bearer token; intended to be called by an external scheduler (e.g., cron job, Vercel Cron, cloud scheduler)
+**Incoming (cron endpoints):**
+- `GET /api/cron/cleanup` - Deletes expired sessions; authenticated via `Authorization: Bearer {CRON_SECRET}`
+- `GET /api/cron/digest` - Sends admin budget digest emails for all orgs; authenticated via `Authorization: Bearer {CRON_SECRET}`
+- These are designed to be called by an external scheduler (e.g., cron job, Vercel Cron, Render Cron)
 
 **Outgoing:**
-- SMTP email via `nodemailer` for: email verification, password reset, team invitations, budget warnings, admin digests
-- LiteLLM REST API calls for org management and LLM proxying
-- LLM provider REST APIs (OpenAI-compatible) via LiteLLM for model discovery on key validation
+- None - no outgoing webhooks
+
+## Email (Transactional)
+
+- Transport: SMTP via `nodemailer`; configured with `SMTP_*` env vars
+- Implementation: `src/lib/server/auth/email.ts`
+- Email types sent (templates in `src/lib/server/auth/emails/`):
+  - `verification.ts` - Email address verification on signup
+  - `password-reset.ts` - Password reset link
+  - `invitation.ts` - Org member invitation
+  - `budget-warning.ts` - Budget soft limit notification to member
+  - `admin-digest.ts` - Daily spend digest to org admins
+- Gracefully degrades: SMTP not configured = emails not sent (except auth flows throw on missing transport)
 
 ---
 
-*Integration audit: 2026-03-16*
+*Integration audit: 2026-03-17*

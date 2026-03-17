@@ -1,54 +1,79 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-03-16
+**Analysis Date:** 2026-03-17
 
 ## Test Framework
 
 **Runner:**
-- Vitest `^4.1.0`
-- Config: `vitest.config.ts` (project root)
+- Vitest 4.x
+- Config: `vitest.config.ts` at project root
 
 **Assertion Library:**
-- Vitest built-in (`expect`) — no separate assertion library
+- Vitest built-in (`expect`)
 
 **Run Commands:**
 ```bash
-npm run test          # Run all tests once (vitest run)
-npm run test:watch    # Watch mode (vitest)
-npx vitest run --coverage   # Coverage report (v8 provider via @vitest/coverage-v8)
+npm run test              # Run all tests with coverage (vitest run --coverage)
+npm run test:unit         # Run all tests without coverage
+npm run test:integration  # Integration tests only (src/lib/server/__integration__/**/*.test.ts)
+npm run test:e2e          # E2E tests only (src/__e2e__/**/*.test.ts)
+npm run test:watch        # Watch mode
+npm run test:load         # Load test script (npx tsx scripts/load-test.ts)
 ```
 
 ## Test File Organization
 
 **Location:**
-- Co-located with source files in the same directory as the module under test
-- Pattern: `src/lib/server/gateway/cache.ts` → `src/lib/server/gateway/cache.test.ts`
+- Unit tests: co-located with source files as `{module}.test.ts`
+- Integration tests: `src/lib/server/__integration__/` directory
+- E2E tests: `src/__e2e__/` directory
+- Mocks: `src/lib/server/__mocks__/` directory
 
 **Naming:**
-- File: `{module-name}.test.ts`
-- Suite: `describe('{functionName}', ...)` — one `describe` block per exported function being tested
-- Test: `it('{expected behavior in plain English}', ...)`
+- `{module}.test.ts` for unit and integration tests
+- `{scenario}.e2e.test.ts` for end-to-end tests (e.g., `user-journey.e2e.test.ts`, `budget-enforcement.e2e.test.ts`)
 
 **Structure:**
 ```
-src/lib/server/gateway/
-├── cache.ts
-├── cache.test.ts
-├── load-balancer.ts
-├── load-balancer.test.ts
-├── proxy.ts
-├── proxy.test.ts
-├── routing.ts
-└── routing.test.ts
+src/
+├── __e2e__/
+│   ├── setup.ts                          # E2E seed helpers + DB utilities
+│   ├── user-journey.e2e.test.ts
+│   └── budget-enforcement.e2e.test.ts
+├── lib/
+│   └── server/
+│       ├── __integration__/
+│       │   ├── setup.ts                  # Integration DB connection + schema push
+│       │   └── db.integration.test.ts
+│       ├── __mocks__/
+│       │   └── env.ts                    # $env/dynamic/private mock
+│       ├── api-keys.test.ts              # Co-located unit test
+│       ├── gateway/
+│       │   ├── auth.test.ts
+│       │   ├── budget.test.ts
+│       │   ├── cache.test.ts
+│       │   ├── load-balancer.test.ts
+│       │   ├── proxy.test.ts
+│       │   ├── rate-limit.test.ts
+│       │   ├── routing.test.ts
+│       │   └── usage.test.ts
+│       ├── auth/
+│       │   ├── email.test.ts
+│       │   ├── password.test.ts
+│       │   ├── session.test.ts
+│       │   └── validation.test.ts
+│       └── members.test.ts
 ```
-
-Only the `gateway/` subdirectory has tests. No tests exist for auth, budget, members, or route handlers.
 
 ## Test Structure
 
 **Suite Organization:**
 ```typescript
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// Mocks declared BEFORE module under test is imported
+vi.mock('$lib/server/db', () => ({ db: { select: vi.fn(), update: vi.fn() } }));
+
 import { functionUnderTest } from './module';
 
 describe('functionUnderTest', () => {
@@ -56,178 +81,251 @@ describe('functionUnderTest', () => {
     vi.clearAllMocks();
   });
 
-  it('does X when Y', () => {
+  it('describes the expected behavior precisely', async () => {
     // arrange
     // act
     // assert
-    expect(result).toBe(expected);
   });
 });
 ```
 
 **Patterns:**
-- `beforeEach(() => { vi.clearAllMocks(); })` — used consistently to reset mock state between tests
-- `afterEach` used only when global state must be restored (e.g., `globalThis.fetch` patching)
-- Single `expect` per test in most cases — tests are narrow and focused
-- Test descriptions are full sentences describing behavior, not function signatures
+- `beforeEach(() => vi.clearAllMocks())` is standard in every suite that uses mocks
+- `beforeAll`/`afterAll` used in integration and E2E suites for DB lifecycle
+- Nested `describe` blocks for grouping by sub-function within a module (e.g., `describe('checkRateLimit', ...)` inside `describe('rate-limit', ...)`)
 
 ## Mocking
 
-**Framework:** Vitest built-in `vi` mock utilities
+**Framework:** Vitest `vi.mock()` and `vi.fn()`
 
-**Module Mock Pattern (for `$lib` alias modules):**
+**Critical rule: mocks must be declared before the module under test is imported:**
 ```typescript
-// Declared BEFORE the import of the module under test
-vi.mock('$lib/server/redis', () => ({
-  getRedis: vi.fn(() => null)
+// CORRECT — mock first, then import
+vi.mock('$lib/server/db', () => ({
+  db: { select: vi.fn(), update: vi.fn() }
 }));
+import { authenticateApiKey } from './auth';
 
-import { getRedis } from '$lib/server/redis';
-const mockGetRedis = vi.mocked(getRedis);
+// WRONG — import before mock causes mock to be ignored
 ```
-This pattern is required because `$lib/server/redis` imports from SvelteKit's build environment. The mock must be declared before the module under test is imported.
 
-**Env Mock:**
-`$env/dynamic/private` is redirected to `src/lib/server/__mocks__/env.ts` via `vitest.config.ts` path alias:
+**Drizzle ORM chain mocking:**
+Drizzle's query builder uses method chaining. The pattern for mocking is to build a chain object where each method returns itself or the final resolved value:
 ```typescript
-// vitest.config.ts
-resolve: {
-  alias: {
-    '$env/dynamic/private': path.resolve(__dirname, 'src/lib/server/__mocks__/env.ts')
-  }
+function mockDbSelectChain(result: unknown[]) {
+  const chain = {
+    from: vi.fn().mockReturnThis(),
+    innerJoin: vi.fn().mockReturnThis(),
+    where: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockResolvedValue(result)
+  };
+  vi.mocked(db.select).mockReturnValue(chain as never);
+  return chain;
 }
 ```
-`src/lib/server/__mocks__/env.ts` exports an empty object: `export const env: Record<string, string | undefined> = {};`
 
-**Global Fetch Mock Pattern:**
+**Sequential DB calls (multiple select calls in one function):**
+When the function under test calls `db.select` multiple times, use `mockImplementation` with a counter:
+```typescript
+function mockDbSelectSequence(results: unknown[][]) {
+  let callIndex = 0;
+  vi.mocked(db.select).mockImplementation(() => {
+    const currentResult = results[callIndex] ?? [];
+    callIndex++;
+    // return chain that resolves to currentResult...
+  });
+}
+```
+See `src/lib/server/gateway/budget.test.ts` for full implementation.
+
+**Mocking `$env/dynamic/private`:**
+The vitest config aliases `$env/dynamic/private` to `src/lib/server/__mocks__/env.ts`:
+```typescript
+// src/lib/server/__mocks__/env.ts
+export const env: Record<string, string | undefined> = {};
+
+// In E2E tests — set env BEFORE importing app modules
+import { env } from '$env/dynamic/private';
+env.ENCRYPTION_KEY = TEST_ENCRYPTION_KEY;
+env.DATABASE_URL = TEST_DATABASE_URL;
+```
+
+**Mocking `globalThis.fetch`:**
+Used in proxy and E2E tests to intercept upstream HTTP calls:
 ```typescript
 const originalFetch = globalThis.fetch;
-
-beforeEach(() => { vi.restoreAllMocks(); });
-afterEach(() => { globalThis.fetch = originalFetch; });
-
-it('retries on 429', async () => {
-  const mockFetch = vi.fn().mockResolvedValue(
-    new Response('rate limited', { status: 429 })
-  );
-  globalThis.fetch = mockFetch;
-  // ...
-  expect(mockFetch).toHaveBeenCalledTimes(4);
+globalThis.fetch = vi.fn(async (url, init) => {
+  if (url.includes('/v1/chat/completions')) {
+    return new Response(JSON.stringify({ ... }), { status: 200 });
+  }
+  return originalFetch(url, init);
 });
+// Restore in afterEach/afterAll
+globalThis.fetch = originalFetch;
 ```
 
 **What to Mock:**
-- External I/O dependencies: `$lib/server/redis` (Redis client)
-- Global Web APIs that must be controlled: `globalThis.fetch`
-- SvelteKit build-time imports: `$env/dynamic/private`
+- `$lib/server/db` — DB operations in unit tests
+- `$lib/server/db/schema` — schema objects (mocked as plain objects with field name strings)
+- `$lib/server/redis` — Redis client
+- `drizzle-orm` operators (`eq`, `and`, `gte`, etc.) — return their args for testability
+- External crypto libraries (`@oslojs/encoding`, `@oslojs/crypto/sha2`) when testing session logic
+- `globalThis.fetch` for HTTP interception in proxy and E2E tests
 
 **What NOT to Mock:**
-- Pure functions with no side effects (tested directly: `estimateTokenCount`, `generateCacheKey`, `selectKeyRoundRobin`, `selectModelTier`)
-- In-memory data structures that are part of the module under test (e.g., rotation counters in load-balancer)
+- Pure functions with no side effects (routing, rate-limit math, cache key generation)
+- The `crypto` Node built-in — used directly in unit tests for `generateApiKey`
 
 ## Fixtures and Factories
 
-**Test Data:**
-- Inline literals — no fixture files or factory functions
-- Simple arrays and objects created inline per test:
-  ```typescript
-  const keys = ['key-a', 'key-b', 'key-c'];
-  const messages = [{ role: 'user', content: 'hello' }];
-  ```
-- Unique org IDs per test to avoid state leakage from in-memory counters:
-  ```typescript
-  // Use a unique org to avoid state from other tests
-  const result = selectKeyRoundRobin(keys, 'org-rr2', 'openai');
-  ```
+**Factory functions:**
+Tests use helper factory functions to create test data with sensible defaults and selective overrides:
+```typescript
+function makeBudget(overrides: Record<string, unknown> = {}) {
+  return {
+    id: 'budget-1',
+    orgId: 'org-1',
+    userId: null as string | null,
+    hardLimitCents: null as number | null,
+    softLimitCents: null as number | null,
+    resetDay: 1,
+    isOrgDefault: false,
+    createdAt: new Date(),
+    spendSnapshotCents: 0,
+    snapshotUpdatedAt: new Date('2026-03-10T00:00:00Z'),
+    ...overrides
+  };
+}
+```
+
+**E2E seed helpers:**
+E2E setup in `src/__e2e__/setup.ts` exports named seeder functions for each entity:
+```typescript
+export async function seedUserAndOrg(db) { ... }  // returns { userId, orgId }
+export async function seedProviderKey(db, orgId, encryptedKey, models) { ... }
+export async function seedApiKey(db, orgId, userId) { ... }  // returns { fullKey, keyHash, apiKeyId }
+export async function seedBudget(db, orgId, userId, hardLimitCents) { ... }  // returns budgetId
+```
+
+**Integration test helpers:**
+`src/lib/server/__integration__/setup.ts` exports:
+- `getTestDb()` — singleton Drizzle client connected to test DB
+- `pushSchema()` — runs `drizzle-kit push --force` with `TEST_DATABASE_URL`
+- `withTestTransaction(fn)` — wraps test in a transaction that always rolls back (isolation)
+- `truncateAllTables()` — TRUNCATE CASCADE on all `app_` tables
+- `cleanupTestDb()` — closes the postgres connection pool
+
+**Test database:**
+- URL: `postgresql://postgres:postgres@localhost:5433/staraigateway_test` (default)
+- Overridable via `TEST_DATABASE_URL` env var
+- Schema pushed fresh on each test suite with `drizzle-kit push --force`
 
 **Location:**
-- No dedicated fixtures directory — all data is inline in test files
+- Unit test data: inline within test files using factory functions
+- Integration/E2E fixture helpers: `src/lib/server/__integration__/setup.ts` and `src/__e2e__/setup.ts`
 
 ## Coverage
 
-**Requirements:** No enforced coverage thresholds configured
+**Requirements:**
+- Lines: 80% threshold
+- Functions: 80% threshold
+- Configured in `vitest.config.ts` under `test.coverage.thresholds`
 
-**Provider:** `@vitest/coverage-v8` (installed as devDependency)
+**Scope:**
+- Coverage measured only over `src/lib/server/**/*.ts`
+- Excludes test files, `__mocks__`, and `__integration__` directories
+
+**Coverage provider:** `@vitest/coverage-v8`
 
 **View Coverage:**
 ```bash
-npx vitest run --coverage
+npm run test              # Generates coverage report (vitest run --coverage)
 ```
 
 ## Test Types
 
 **Unit Tests:**
-- All existing tests are unit tests for pure/near-pure server utility functions
-- Scope: single function per `describe` block
-- Dependencies mocked where necessary (Redis, fetch)
-- DB layer is NOT tested — no integration tests for Drizzle ORM queries
+- Scope: individual exported functions with all I/O dependencies mocked
+- Location: co-located with source files
+- DB mock pattern: Drizzle chain mocking (`mockDbSelectChain`, `mockDbSelectSequence`)
+- Examples: `src/lib/server/gateway/auth.test.ts`, `src/lib/server/gateway/budget.test.ts`
 
 **Integration Tests:**
-- Not present in the codebase
+- Scope: Drizzle ORM + real PostgreSQL — validates schema constraints, joins, aggregations
+- Location: `src/lib/server/__integration__/`
+- Requires: local PostgreSQL on port 5433 (`staraigateway_test` database)
+- Uses `truncateAllTables()` in `afterAll` for cleanup
+- Examples: `src/lib/server/__integration__/db.integration.test.ts`
 
 **E2E Tests:**
-- Not present in the codebase
+- Scope: full gateway request pipeline — real DB + mocked upstream LLM responses via `globalThis.fetch`
+- Location: `src/__e2e__/`
+- Pattern: import SvelteKit route handler directly (`import { POST } from '../routes/v1/chat/completions/+server'`), call with a synthetic `Request` object
+- Env setup: populate `env` mock object before importing app modules
+- Examples: `src/__e2e__/user-journey.e2e.test.ts`, `src/__e2e__/budget-enforcement.e2e.test.ts`
+
+**Load Tests:**
+- Framework: `autocannon` (configured via `@types/autocannon`)
+- Script: `scripts/load-test.ts`
+- Run: `npm run test:load`
 
 ## Common Patterns
 
-**Testing stateful in-memory modules (side effects persist between tests):**
-Use unique identifiers per test to avoid cross-test contamination:
+**Fake timers for rate limit and time-dependent tests:**
 ```typescript
-it('consecutive calls rotate through keys', () => {
-  const first = selectKeyRoundRobin(keys, 'org-rr2', 'openai');
-  const second = selectKeyRoundRobin(keys, 'org-rr2', 'openai');
-  expect(first).toEqual(['key-a', 'key-b', 'key-c']);
-  expect(second).toEqual(['key-b', 'key-c', 'key-a']);
+beforeEach(() => {
+  vi.useFakeTimers();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+it('allows after window expires', () => {
+  vi.advanceTimersByTime(61_000);
+  // now check behavior
 });
 ```
 
-**Testing retry/fallback behavior:**
-Use `vi.fn().mockResolvedValueOnce(...).mockResolvedValueOnce(...)` to sequence responses:
+**Testing async error boundaries:**
 ```typescript
-const mockFetch = vi.fn()
-  .mockResolvedValueOnce(new Response('err', { status: 503 }))
-  .mockResolvedValueOnce(new Response('ok', { status: 200 }));
-globalThis.fetch = mockFetch;
-const response = await fetchWithRetry('http://test.com/api', { method: 'POST' });
+it('returns null on Redis failure', async () => {
+  const mockRedis = {
+    get: vi.fn().mockRejectedValue(new Error('conn'))
+  };
+  mockGetRedis.mockReturnValue(mockRedis as never);
+  const result = await functionUnderTest(...);
+  expect(result).toBeNull(); // graceful degradation
+});
+```
+
+**Testing database constraint violations in integration tests:**
+```typescript
+it('enforces unique constraint on organization slug', async () => {
+  const slug = `unique-slug-${randomUUID().slice(0, 8)}`;
+  await db.insert(appOrganizations).values(makeOrg({ slug }));
+
+  await expect(
+    db.insert(appOrganizations).values(makeOrg({ slug }))
+  ).rejects.toThrow();
+});
+```
+
+**Testing HTTP response shape:**
+```typescript
+const response = await POST({ request } as any);
 expect(response.status).toBe(200);
-expect(mockFetch).toHaveBeenCalledTimes(2);
+const body = await response.json();
+expect(body.choices[0].message.content).toBe('Hello from E2E test!');
 ```
 
-**Testing null/no-op behavior (best-effort operations):**
+**E2E import pattern — dynamic import for route handlers:**
 ```typescript
-it('is no-op when Redis not available', async () => {
-  mockGetRedis.mockReturnValue(null);
-  // Should not throw
-  await setCachedResponse('cache:org-1:abc', '{"data": "test"}', 3600);
-});
+// Dynamic import AFTER env is set up
+const { POST } = await import('../routes/v1/chat/completions/+server');
 ```
-
-**Testing regex/format contracts:**
-```typescript
-it('produces format "cache:{orgId}:{sha256hex}"', () => {
-  const key = generateCacheKey('org-1', 'gpt-4o', [{ role: 'user', content: 'hello' }]);
-  expect(key).toMatch(/^cache:org-1:[a-f0-9]{64}$/);
-});
-```
-
-**Testing boundary values:**
-```typescript
-it('returns expensiveModel at exactly 500 tokens', () => {
-  expect(selectModelTier(500, 'gpt-4o-mini', 'gpt-4o')).toBe('gpt-4o');
-});
-```
-
-## Coverage Gaps
-
-**Untested areas:**
-- `src/lib/server/gateway/auth.ts` — API key authentication (DB join, hash lookup)
-- `src/lib/server/gateway/budget.ts` — Budget cascade logic, period spend calculation
-- `src/lib/server/gateway/rate-limit.ts` — Sliding window RPM/TPM enforcement
-- `src/lib/server/gateway/usage.ts` — Token extraction from JSON/SSE, cost calculation
-- `src/lib/server/auth/` — All auth flows (password, session, OAuth, email)
-- `src/lib/server/api-keys.ts` — Key generation, validation, revocation
-- `src/routes/` — All SvelteKit server actions and load functions
+This ensures env vars are set before the module initializes.
 
 ---
 
-*Testing analysis: 2026-03-16*
+*Testing analysis: 2026-03-17*

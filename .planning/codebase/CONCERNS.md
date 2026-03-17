@@ -1,199 +1,238 @@
 # Codebase Concerns
 
-**Analysis Date:** 2026-03-16
-
-## Tech Debt
-
-**In-memory rate limiter does not survive restarts or scale horizontally:**
-- Issue: `src/lib/server/gateway/rate-limit.ts` stores all rate limit windows in a module-level `Map`. Every process restart (deploy, crash, scale-out) resets all counters. In a multi-replica deployment, each replica tracks its own window, so actual per-key throughput can be N×limit where N is the replica count.
-- Files: `src/lib/server/gateway/rate-limit.ts`
-- Impact: Rate limits become unenforceable under horizontal scale or after any process restart. High-volume teams can inadvertently exceed upstream provider quotas.
-- Fix approach: Move the sliding window to Redis using a sorted set or a dedicated Redis rate-limit library (e.g., `rate-limiter-flexible` with Redis backend).
-
-**In-memory round-robin counter does not persist or distribute:**
-- Issue: `src/lib/server/gateway/load-balancer.ts` uses a module-level `Map<string, number>` for rotation counters. Same failure mode as the rate limiter — resets on restart, not shared across replicas.
-- Files: `src/lib/server/gateway/load-balancer.ts`
-- Impact: Load distribution among provider keys is skewed after restarts; all replicas start from index 0 simultaneously, creating request bursts to the first key.
-- Fix approach: Store counters in Redis with INCR, or accept the limitation as low-severity if single-replica deployment is the target.
-
-**Hardcoded model pricing table will go stale:**
-- Issue: `src/lib/server/gateway/usage.ts` contains a static `MODEL_PRICING` dict of 14 models. Unknown models silently return cost=0, meaning usage accrues but is tracked as free. Pricing changes (provider price cuts, new model versions) require code deploys.
-- Files: `src/lib/server/gateway/usage.ts` (lines 14–29)
-- Impact: Budget enforcement is inaccurate for any model not in the table or whose price has changed. Org admins may see underreported costs, allowing users to exceed true spend limits.
-- Fix approach: Fetch pricing from LiteLLM's `/model/info` or `/v1/model/info` endpoint at startup and cache in Redis/DB, falling back to hardcoded values.
-
-**`models` field stored as raw JSON string in DB:**
-- Issue: `appProviderKeys.models` is a `text` column containing a JSON-stringified `string[]`. Every consumer (proxy, model listing, budget notifications) must `JSON.parse` this field individually, with individual `try/catch` blocks scattered across at least 3 files.
-- Files: `src/lib/server/gateway/proxy.ts` (lines 151–159), `src/lib/server/gateway/models.ts` (lines 34–36), `src/lib/server/db/schema.ts` (line 105)
-- Impact: If any insertion path stores malformed JSON, the key silently disappears from routing with no error. Parse failures are swallowed (`catch { return false }`), making debugging hard.
-- Fix approach: Use a proper `jsonb` column in PostgreSQL (Drizzle supports `json()`) or normalize models into a separate `app_provider_key_models` join table.
-
-**`getBudgetResetDate` is duplicated:**
-- Issue: The identical `getBudgetResetDate(resetDay)` function is defined verbatim in both `src/lib/server/gateway/budget.ts` (line 15) and `src/lib/server/budget/notifications.ts` (line 12).
-- Files: `src/lib/server/gateway/budget.ts`, `src/lib/server/budget/notifications.ts`
-- Impact: If reset logic needs to change (e.g., month-end edge cases), only one copy may get updated, causing inconsistent behavior between enforcement and reporting.
-- Fix approach: Extract to a shared `src/lib/server/budget/utils.ts` and import from both files.
-
-**No database connection pooling configuration:**
-- Issue: `src/lib/server/db/index.ts` creates a `postgres()` client with no pool size, timeout, or idle settings. The `postgres.js` library defaults to a max of 10 connections.
-- Files: `src/lib/server/db/index.ts`
-- Impact: Under concurrent load (many simultaneous API proxy requests), the pool can exhaust, causing queued requests and increased latency. No visibility into pool exhaustion.
-- Fix approach: Pass explicit pool options (`max`, `idle_timeout`, `connect_timeout`) and expose pool metrics if needed.
-
-**`CRON_SECRET` env var name mismatch in .env.example:**
-- Issue: `src/routes/api/cron/digest/+server.ts` reads `env.CRON_SECRET` but `.env.example` does not list `CRON_SECRET` as a required variable. The cron endpoint returns a 500 if the variable is missing, rather than a configuration error.
-- Files: `src/routes/api/cron/digest/+server.ts` (line 8), `.env.example`
-- Impact: Operators may unknowingly deploy without the cron secret configured, causing the digest endpoint to be permanently broken with a 500.
-- Fix approach: Add `CRON_SECRET` to `.env.example` with a generation instruction. Also change the 500 to a 503 "Service Unavailable" with a clear message.
-
-**`APP_URL` env var inconsistency:**
-- Issue: `src/lib/server/auth/oauth.ts` reads `env.APP_URL`. `src/lib/server/auth/email.ts` reads `env.APP_URL` via `getAppUrl()`. But `.env.example` defines `BASE_URL`, not `APP_URL`. The example value points to port 3000 while OAuth uses 5173 as the fallback.
-- Files: `src/lib/server/auth/oauth.ts` (line 4), `src/lib/server/auth/email.ts` (line 26), `.env.example` (line 19)
-- Impact: OAuth callbacks and email links point to the wrong URL if the operator only sets `BASE_URL`. Social login and invite emails break silently in production.
-- Fix approach: Standardize on one variable name throughout (`APP_URL` or `BASE_URL`) and update `.env.example` accordingly.
-
-## Known Bugs
-
-**Cache key normalizer collapses distinct messages:**
-- Symptoms: Two requests with different content that differ only in internal whitespace produce the same cache key and receive the same cached response.
-- Files: `src/lib/server/gateway/cache.ts` (line 9)
-- Trigger: The normalization is `.replace(/\s+/g, ' ').trim()` applied to the entire JSON-stringified messages array. `"hello  world"` and `"hello world"` in user content collapse to the same hash. This also means `"role": "user"` and `"role":  "user"` (extra space in key) deduplicate incorrectly.
-- Workaround: None at the gateway level; turn off caching or accept occasional wrong cache hits.
-
-**Streaming token count may be zero on usage-less providers:**
-- Symptoms: Streaming responses from providers that do not include `usage` in the final SSE chunk (some providers only include it if `stream_options: { include_usage: true }` is set) log 0 input/0 output tokens. Budget and rate limiting based on token counts are then inaccurate for streaming requests.
-- Files: `src/lib/server/gateway/proxy.ts` (lines 278–318), `src/lib/server/gateway/usage.ts` (lines 57–79)
-- Trigger: Any streaming request to a provider that omits `usage` in SSE.
-- Workaround: None; users must configure `stream_options` on the client side.
-
-**`secure: false` hardcoded in session cookie for login and OAuth callbacks:**
-- Symptoms: Session cookies are always set with `secure: false` in `src/routes/auth/login/+page.server.ts` (line 82) and both OAuth callback handlers. The hooks.server.ts sets `secure` conditionally based on hostname but the initial cookie creation never does.
-- Files: `src/routes/auth/login/+page.server.ts` (line 82), `src/routes/auth/oauth/google/callback/+server.ts` (line 87), `src/routes/auth/oauth/github/callback/+server.ts`
-- Trigger: Deployed behind HTTPS; the cookie is transmitted without the Secure flag, making it accessible over plain HTTP.
-- Workaround: Operator must ensure the reverse proxy enforces HTTPS, but the cookie itself is not protected at the application layer.
-
-**Budget `resolveMemberBudgets` issues N+1 queries:**
-- Symptoms: Digest emails and soft-limit notifications become slow for large orgs.
-- Files: `src/lib/server/budget/notifications.ts` (lines 59–103)
-- Trigger: For each member in an org, one separate `SELECT ... FROM app_usage_logs` query is issued. An org with 50 members causes 50 sequential DB round trips on every soft-limit hit or digest send.
-- Workaround: None; acceptable for small teams but degrades linearly with org size.
-
-## Security Considerations
-
-**Wildcard CORS on gateway endpoints:**
-- Risk: All three `/v1/*` endpoints (`/v1/chat/completions`, `/v1/embeddings`, `/v1/models`) respond with `Access-Control-Allow-Origin: *`. This means any webpage on the internet can make authenticated API requests in a user's browser if they have the key available in JavaScript context (e.g., stored in localStorage).
-- Files: `src/routes/v1/chat/completions/+server.ts` (lines 7–11), `src/routes/v1/embeddings/+server.ts` (lines 7–11), `src/routes/v1/models/+server.ts` (lines 7–11)
-- Current mitigation: Bearer token authentication still applies; attackers need the actual `sk-th-*` key.
-- Recommendations: Restrict CORS to trusted origins (the app's own domain, registered IDE origins) via an allowlist configured through an env var. Wildcard CORS is only safe if API keys are never exposed to browser JavaScript.
-
-**OAuth callback silently links accounts by email without verification:**
-- Risk: If a user registers with email/password for `alice@corp.com`, then an attacker creates a Google OAuth account with `alice@corp.com`, the OAuth callback at `src/routes/auth/oauth/google/callback/+server.ts` (lines 43–58) silently links the attacker's Google account to Alice's existing account and grants full access.
-- Files: `src/routes/auth/oauth/google/callback/+server.ts` (lines 43–58), `src/routes/auth/oauth/github/callback/+server.ts`
-- Current mitigation: None. The check only verifies the Google `sub` is not already linked; if the email matches an existing user, the OAuth account is linked unconditionally.
-- Recommendations: Before linking an OAuth identity to an existing email/password account, require the user to authenticate with their existing password or explicitly confirm the link via an email challenge.
-
-**Invitation token is `crypto.randomUUID()`:**
-- Risk: UUIDs (128-bit, version 4) are cryptographically random but only have 122 bits of entropy. The token is also used as the invitation record's primary key (`id`) in `src/lib/server/members.ts` (line 54–55), causing the same value to be used for both purposes.
-- Files: `src/lib/server/members.ts` (lines 54–56)
-- Current mitigation: 122-bit entropy is computationally sufficient for brute-force resistance. No immediate risk.
-- Recommendations: Use separate values for the invitation `id` and the shareable `token`. Generate the token with `randomBytes(32).toString('hex')` for clarity and to avoid semantic confusion between record IDs and secrets.
-
-**`LITELLM_MASTER_KEY` in `.env.example`:**
-- Risk: `.env.example` contains `LITELLM_MASTER_KEY=sk-master-key` as a placeholder. Operators who copy this file without changing the value will deploy with the well-known default master key, allowing anyone who reads the example to authenticate to LiteLLM directly.
-- Files: `.env.example` (line 16)
-- Current mitigation: The app itself does not use `LITELLM_MASTER_KEY` in any server code (it's for LiteLLM configuration), but the risk exists in deployments.
-- Recommendations: Change the placeholder to an empty value and add a generation note identical to `ENCRYPTION_KEY`.
-
-**No request body size limit on `/v1/*` endpoints:**
-- Risk: A client can submit an arbitrarily large JSON body to `/v1/chat/completions`. The entire body is read with `request.json()` into memory in `proxy.ts` (line 83) before any validation.
-- Files: `src/lib/server/gateway/proxy.ts` (line 83)
-- Current mitigation: Underlying runtime (SvelteKit + Node) has some default limits, but they are not explicitly configured.
-- Recommendations: Add an explicit body size check before parsing, or configure SvelteKit's `bodySize` limit.
-
-## Performance Bottlenecks
-
-**Per-request DB round-trip for auth on every API call:**
-- Problem: Every request to `/v1/chat/completions` or `/v1/embeddings` calls `authenticateApiKey()` which issues a DB join query (appApiKeys + appOrganizations), then a fire-and-forget `UPDATE lastUsedAt`, and then `checkBudget()` which issues two more queries (member role lookup + budget fetch + usage aggregate). That is 4–5 DB queries synchronously in the hot path before the request reaches LiteLLM.
-- Files: `src/lib/server/gateway/auth.ts`, `src/lib/server/gateway/budget.ts`
-- Cause: No caching of auth or budget results between requests.
-- Improvement path: Cache the `GatewayAuth` result in Redis keyed by `keyHash` with a short TTL (30–60 seconds). Cache the budget result per user with a very short TTL (5–10 seconds) since precision is not critical pre-request.
-
-**Budget aggregate query scans all usage logs since reset date:**
-- Problem: `checkBudget()` runs `SUM(cost) FROM app_usage_logs WHERE org_id=? AND user_id=? AND created_at >= resetDate` on every request. As the table grows (high-volume teams generate thousands of rows/day), this scan becomes expensive even with the composite index.
-- Files: `src/lib/server/gateway/budget.ts` (lines 78–92)
-- Cause: No materialized running total; each check recomputes from raw logs.
-- Improvement path: Maintain a `app_budget_snapshots` table with a daily or hourly rollup, and only sum from the snapshot + recent unbucketed rows. Or use a Redis counter incremented on each logged cost value, reset on the budget reset day.
-
-**Nodemailer creates a new transporter on every email send:**
-- Problem: `src/lib/server/auth/email.ts` calls `getTransport()` (which calls `nodemailer.createTransport(...)`) inside every `send*Email` function. This creates a new TCP connection pool per email.
-- Files: `src/lib/server/auth/email.ts` (lines 9–18)
-- Cause: The transporter is not cached as a module-level singleton.
-- Improvement path: Create the transporter once at module load and export it, or use a lazy singleton pattern matching `getRedis()`.
-
-## Fragile Areas
-
-**`proxyToLiteLLM` function is 489 lines and does too much:**
-- Files: `src/lib/server/gateway/proxy.ts`
-- Why fragile: The function handles smart routing, cache lookup, key selection, retry loop, streaming passthrough, non-streaming response, usage logging, and cache store — all in a single function body. Streaming and non-streaming paths share variable scope, making it easy to introduce regressions when modifying one path. The streaming path uses a closure over `recentLines` with a bounded buffer of 10 lines, which may miss the `usage` chunk in long responses from providers that emit it earlier in the stream.
-- Safe modification: Any change to the streaming path must be accompanied by end-to-end manual testing with a real streaming provider. Consider extracting `handleStreamingResponse()` and `handleNonStreamingResponse()` as separate functions.
-- Test coverage: Unit tests only cover `fetchWithRetry` and `RETRYABLE_STATUSES`. The full proxy flow, including smart routing fallback, streaming usage extraction, and cache interaction, has no tests.
-
-**Budget enforcement is pre-request only (no mid-stream cutoff):**
-- Files: `src/routes/v1/chat/completions/+server.ts`, `src/lib/server/gateway/budget.ts`
-- Why fragile: Budget is checked before the request starts. A user exactly at their limit can start a very long completion (e.g., 100k token generation) that runs to completion, potentially exceeding the budget by the full cost of that request. The post-request cost is logged only after the response is finished.
-- Safe modification: Accept this as a design limitation for now. Documenting it prevents surprising behavior if admins notice overage.
-- Test coverage: No test exercises the budget-exceeded path in the proxy flow.
-
-**OAuth state verification uses cookies that may not be set under some proxy configs:**
-- Files: `src/routes/auth/oauth/google/+server.ts`, `src/routes/auth/oauth/google/callback/+server.ts`, `src/routes/auth/oauth/github/+server.ts`, `src/routes/auth/oauth/github/callback/+server.ts`
-- Why fragile: The OAuth PKCE state and code verifier are stored in short-lived cookies. If the app is deployed behind a reverse proxy that strips cookies, or if the user's browser blocks third-party cookies in an embedded context, the callback state verification fails silently with a redirect to `/auth/login?error=oauth_failed`.
-- Safe modification: Ensure the reverse proxy passes `Cookie` headers and that the app is accessed on the same domain as the callback URL.
-- Test coverage: None.
-
-**Invitation acceptance has no transaction:**
-- Files: `src/lib/server/members.ts` (lines 94–148)
-- Why fragile: `acceptInvitation` performs two separate DB writes: `INSERT INTO app_org_members` then `UPDATE app_org_invitations SET acceptedAt`. If the process crashes between these two statements, the member row exists but the invitation remains "pending", allowing the invitation to be accepted again by the same or a different user.
-- Safe modification: Wrap both writes in a Drizzle transaction.
-- Test coverage: None.
-
-## Scaling Limits
-
-**`appUsageLogs` table grows unboundedly:**
-- Current capacity: No partition, archival, or TTL strategy. Every API call (success or error) appends one row.
-- Limit: At 1,000 requests/day across a 50-person team, the table grows by ~365,000 rows/year. Query performance degrades for budget aggregate and usage dashboard queries as the table size grows into millions of rows.
-- Scaling path: Add a monthly partition key on `created_at`, or implement a background job that rolls up rows older than 90 days into an `app_usage_summaries` table and deletes the raw logs.
-
-**`app_sessions` table is never pruned:**
-- Current capacity: Sessions expire after 30 days but are only deleted on access (when `validateSession` detects expiry). Sessions for users who never return accumulate indefinitely.
-- Limit: Not critical at small scale, but causes table bloat over time.
-- Scaling path: Add a cron job or DB scheduled task to `DELETE FROM app_sessions WHERE expires_at < NOW()`.
-
-## Test Coverage Gaps
-
-**Gateway proxy end-to-end flow:**
-- What's not tested: Smart routing model substitution, cache hit/miss paths, multi-key fallback on retryable errors, streaming usage extraction, budget-exceeded path, and the full auth → budget → proxy chain.
-- Files: `src/lib/server/gateway/proxy.ts`, `src/routes/v1/chat/completions/+server.ts`
-- Risk: Regressions in the core revenue-generating path go undetected until production.
-- Priority: High
-
-**Auth flows (signup, login, OAuth, password reset):**
-- What's not tested: No tests exist for any route in `src/routes/auth/`. Registration uniqueness enforcement, email verification token expiry, password reset token replay, and OAuth account linking are all untested.
-- Files: `src/routes/auth/**`
-- Risk: Security regressions in authentication are silent.
-- Priority: High
-
-**Budget enforcement logic:**
-- What's not tested: `checkBudget()` cascade resolution (individual → role → org default), soft limit notification trigger, and hard limit enforcement result in the request path.
-- Files: `src/lib/server/gateway/budget.ts`, `src/lib/server/budget/notifications.ts`
-- Risk: Budget overrides and cascade rules may be silently broken by schema or query changes.
-- Priority: High
-
-**Member management:**
-- What's not tested: `inviteMember`, `acceptInvitation`, `removeMember`, `changeRole` in `src/lib/server/members.ts` have no tests. Edge cases like duplicate invitation, expired token, and removing-already-removed member are untested.
-- Files: `src/lib/server/members.ts`
-- Risk: Multi-step flows with multiple DB writes are prone to partial-failure bugs.
-- Priority: Medium
+**Analysis Date:** 2026-03-17
 
 ---
 
-*Concerns audit: 2026-03-16*
+## Tech Debt
+
+**In-memory rate limiter not horizontally scalable:**
+- Issue: `windows` Map and `rotationCounters` Map in `rate-limit.ts` and `load-balancer.ts` are process-local. Each Node.js instance has its own state. Running 2+ app replicas means a user's 100 RPM limit becomes effectively N×100 RPM.
+- Files: `src/lib/server/gateway/rate-limit.ts` (line 22), `src/lib/server/gateway/load-balancer.ts` (line 7)
+- Impact: Rate limiting and round-robin load balancing silently break under horizontal scaling. Users can exceed their limits simply by having requests hit different replicas.
+- Fix approach: Move sliding window counters to Redis (sorted sets + ZADD/ZCOUNT/EXPIRE pattern). Round-robin state also needs Redis if multi-replica operation is required.
+
+**MODEL_PRICING hardcoded lookup table:**
+- Issue: `MODEL_PRICING` in `usage.ts` is a static map of 14 models with hardcoded dollar rates. Unknown models silently return `$0` cost, meaning usage is logged with zero cost and budget enforcement never triggers for those models.
+- Files: `src/lib/server/gateway/usage.ts` (lines 15–30, line 34)
+- Impact: Any new model (e.g., a new Claude or GPT release) will have all its usage recorded as $0 cost, budget limits will never enforce, and spend totals will be wrong until the table is manually updated.
+- Fix approach: Fetch pricing from LiteLLM's `/model_prices_and_context_window` endpoint at startup (or periodically), fall back to static table. Alternatively, parse cost from LiteLLM's response body which includes a `cost` field on proxied responses.
+
+**`content-length` body size check is bypassable:**
+- Issue: The gateway in `chat/completions/+server.ts` and `embeddings/+server.ts` only checks `Content-Length` header for body size enforcement. A client can omit `Content-Length` entirely and stream an arbitrarily large body — the check is silently skipped.
+- Files: `src/routes/v1/chat/completions/+server.ts` (lines 13–25), `src/routes/v1/embeddings/+server.ts` (lines 13–25)
+- Impact: Malicious or buggy clients can send multi-GB bodies, potentially exhausting memory.
+- Fix approach: Either enforce via Nginx `client_max_body_size` (already mentioned in PRD), or wrap the `request.json()` call with a size check against the actual body bytes, not just the header.
+
+**`updatedAt` on users not auto-refreshed:**
+- Issue: `app_users.updated_at` exists in schema (`schema.ts` line 27) but no application code ever calls `.set({ updatedAt: new Date() })` when user fields change (e.g., name update in settings).
+- Files: `src/lib/server/db/schema.ts` (line 27), no corresponding update calls in `src/routes/org/[slug]/settings/`
+- Impact: Audit column is misleading — `updated_at` always shows the creation time for users.
+- Fix approach: Add `updatedAt: new Date()` to any `db.update(appUsers)` calls when implemented.
+
+**Budget reset date ignores months with < resetDay days:**
+- Issue: `getBudgetResetDate` creates dates like `new Date(year, month, 31)` for February. JavaScript silently normalizes this to March 3rd (or 2nd in leap years), causing the reset to trigger in the wrong month.
+- Files: `src/lib/server/budget/utils.ts` (lines 5–13)
+- Impact: Users with `resetDay > 28` in short months will have their budget period start on an incorrect date.
+- Fix approach: Clamp `resetDay` to the actual last day of the month: `Math.min(resetDay, new Date(year, month + 1, 0).getDate())`.
+
+**CORS origins cached forever in process memory:**
+- Issue: `getAllowedOrigins()` in `cors.ts` caches the `CORS_ALLOWED_ORIGINS` env var into a module-level `cachedOrigins` Set on first call and never invalidates it. Changing the env var requires a full process restart.
+- Files: `src/lib/server/gateway/cors.ts` (lines 3–13)
+- Impact: Minor operational friction, not a security risk. Expected behavior for a Node.js process, but worth documenting.
+
+---
+
+## Known Bugs
+
+**Budget snapshot race condition under concurrent requests:**
+- Symptoms: Under high concurrency, two simultaneous requests can both pass the budget check (`checkBudget` returns `allowed: true`), then both fire `updateSpendSnapshot` independently. The snapshot increments twice but the hard limit is checked before either increment completes.
+- Files: `src/lib/server/gateway/budget.ts`, `src/lib/server/gateway/usage.ts` (line 119–127)
+- Trigger: Multiple concurrent API requests from the same user near their budget limit
+- Workaround: The stale-SUM fallback path corrects the snapshot on the next request, so brief overages are self-healing. For strict enforcement, use a Redis atomic counter with `INCR` + compare-and-swap.
+
+**E2E tests use `as any` for RequestHandler invocation:**
+- Symptoms: Both e2e test files invoke `POST({ request } as any)` which bypasses the SvelteKit `RequestHandler` type. If the handler signature changes (e.g., adding `locals`, `params`, etc.), tests silently pass with an incomplete event object.
+- Files: `src/__ e2e__/budget-enforcement.e2e.test.ts` (lines 130, 159), `src/__e2e__/user-journey.e2e.test.ts` (lines 104, 128)
+- Trigger: Any future handler that accesses `event.locals` or `event.params` will throw a runtime error in tests without a TypeScript compile-time error.
+- Workaround: Build a minimal `RequestEvent`-shaped object rather than casting to `any`.
+
+**`inviteMember` does not check expired existing invitations:**
+- Symptoms: If a previous invitation to the same email expired, `inviteMember` throws "This email has already been invited" instead of allowing a new invitation. The check looks for `isNull(acceptedAt)` but does not exclude expired invites.
+- Files: `src/lib/server/members.ts` (lines 39–52)
+- Trigger: Re-inviting an email address after their 7-day invite token expires
+- Workaround: Admin must use `revokeInvitation` first to delete the stale invite before re-inviting.
+
+---
+
+## Security Considerations
+
+**LiteLLM image tag not pinned (`main-latest`):**
+- Risk: `docker-compose.yml` uses `ghcr.io/berriai/litellm:main-latest` — a rolling tag. A breaking change or compromised image pushed to `main-latest` would be pulled on next `docker compose pull`.
+- Files: `docker-compose.yml` (line 22)
+- Current mitigation: None
+- Recommendations: Pin to a specific release tag (e.g., `ghcr.io/berriai/litellm:v1.40.0`) and update intentionally.
+
+**CRON_SECRET compared with timing-unsafe string equality:**
+- Risk: `token !== env.CRON_SECRET` in cron endpoints uses JavaScript string `!==` which is not constant-time. Theoretically exploitable via timing side-channel to brute-force the secret.
+- Files: `src/routes/api/cron/cleanup/+server.ts` (line 18), `src/routes/api/cron/digest/+server.ts` (line 18)
+- Current mitigation: The secret is long (openssl rand -hex 32 = 64 chars), making practical timing attacks extremely difficult.
+- Recommendations: Use `crypto.timingSafeEqual(Buffer.from(token), Buffer.from(env.CRON_SECRET))` for defense-in-depth.
+
+**Invitation token is a raw hex string in URL:**
+- Risk: Invitation token (`randomBytes(32).toString('hex')`) is included in email links and stored unhashed in `app_org_invitations.token`. If the database is read by an attacker, all pending invitation tokens are immediately usable.
+- Files: `src/lib/server/members.ts` (line 55), `src/lib/server/db/schema.ts` (line 205)
+- Current mitigation: Tokens are random (256-bit), expiry is 7 days.
+- Recommendations: Store only the SHA-256 hash of the token in the database, same pattern as session tokens and API keys.
+
+**Password reset token also stored unhashed:**
+- Risk: Same as invitation token — `app_password_resets.id` appears to be the token itself stored directly, unlike session tokens which are hashed.
+- Files: `src/lib/server/db/schema.ts` (lines 86–93), `src/routes/auth/reset-password/+page.server.ts`
+- Current mitigation: Tokens are time-limited; `expiresAt` enforced on use.
+- Recommendations: Hash reset tokens before storage.
+
+**GitHub OAuth is declared in `oauth.ts` but no GitHub callback route exists:**
+- Risk: The `github` OAuth client is initialized when `GITHUB_CLIENT_ID`/`GITHUB_CLIENT_SECRET` are set, but only a Google callback exists at `src/routes/auth/oauth/google/callback/+server.ts`. Enabling GitHub OAuth via env vars would silently fail with no useful error.
+- Files: `src/lib/server/auth/oauth.ts` (lines 11–14), missing `src/routes/auth/oauth/github/callback/+server.ts`
+- Current mitigation: GitHub OAuth silently does nothing if not wired up.
+- Recommendations: Either add the GitHub callback route or remove the `github` export from `oauth.ts`.
+
+**Redis connection error silently suppressed:**
+- Risk: `redis.on('error', () => {})` in `redis.ts` swallows all Redis errors with an empty handler. Redis connection failures (auth errors, wrong URL, network issues) produce no log output and no alerting.
+- Files: `src/lib/server/redis.ts` (line 25)
+- Current mitigation: App degrades gracefully (no caching, DB fallback for auth cache), but operators have no visibility into Redis health.
+- Recommendations: `redis.on('error', (err) => console.error('[Redis]', err.message))` at minimum.
+
+---
+
+## Performance Bottlenecks
+
+**`checkBudget` executes 2–3 DB queries on every gateway request:**
+- Problem: Each `/v1/chat/completions` and `/v1/embeddings` request runs: (1) a member role lookup, (2) a budget candidates query, and (3) optionally a full `SUM()` aggregation against `app_usage_logs` when the snapshot is stale. At 100 RPS this is 200–300+ DB queries/second on the budget tables alone.
+- Files: `src/lib/server/gateway/budget.ts` (lines 18–98)
+- Cause: No per-request budget result caching. The auth result is cached in Redis (60s TTL) but budget is always re-queried.
+- Improvement path: Cache the `BudgetCheckResult` in Redis keyed by `userId:orgId` with a short TTL (5–10 seconds). Accept brief budget overruns in exchange for dramatically reduced DB load.
+
+**`proxyToLiteLLM` queries ALL active provider keys on every request:**
+- Problem: The proxy fetches all active provider keys for the org on every request (`src/lib/server/gateway/proxy.ts` lines 141–150), then filters by model in-process. For an org with many keys, this is unnecessary data transfer.
+- Files: `src/lib/server/gateway/proxy.ts` (lines 141–150)
+- Cause: No model-scoped query; retrieves all active keys then filters.
+- Improvement path: Add a `model` filter to the DB query using `jsonb` containment (`@>`) or a separate junction table for key-to-model mapping.
+
+**`resolveMemberBudgets` in notifications uses `earliestResetDate` across all members:**
+- Problem: The batch spend query in `notifications.ts` uses the earliest reset date across all budgets, which may pull in more historical rows than needed for members with more recent reset dates. Not critical at small scale, but inflates the `SUM()` scan as the usage table grows.
+- Files: `src/lib/server/budget/notifications.ts` (lines 49–70)
+- Cause: Optimization for single query vs per-member queries, but uses a conservative earliest date.
+- Improvement path: For large orgs, consider per-reset-date grouping or a materialized spend view.
+
+**`app_usage_logs` will grow unbounded:**
+- Problem: There is no partitioning, archival, or TTL on `app_usage_logs`. The cleanup cron (`/api/cron/cleanup`) only deletes expired sessions, not old usage records.
+- Files: `src/lib/server/db/schema.ts` (lines 147–177), `src/routes/api/cron/cleanup/+server.ts`
+- Cause: No data retention policy implemented.
+- Improvement path: Add a cron job to delete/archive usage logs older than N months. Consider PostgreSQL table partitioning by `created_at` for query performance at scale.
+
+---
+
+## Fragile Areas
+
+**`extractUsageFromSSEText` relies on only last 10 SSE lines:**
+- Files: `src/lib/server/gateway/proxy.ts` (lines 263–329), `src/lib/server/gateway/usage.ts` (lines 58–80)
+- Why fragile: The streaming proxy buffers only the most recent 10 lines (`MAX_RECENT = 10`) to extract usage data from SSE. LiteLLM typically puts usage in the last chunk, but if a provider's final chunk is followed by extra blank lines or comments, the usage chunk could shift outside the window.
+- Safe modification: Increase `MAX_RECENT` to 20 or buffer only `data:` prefixed lines. Alternatively, accumulate usage tokens from incremental delta chunks if the provider streams them per-chunk.
+
+**`db` singleton via Proxy swallows initialization errors silently:**
+- Files: `src/lib/server/db/index.ts` (lines 5–27)
+- Why fragile: `DATABASE_URL` is read from `process.env` (not `$env/dynamic/private`), so it bypasses SvelteKit's env validation. The `getDb()` function throws if the var is missing, but only at first access — this could manifest as a runtime crash on the first request rather than at startup.
+- Safe modification: Eagerly initialize the DB client at module load time, or add a health check endpoint that validates DB connectivity before accepting traffic.
+
+**`getBudgetResetDate` is called with `budget.resetDay` which can be 1–28 but the `resetDay` DB column default is 1:**
+- Files: `src/lib/server/budget/utils.ts`, `src/lib/server/db/schema.ts` (line 230)
+- Why fragile: If a future migration or direct DB operation sets `resetDay = 0` or `resetDay = 29+`, the date calculation produces unexpected months. No validation exists at the read layer; validation only exists in the write handler.
+- Safe modification: Add a guard in `getBudgetResetDate`: `const day = Math.max(1, Math.min(28, resetDay))`.
+
+**`validateProviderKey` assumes Google returns `{ models: [...] }` but Google AI Studio changed its `/v1beta/models` response format:**
+- Files: `src/lib/server/provider-keys.ts` (lines 151–157)
+- Why fragile: The model name parser expects `m.name ?? m.id` for Google responses. Google returns names like `models/gemini-1.5-pro` with the `models/` prefix, which becomes the model identifier stored in `appProviderKeys.models`. If the proxy later compares `effectiveModel` to these stored names, the prefix mismatch will cause "No provider configured for model" errors.
+- Safe modification: Strip the `models/` prefix when parsing Google model names: `m.name?.replace(/^models\//, '') ?? m.id`.
+
+---
+
+## Scaling Limits
+
+**Single-process Node.js, no clustering:**
+- Current capacity: 1 CPU core utilized (SvelteKit adapter-node runs single process by default)
+- Limit: CPU-bound latency spikes at high concurrency; estimated ~500–1000 RPS before noticeable queuing
+- Scaling path: Use `NODE_CLUSTER_WORKERS=N` env var with adapter-node, or deploy behind a load balancer with multiple container replicas. Note: in-memory rate limiter must be migrated to Redis first.
+
+**PostgreSQL connection pool capped at 20:**
+- Current capacity: `max: 20` connections (configurable via `DB_POOL_MAX`)
+- Limit: At 20 concurrent DB-heavy requests (auth + budget + usage log each needing a connection), pool saturation can cause request queuing
+- Scaling path: Increase `DB_POOL_MAX` or deploy PgBouncer as a connection pooler in transaction mode.
+
+---
+
+## Dependencies at Risk
+
+**`arctic` OAuth library (v3.x) has small community:**
+- Risk: `arctic` is a niche OAuth client for the Lucia auth ecosystem. If maintainer abandons the project, it may not receive updates for new OAuth provider changes or security advisories.
+- Impact: Google/GitHub OAuth sign-in would break if provider APIs change without a library update.
+- Migration plan: The OAuth flow (`oauth.ts`) is minimal (~15 lines); migrating to `openid-client` or `@auth/core` providers is feasible.
+
+**`@node-rs/argon2` requires native bindings:**
+- Risk: `@node-rs/argon2` is a Rust-compiled native addon distributed as pre-built binaries per platform. If a build target is not prebuilt (e.g., unusual Linux distro or architecture), the install fails silently or falls back to a non-native implementation.
+- Impact: Deployment fails on unsupported platforms; Docker base image must match a supported ABI.
+- Migration plan: Pure-JS `argon2` package exists as fallback but is slower. The Docker image (`node:20-alpine`) is a supported target.
+
+---
+
+## Missing Critical Features
+
+**No request body size enforcement for actual stream (only Content-Length header):**
+- Problem: The `MAX_REQUEST_BODY_BYTES` check relies on the `Content-Length` header which is optional in HTTP/1.1 and always absent for chunked transfer encoding.
+- Blocks: Reliable protection against oversized request bodies without Nginx `client_max_body_size` in front.
+
+**No usage log pagination — dashboard loads all rows:**
+- Problem: Usage page server loads (`src/routes/org/[slug]/usage/+page.server.ts`) may load unbounded rows from `app_usage_logs` as usage grows.
+- Blocks: Dashboard performance degrades linearly with usage table size. Pagination or time-bounded queries are not implemented.
+
+**No GitHub OAuth callback route:**
+- Problem: `oauth.ts` exports a `github` client but `src/routes/auth/oauth/github/` does not exist.
+- Blocks: GitHub OAuth cannot be enabled even with credentials set.
+
+---
+
+## Test Coverage Gaps
+
+**No tests for `proxyToLiteLLM` end-to-end happy path:**
+- What's not tested: The full `proxyToLiteLLM` flow (model selection → cache check → key selection → LiteLLM request → usage logging → cache set) has no unit or integration test. Only `fetchWithRetry` is tested in isolation.
+- Files: `src/lib/server/gateway/proxy.ts`, `src/lib/server/gateway/proxy.test.ts`
+- Risk: Silent regressions in the critical request path
+- Priority: High
+
+**No tests for `validateProviderKey`:**
+- What's not tested: Provider key validation (model discovery, auth header variants, Google model name parsing) is entirely untested.
+- Files: `src/lib/server/provider-keys.ts` (lines 104–164)
+- Risk: Model name format bugs (e.g., Google's `models/` prefix) go undetected
+- Priority: Medium
+
+**No tests for `members.ts` invite/acceptance flows:**
+- What's not tested: `inviteMember` with expired invite re-invite edge case, `acceptInvitation` transaction rollback on error
+- Files: `src/lib/server/members.ts`
+- Risk: Invitation state corruption under failure conditions
+- Priority: Medium
+
+**No tests for budget API endpoint input validation:**
+- What's not tested: `POST /org/[slug]/usage/budget` input validation (negative limits, float precision, missing required fields) has no test coverage.
+- Files: `src/routes/org/[slug]/usage/budget/+server.ts`
+- Risk: Invalid budget values stored in DB causing downstream calculation errors
+- Priority: Medium
+
+**`src/lib/server/litellm.ts` entirely untested:**
+- What's not tested: `createLiteLLMOrganization` fetch call, error handling, response parsing
+- Files: `src/lib/server/litellm.ts`
+- Risk: LiteLLM org creation silently broken on API changes
+- Priority: Low (non-critical path, graceful no-op on failure)
+
+---
+
+*Concerns audit: 2026-03-17*

@@ -1,21 +1,19 @@
 # Technology Stack
 
-**Analysis Date:** 2026-03-16
+**Analysis Date:** 2026-03-17
 
 ## Languages
 
 **Primary:**
-- TypeScript 5.x - All server logic, route handlers, library code in `src/`
-- Svelte 5.x - UI components in `src/lib/components/` and route pages in `src/routes/`
+- TypeScript 5.x - All source code (`src/**/*.ts`, `src/**/*.svelte`)
 
 **Secondary:**
-- CSS (Tailwind v4) - Styling via `src/app.css` and component-level classes
-- SQL - Migration files in `src/lib/server/db/migrations/`
+- SQL - Drizzle migration files (`src/lib/server/db/migrations/*.sql`)
 
 ## Runtime
 
 **Environment:**
-- Node.js 22 (alpine) - specified in `Dockerfile` base image
+- Node.js 22 (Alpine) - confirmed in `Dockerfile`: `FROM node:22-alpine`
 
 **Package Manager:**
 - npm
@@ -24,79 +22,66 @@
 ## Frameworks
 
 **Core:**
-- SvelteKit 2.x (`@sveltejs/kit ^2.16.0`) - Full-stack web framework; handles routing, SSR, server actions, and API endpoints
-- Adapter: `@sveltejs/adapter-node ^5.2.12` - Produces a standalone Node.js server via `npm run build`
+- SvelteKit 2.16+ (`@sveltejs/kit`) - Full-stack web framework; handles routing, SSR, server actions, API endpoints
+- Svelte 5.0+ - UI component framework with runes syntax
 
-**UI:**
-- Svelte 5.x - Reactive component framework
-- Tailwind CSS 4.x (`tailwindcss ^4.0.0`) - Utility-first CSS, integrated via `@tailwindcss/vite` Vite plugin
-- `@tailwindcss/typography ^0.5.16` - Prose styling for docs pages
-- Chart.js 4.x (`chart.js ^4.5.1`) - Client-side usage charts (cost trends, breakdown bars) in `src/lib/components/usage/`
-
-**Database ORM:**
-- Drizzle ORM 0.38.x (`drizzle-orm ^0.38.0`) - Type-safe SQL query builder targeting PostgreSQL
-- Drizzle Kit 0.30.x (`drizzle-kit ^0.30.0`) - Schema migration tool; config at `drizzle.config.ts`, schema at `src/lib/server/db/schema.ts`, output migrations to `drizzle/`
-
-**Testing:**
-- Vitest 4.x (`vitest ^4.1.0`) - Unit/integration test runner; config at `vitest.config.ts`
-- `@vitest/coverage-v8 ^4.1.0` - V8-based coverage reporting
+**Adapter:**
+- `@sveltejs/adapter-node` 5.x - Produces a standalone Node.js server (`build/` dir); runs as `node build`
 
 **Build/Dev:**
-- Vite 6.x (`vite ^6.0.0`) - Dev server and production bundler; config at `vite.config.ts`
+- Vite 6.x - Build tool and dev server
+- `@sveltejs/vite-plugin-svelte` 5.x - Svelte compilation in Vite
+- `@tailwindcss/vite` 4.x - Tailwind CSS integration
+
+**Testing:**
+- Vitest 4.x - Unit and integration test runner; config in `vitest.config.ts`
+- `@vitest/coverage-v8` 4.x - Code coverage via V8
 
 ## Key Dependencies
 
-**Authentication:**
-- `@node-rs/argon2 ^2.0.2` - Native Argon2id password hashing (used in `src/lib/server/auth/password.ts`)
-- `@oslojs/crypto ^1.0.1` - SHA-256 for session token hashing (used in `src/lib/server/auth/session.ts`)
-- `@oslojs/encoding ^1.1.0` - Base32 encoding for session tokens
-- `arctic ^3.7.0` - OAuth 2.0 client library for Google and GitHub (used in `src/lib/server/auth/oauth.ts`)
+**Critical:**
+- `drizzle-orm` 0.38 - TypeScript-first ORM for PostgreSQL; schema defined in `src/lib/server/db/schema.ts`
+- `postgres` 3.4 - Low-level PostgreSQL driver used by drizzle; connection pool in `src/lib/server/db/index.ts`
+- `ioredis` 5.10 - Redis client for response caching and auth cache-aside; lazy singleton in `src/lib/server/redis.ts`
+- `arctic` 3.7 - OAuth 2.0 client library for Google and GitHub flows; used in `src/lib/server/auth/oauth.ts`
+- `@node-rs/argon2` 2.x - Native argon2 password hashing (memory=19456, time=2); used in `src/lib/server/auth/password.ts`
+- `@oslojs/crypto` + `@oslojs/encoding` - SHA-256 session token hashing, base32 encoding; used in `src/lib/server/auth/session.ts`
+- `nodemailer` 6.9 - Transactional email via SMTP; used in `src/lib/server/auth/email.ts`
+- `zod` 3.24 - Runtime validation for form inputs and API payloads
+- `chart.js` 4.5 - Client-side charts for usage analytics dashboards
 
-**Database/Cache:**
-- `postgres ^3.4.0` - PostgreSQL client (low-level driver used by Drizzle)
-- `ioredis ^5.10.0` - Redis client for response caching (used in `src/lib/server/redis.ts`)
-
-**Email:**
-- `nodemailer ^6.9.0` - SMTP email sending for verification, password reset, invitations, and budget alerts (used in `src/lib/server/auth/email.ts`)
-
-**Validation:**
-- `zod ^3.24.0` - Runtime schema validation for form inputs and API payloads
-
-**Cryptography:**
-- Node.js built-in `crypto` module - AES-256-GCM encryption of provider API keys (used in `src/lib/server/crypto.ts`)
+**Infrastructure:**
+- `drizzle-kit` 0.30 (dev) - CLI for schema migrations and Drizzle Studio; commands in `package.json` (`db:generate`, `db:migrate`, `db:push`, `db:studio`)
+- `autocannon` 8.x (dev) - HTTP load testing; used in `scripts/load-test.ts`
+- `tailwindcss` 4.x (dev) - Utility CSS framework
 
 ## Configuration
 
 **Environment:**
-- Configured via environment variables; `.env.example` documents all keys
-- Required: `DATABASE_URL`, `ENCRYPTION_KEY`
-- Optional: `REDIS_URL`, `LITELLM_API_URL`, `LITELLM_MASTER_KEY`, `BASE_URL`, `SMTP_*`, `GOOGLE_CLIENT_*`, `GITHUB_CLIENT_*`, `CRON_SECRET`
-- SvelteKit accesses private env vars via `$env/dynamic/private`
-
-**TypeScript:**
-- `strict: true` mode
-- `moduleResolution: "bundler"` (Vite-compatible)
-- Path alias `$lib` → `src/lib/` (configured in `vitest.config.ts` for test environment)
+- Configured via environment variables; template at `.env.example`
+- Required: `DATABASE_URL`, `ENCRYPTION_KEY` (64 hex chars for AES-256-GCM), `CRON_SECRET`
+- Optional: `REDIS_URL`, `LITELLM_API_URL`, `LITELLM_MASTER_KEY`, `APP_URL`, `SMTP_*`, `GOOGLE_CLIENT_*`, `GITHUB_CLIENT_*`, `CORS_ALLOWED_ORIGINS`, `MAX_REQUEST_BODY_BYTES`, `DB_POOL_MAX`, `DB_IDLE_TIMEOUT`, `DB_CONNECT_TIMEOUT`
+- SvelteKit reads these via `$env/dynamic/private` at runtime (not baked into the build)
 
 **Build:**
-- `vite.config.ts` — plugins: `tailwindcss()`, `sveltekit()`
-- `svelte.config.js` — adapter: node, preprocessor: vitePreprocess
-- `drizzle.config.ts` — dialect: postgresql, schema: `./src/lib/server/db/schema.ts`
+- `svelte.config.js` - SvelteKit config, uses `adapter-node`
+- `vite.config.ts` - Vite config with Tailwind + SvelteKit plugins
+- `tsconfig.json` - TypeScript in strict mode, `moduleResolution: "bundler"`
+- `drizzle.config.ts` - Points at `src/lib/server/db/schema.ts`, dialect postgresql, migrations output to `drizzle/`
 
 ## Platform Requirements
 
 **Development:**
 - Node.js 22+
-- PostgreSQL 16 (or Docker Compose service)
-- Redis 7 (optional, Docker Compose service)
-- LiteLLM proxy running (optional, Docker Compose service)
+- PostgreSQL 16+ (or Docker)
+- Redis 7+ (optional, enables caching)
+- LiteLLM proxy (optional, enables actual LLM proxying)
 
 **Production:**
-- Docker with multi-stage build (builder: `node:22-alpine`, runner: `node:22-alpine`)
-- Exposes port 3000
-- `NODE_ENV=production`, runs `node build`
-- `docker-compose.yml` orchestrates: app + litellm + postgres:16-alpine + redis:7-alpine
+- Docker Compose: `docker-compose.yml` orchestrates app + litellm + postgres:16-alpine + redis:7-alpine
+- App exposed on port 3000 (inside container)
+- Two-stage Docker build: `builder` stage compiles with Vite, production stage is minimal Alpine with only `build/` and pruned `node_modules/`
 
 ---
 
-*Stack analysis: 2026-03-16*
+*Stack analysis: 2026-03-17*

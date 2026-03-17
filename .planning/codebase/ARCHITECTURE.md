@@ -1,164 +1,180 @@
 # Architecture
 
-**Analysis Date:** 2026-03-16
+**Analysis Date:** 2026-03-17
 
 ## Pattern Overview
 
-**Overall:** Full-stack SvelteKit application with a dual-purpose design — a web management dashboard AND an OpenAI-compatible API gateway in a single Node.js process.
+**Overall:** Multi-tenant SvelteKit monolith with dual API surface
 
 **Key Characteristics:**
-- SvelteKit file-system routing handles both UI pages (SSR) and API endpoints in the same app
-- Two distinct authentication systems operate in parallel: cookie-based sessions for the web UI, and Bearer API key auth for `/v1/*` gateway routes
-- The gateway layer (`src/lib/server/gateway/`) is an in-process middleware pipeline (not a separate service) sitting in front of LiteLLM
-- All app-owned DB tables carry an `app_` prefix to coexist with LiteLLM's Prisma-managed tables in the same PostgreSQL database
-- Redis is optional — caching silently degrades to no-op when `REDIS_URL` is absent
+- A single SvelteKit application that serves two distinct audiences simultaneously: (1) end-user browser sessions via the web UI and (2) programmatic clients (IDE plugins, CLI tools) via an OpenAI-compatible REST API at `/v1/*`
+- The `/v1/*` routes act as a gateway layer that proxies upstream to a LiteLLM instance, with all auth/budget/rate-limit enforcement happening in SvelteKit before the request ever reaches LiteLLM
+- All server-side logic lives under `src/lib/server/` with a clear sub-module structure; the gateway pipeline (`src/lib/server/gateway/`) is completely decoupled from the web UI session logic (`src/lib/server/auth/`)
+- The database schema uses an `app_` prefix on every table to coexist peacefully with LiteLLM's own Prisma-managed tables in the same PostgreSQL database
 
 ## Layers
 
-**Route Layer:**
-- Purpose: HTTP request handling, authentication guards, form actions
+**Route/Controller Layer:**
+- Purpose: Receives HTTP requests, dispatches to service functions, returns typed responses
 - Location: `src/routes/`
-- Contains: SvelteKit `+page.server.ts` (SSR load + form actions), `+layout.server.ts` (auth checks, shared data), `+server.ts` (pure API endpoints)
-- Depends on: Server lib modules in `src/lib/server/`
-- Used by: Browser clients (UI), AI tools via OpenAI-compatible API
+- Contains: `+page.server.ts` (form actions + SSR load), `+server.ts` (pure API endpoints), `+layout.server.ts` (shared load guards)
+- Depends on: `$lib/server/*` service modules
+- Used by: SvelteKit adapter-node HTTP handler
 
-**Gateway Layer:**
-- Purpose: LLM proxy pipeline — auth, budget, rate limiting, smart routing, caching, load balancing, usage logging
+**Gateway Pipeline Layer:**
+- Purpose: Enforces auth, budget, rate limiting, smart routing, caching, and load balancing before proxying to LiteLLM
 - Location: `src/lib/server/gateway/`
-- Contains: `auth.ts`, `budget.ts`, `cache.ts`, `load-balancer.ts`, `models.ts`, `proxy.ts`, `rate-limit.ts`, `routing.ts`, `usage.ts`
-- Depends on: `db`, `redis`, `crypto`, `providers`
-- Used by: `/v1/chat/completions`, `/v1/embeddings`, `/v1/models` route handlers
+- Contains: `auth.ts`, `budget.ts`, `rate-limit.ts`, `routing.ts`, `load-balancer.ts`, `cache.ts`, `proxy.ts`, `usage.ts`, `models.ts`, `cors.ts`
+- Depends on: `$lib/server/db`, `$lib/server/redis`, `$lib/server/crypto`, `$lib/server/providers`
+- Used by: `src/routes/v1/chat/completions/+server.ts`, `src/routes/v1/embeddings/+server.ts`, `src/routes/v1/models/+server.ts`
 
-**Auth Layer:**
-- Purpose: Web session management, OAuth, email flows, password handling
+**Auth/Session Layer:**
+- Purpose: Manages web UI user sessions, email verification, password reset, OAuth login
 - Location: `src/lib/server/auth/`
-- Contains: `session.ts`, `oauth.ts`, `password.ts`, `validation.ts`, `email.ts`, `emails/`
-- Depends on: `db`, `nodemailer`, `arctic` (OAuth), `@node-rs/argon2` (password hashing)
-- Used by: Auth route handlers in `src/routes/auth/`
+- Contains: `session.ts`, `password.ts`, `email.ts`, `oauth.ts`, `validation.ts`, `cookies.ts`, `emails/`
+- Depends on: `$lib/server/db`, `@oslojs/crypto`, `@node-rs/argon2`, `arctic`, `nodemailer`
+- Used by: `src/routes/auth/*` page server files, `src/hooks.server.ts`
 
-**Data Layer:**
-- Purpose: Database schema definition, connection singleton, migrations
+**Service Layer:**
+- Purpose: Domain operations for API key management, member management, provider key management
+- Location: `src/lib/server/`
+- Contains: `api-keys.ts`, `members.ts`, `provider-keys.ts`, `providers.ts`, `litellm.ts`, `redis.ts`, `crypto.ts`
+- Depends on: `$lib/server/db`
+- Used by: `src/routes/org/[slug]/*` server files
+
+**Database Layer:**
+- Purpose: Schema definition and connection pooling
 - Location: `src/lib/server/db/`
-- Contains: `schema.ts` (all table definitions), `index.ts` (lazy Drizzle singleton)
-- Depends on: `drizzle-orm`, `postgres` driver
-- Used by: All server-side modules
+- Contains: `schema.ts` (all table definitions), `index.ts` (lazy singleton connection + proxy), `migrations/` (supplementary SQL files)
+- Depends on: `drizzle-orm`, `postgres` (connection driver)
+- Used by: All `$lib/server/*` modules via `import { db } from '$lib/server/db'`
 
-**Component Layer:**
-- Purpose: Svelte UI components organized by domain
+**UI Component Layer:**
+- Purpose: Svelte 5 components organized by feature domain
 - Location: `src/lib/components/`
-- Contains: Feature-grouped `.svelte` files (api-keys, budget, dashboard, landing, layout, members, models, provider-keys, settings, usage)
-- Depends on: Chart.js for usage visualizations
-- Used by: Route `+page.svelte` files
+- Contains: Feature folders (`api-keys/`, `auth/`, `budget/`, `dashboard/`, `docs/`, `landing/`, `layout/`, `members/`, `models/`, `provider-keys/`, `settings/`, `usage/`)
+- Depends on: `$app/stores`, props only — no server imports
+- Used by: `src/routes/**/*.svelte` page files
 
-**Types Layer:**
-- Purpose: Shared TypeScript types derived directly from DB schema
+**Shared Types Layer:**
+- Purpose: TypeScript types derived from Drizzle schema inference
 - Location: `src/lib/types/index.ts`
-- Contains: `InferSelectModel` / `InferInsertModel` derived types for all tables, `OrgRole` union type
-- Used by: Server modules and Svelte components via `$lib/types`
+- Contains: `User`, `Session`, `Organization`, `OrgMember`, `ProviderKey`, `ApiKey`, `OrgRole`, and corresponding `New*` insert types
+- Depends on: `$lib/server/db/schema`
+- Used by: All layers for type-safe DB row handling
 
 ## Data Flow
 
-**Web UI Request Flow:**
+**OpenAI-compatible API request (primary gateway flow):**
+
+1. External client sends `POST /v1/chat/completions` with `Authorization: Bearer sk-th-*`
+2. `src/hooks.server.ts` skips session cookie auth for `/v1/*` paths, passes through
+3. `src/routes/v1/chat/completions/+server.ts` validates body size (configurable `MAX_REQUEST_BODY_BYTES`)
+4. `gateway/auth.ts::authenticateApiKey` extracts `sk-th-*` token, SHA-256 hashes it, checks Redis cache then DB (`app_api_keys` joined with `app_organizations`); populates `GatewayAuth` with effective rate limits and org settings
+5. `gateway/budget.ts::checkBudget` fetches user's budget via cascade: individual > role default > org default; reads spend from snapshot or SUM query if snapshot is stale; returns `BudgetCheckResult`
+6. Hard budget limit hit → 429 response. Soft limit hit → fire-and-forget email notifications via `budget/notifications.ts`
+7. `gateway/proxy.ts::proxyToLiteLLM` runs full pipeline:
+   a. In-memory sliding window rate limit check (`gateway/rate-limit.ts`)
+   b. Smart routing: estimate token count, optionally substitute cheap/expensive model (`gateway/routing.ts`)
+   c. Redis cache lookup for non-streaming requests (`gateway/cache.ts`)
+   d. DB lookup for active provider keys matching effective model
+   e. Round-robin key ordering (`gateway/load-balancer.ts`)
+   f. Per-key retry loop with exponential backoff (max 3 retries on 429/500/503)
+   g. Decrypt provider API key with AES-256-GCM (`crypto.ts`)
+   h. Forward to `LITELLM_API_URL` with decrypted key in appropriate auth header
+8. On success: extract token usage from JSON or SSE stream, calculate cost from `MODEL_PRICING` table, fire-and-forget `logUsage` and `updateSpendSnapshot` to DB; set Redis cache for non-streaming
+9. Return response with `x-ratelimit-*` headers and `X-Cache: HIT/MISS` header
+
+**Web UI session authentication flow:**
 
 1. Browser sends request with `auth_session` cookie
-2. `src/hooks.server.ts` intercepts all requests — validates session token (SHA-256 hashed, compared to DB), populates `event.locals.user`
-3. `src/routes/+layout.server.ts` passes `user` to all pages via `load()`
-4. Org-scoped `src/routes/org/[slug]/+layout.server.ts` checks org membership, loads org context + budget warning, populates `currentOrg`, `membership`, `userOrgs`
-5. Child page `+page.server.ts` calls `await parent()` to inherit layout data, then loads page-specific data
-6. Svelte components render SSR on server, hydrate on client
-
-**API Gateway Request Flow (LLM calls):**
-
-1. Client sends `POST /v1/chat/completions` with `Authorization: Bearer sk-th-...`
-2. `src/hooks.server.ts` bypasses session auth for `/v1/*` routes
-3. Route handler (`src/routes/v1/chat/completions/+server.ts`) calls `authenticateApiKey()` — SHA-256 hashes the Bearer token, looks up in `app_api_keys`, joins `app_organizations`
-4. `checkBudget()` queries `app_budgets` with cascade (individual > role default > org default), sums `app_usage_logs` for current billing period
-5. If budget allows: `proxyToLiteLLM()` is called, which:
-   a. Checks in-memory sliding window rate limit (RPM/TPM)
-   b. Parses request body, applies smart routing (cheap vs. expensive model by token count)
-   c. Checks Redis cache for non-streaming requests
-   d. Queries `app_provider_keys` for active keys matching the model
-   e. Orders keys via round-robin (`load-balancer.ts`)
-   f. Decrypts provider key (AES-256-GCM), adds provider-specific auth header
-   g. Forwards to LiteLLM with exponential backoff retry (max 3 retries for 429/500/503)
-   h. Falls back to next key on failure
-   i. Extracts token usage from response (JSON or SSE stream)
-   j. Writes usage log to `app_usage_logs` (fire-and-forget)
-   k. Caches successful non-streaming response in Redis
+2. `src/hooks.server.ts::handle` validates token: SHA-256 hash, DB lookup in `app_sessions`, sliding window extension if within 15 days of expiry
+3. Sets `event.locals.user` and `event.locals.session` for all downstream route handlers
+4. `src/routes/org/[slug]/+layout.server.ts` checks `locals.user`, resolves org by slug, verifies membership, loads budget warning data for `BudgetBanner`
+5. Child page `load` functions read `locals.user` and return typed page data to Svelte components
 
 **State Management:**
-- Server state: PostgreSQL via Drizzle ORM; in-memory rate limit windows (per-process, not shared across replicas)
-- Client state: Svelte component local state + SvelteKit form action return values
-- Cache state: Redis (optional), keyed as `cache:{orgId}:{sha256(model+messages)}`
+- Server state: PostgreSQL via Drizzle ORM (authoritative)
+- Gateway hot path caching: Redis (optional, graceful degradation when absent) — auth cache TTL 60s, response cache TTL configurable per org (`cacheTtlSeconds`)
+- In-process state: `Map<keyId, RequestEntry[]>` for rate limit sliding windows; `Map<orgId:provider, counter>` for round-robin counters (both in `src/lib/server/gateway/rate-limit.ts` and `load-balancer.ts` module scope)
+- Client state: Svelte 5 `$state()` runes in `.svelte` files; `$app/stores` for page URL
 
 ## Key Abstractions
 
 **GatewayAuth:**
-- Purpose: Authenticated identity for a gateway API request — combines user, org, key config, and effective limits
-- Examples: `src/lib/server/gateway/auth.ts`
-- Pattern: Returned by `authenticateApiKey()`, threaded through all gateway functions as context
-
-**ProviderDef:**
-- Purpose: Static definition of a supported LLM provider (auth header style, model discovery endpoint, base URL)
-- Examples: `src/lib/server/providers.ts` — 10 providers defined (OpenAI, Anthropic, Google, Azure, Mistral, Cohere, DeepSeek, Qwen, GLM, Doubao, Custom)
-- Pattern: Looked up by `getProvider(id)` during proxy request to select correct auth header
+- Purpose: Resolved identity context for a gateway API request — carries userId, orgId, apiKeyId, effective rate limits, and org settings (smart routing models, cache TTL)
+- Definition: `src/lib/server/gateway/auth.ts` (`interface GatewayAuth`)
+- Pattern: Resolved once per request by `authenticateApiKey`, passed through the entire gateway pipeline; cached in Redis keyed by `auth:{keyHash}` for 60s
 
 **Budget Cascade:**
-- Purpose: Layered spending limits — individual user overrides role defaults, which override org-wide default
-- Examples: `src/lib/server/gateway/budget.ts`, `src/routes/org/[slug]/+layout.server.ts`
-- Pattern: Single query fetches all candidate budgets, `find()` applies priority order: `userId match > role match > isOrgDefault`
+- Purpose: Tiered budget inheritance so admins can set org-wide defaults with per-user overrides
+- Files: `src/lib/server/gateway/budget.ts`, `src/lib/server/budget/utils.ts`, `src/lib/server/budget/notifications.ts`
+- Pattern: Single DB query fetches all candidate budgets (individual + role + org default), then `find()` cascade selects with priority: individual > role default > org default
 
-**Encrypted Provider Key:**
-- Purpose: API keys for LLM providers stored encrypted at rest
-- Examples: `src/lib/server/crypto.ts` — AES-256-GCM with random 96-bit IV per encryption
-- Pattern: Stored as `iv_hex:ciphertext_hex:authTag_hex` in `app_provider_keys.encrypted_key`
+**Provider Key:**
+- Purpose: Encrypted credentials for an external LLM provider API key, scoped to an org
+- Schema: `app_provider_keys` in `src/lib/server/db/schema.ts`
+- Pattern: Stored as `iv_hex:ciphertext_hex:authTag_hex` (AES-256-GCM); decrypted at request time in `proxy.ts` via `src/lib/server/crypto.ts`
+
+**PROVIDERS registry:**
+- Purpose: Static registry of all supported LLM providers with their auth header conventions, base URLs, and model discovery endpoints
+- Location: `src/lib/server/providers.ts`
+- Pattern: `PROVIDERS: ProviderDef[]` constant; `getProvider(id)` lookup used in `proxy.ts` to determine whether to send `Authorization: Bearer`, `x-api-key`, or `api-key` header
 
 ## Entry Points
 
-**Web Application:**
-- Location: `src/app.html` (HTML shell), `src/routes/+layout.svelte` (root Svelte layout)
-- Triggers: Browser navigation, SSR request
-- Responsibilities: Renders the full application; unauthenticated users see the landing page (`src/routes/+page.svelte`); authenticated users are redirected to their org dashboard
-
-**SvelteKit Server Hook:**
+**SvelteKit server hook:**
 - Location: `src/hooks.server.ts`
-- Triggers: Every HTTP request
-- Responsibilities: Session validation and `locals` population; exempts `/v1/*` from session auth
+- Triggers: Every HTTP request (both session web UI and `/v1/*` API calls)
+- Responsibilities: Session cookie validation, populates `event.locals.user` and `event.locals.session`; skips session auth for `/v1/*` paths
 
-**API Gateway:**
-- Location: `src/routes/v1/chat/completions/+server.ts`, `src/routes/v1/embeddings/+server.ts`, `src/routes/v1/models/+server.ts`
-- Triggers: OpenAI-compatible API calls from IDE plugins, CLI tools, chat UIs
-- Responsibilities: Full gateway pipeline — auth, budget, rate limit, proxy, usage logging
+**OpenAI chat completions endpoint:**
+- Location: `src/routes/v1/chat/completions/+server.ts`
+- Triggers: `POST /v1/chat/completions`
+- Responsibilities: Orchestrates the full gateway pipeline — auth → budget check → proxy (which runs rate limit + smart routing + cache + load balance + retry + usage log)
 
-**Cron Endpoint:**
-- Location: `src/routes/api/cron/digest/+server.ts`
-- Triggers: External cron job with `Authorization: Bearer {CRON_SECRET}`
-- Responsibilities: Sends admin digest emails for all organizations
+**OpenAI embeddings endpoint:**
+- Location: `src/routes/v1/embeddings/+server.ts`
+- Triggers: `POST /v1/embeddings`
+- Responsibilities: Identical pipeline to chat completions, forwards to LiteLLM `/v1/embeddings`
+
+**OpenAI models endpoint:**
+- Location: `src/routes/v1/models/+server.ts`
+- Triggers: `GET /v1/models`
+- Responsibilities: Authenticates API key, returns aggregated model list from all active provider keys for the org
+
+**Root layout load:**
+- Location: `src/routes/+layout.server.ts`
+- Triggers: Every page render
+- Responsibilities: Passes `locals.user` to all page components
+
+**Org layout load:**
+- Location: `src/routes/org/[slug]/+layout.server.ts`
+- Triggers: Every `/org/[slug]/*` page render
+- Responsibilities: Resolves org by slug, verifies membership, loads budget warning data
+
+**Cron endpoints:**
+- Location: `src/routes/api/cron/cleanup/+server.ts`, `src/routes/api/cron/digest/+server.ts`
+- Triggers: External cron scheduler via `Authorization: Bearer {CRON_SECRET}`
+- Responsibilities: Cleanup expired sessions; send admin digest emails
 
 ## Error Handling
 
-**Strategy:** Fail fast with OpenAI-compatible error response shapes for gateway routes; SvelteKit `fail()` / `error()` helpers for form actions and page loads.
+**Strategy:** Fail fast, return OpenAI-compatible JSON error bodies at the gateway layer; use SvelteKit's `fail()` and `error()` helpers at the web UI layer
 
 **Patterns:**
-- Gateway errors return `{ error: { message, type, code } }` JSON with appropriate HTTP status (401, 404, 429, 502)
-- Budget exceeded returns HTTP 429 with `type: 'budget_exceeded'`
-- Rate limit exceeded returns HTTP 429 with `x-ratelimit-*` headers and `Retry-After`
-- All keys exhausted: logs usage with `'error'` status, returns last error response or 502
-- Form actions use `return fail(status, { error: message })` caught by Svelte components
-- Network errors during proxy are caught per-key, allowing fallback to next key
+- Gateway layer: All error responses follow `{ error: { message, type, code } }` format matching OpenAI's API convention; HTTP status codes map to: 400 bad request, 401 auth failure, 404 no provider, 413 payload too large, 429 rate/budget limit exceeded, 502 upstream failure
+- Retry logic: `fetchWithRetry` in `proxy.ts` retries 429/500/503 with exponential backoff + jitter (base 500ms, up to 3 retries), falls back to next provider key on persistent failure
+- Fire-and-forget operations (usage logging, spend snapshot update, auth cache write, Redis cache write) are all `.catch(() => {})` — non-critical side effects never block or error responses
+- Web UI layer: Form actions return `fail(statusCode, { errors })` for validation; page loads throw `error(404)` or `redirect(302)` for access control
+- Redis/cache failures: All Redis calls wrapped in try/catch with graceful null returns; app functions fully without Redis
 
 ## Cross-Cutting Concerns
 
-**Logging:** `console.error()` only for cron failures; all LLM request outcomes logged to `app_usage_logs` table via fire-and-forget `logUsage()` in `src/lib/server/gateway/usage.ts`
-
-**Validation:** Zod schemas on all form actions (e.g., `createSchema`, `revokeSchema` in page server files); input validation at gateway for required `model` field
-
-**Authentication:** Two independent systems — cookie sessions (web UI, 30-day sliding window) and SHA-256-hashed API keys (gateway, prefix `sk-th-`)
-
-**Encryption:** AES-256-GCM via Node.js `crypto` module in `src/lib/server/crypto.ts`; used only for provider keys at rest
-
-**CORS:** All `/v1/*` endpoints return `Access-Control-Allow-Origin: *` to allow browser-based tool integrations
+**Logging:** `console.warn` for non-critical LiteLLM/email failures; no structured logging framework. Usage data logged to `app_usage_logs` table (queryable).
+**Validation:** Zod schemas in `src/lib/server/auth/validation.ts` for web form inputs; manual field checks in gateway endpoints for API requests.
+**Authentication:** Two separate auth paths — session cookies (web UI, handled in `hooks.server.ts`) and `sk-th-*` Bearer tokens (gateway API, handled in `gateway/auth.ts`). These are completely independent and do not share middleware.
 
 ---
 
-*Architecture analysis: 2026-03-16*
+*Architecture analysis: 2026-03-17*
