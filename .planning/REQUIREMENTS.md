@@ -31,7 +31,7 @@ Requirements for v1.2 Feature Expansion. Each maps to roadmap phases.
 
 ### Model Management (deferred from v1.2)
 
-- **MODEL-04**: Admin can create model aliases (e.g., 'fast' → gpt-4o-mini)
+- **MODEL-04**: Admin can create model aliases (e.g., 'fast' -> gpt-4o-mini)
 - **MODEL-05**: Admin can set per-org model allowlists
 - **MODEL-06**: Admin can configure per-org routing rules (preferred providers, fallback order)
 
@@ -54,23 +54,23 @@ Requirements for v1.2 Feature Expansion. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| I18N-01 | Pending | Pending |
-| I18N-02 | Pending | Pending |
-| I18N-03 | Pending | Pending |
-| I18N-04 | Pending | Pending |
-| I18N-05 | Pending | Pending |
-| AUDIT-01 | Pending | Pending |
-| AUDIT-02 | Pending | Pending |
-| AUDIT-03 | Pending | Pending |
-| MODEL-01 | Pending | Pending |
-| MODEL-02 | Pending | Pending |
-| MODEL-03 | Pending | Pending |
+| I18N-01 | Phase 12 | Pending |
+| I18N-02 | Phase 12 | Pending |
+| I18N-03 | Phase 13 | Pending |
+| I18N-04 | Phase 13 | Pending |
+| I18N-05 | Phase 12 | Pending |
+| AUDIT-01 | Phase 14 | Pending |
+| AUDIT-02 | Phase 14 | Pending |
+| AUDIT-03 | Phase 14 | Pending |
+| MODEL-01 | Phase 15 | Pending |
+| MODEL-02 | Phase 15 | Pending |
+| MODEL-03 | Phase 15 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 11 total
-- Mapped to phases: 0
-- Unmapped: 11 ⚠️
+- Mapped to phases: 11
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-03-17 after initial definition*
+*Last updated: 2026-03-17 after roadmap creation*
