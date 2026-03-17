@@ -13,8 +13,8 @@ Requirements for production hardening release. Each maps to roadmap phases.
 - [x] **TEST-02**: Unit tests cover auth flows (signup, login, session, OAuth, password reset)
 - [x] **TEST-03**: Unit tests cover member management (invite, accept, remove, role change)
 - [x] **TEST-04**: Integration tests verify DB queries (Drizzle ORM with test database)
-- [ ] **TEST-05**: E2E tests cover critical user flows (signup → org → API key → gateway request)
-- [ ] **TEST-06**: E2E tests cover budget enforcement flow (set limit → exceed → rejection)
+- [x] **TEST-05**: E2E tests cover critical user flows (signup → org → API key → gateway request)
+- [x] **TEST-06**: E2E tests cover budget enforcement flow (set limit → exceed → rejection)
 - [x] **TEST-07**: Load testing validates gateway throughput under concurrent requests
 - [x] **TEST-08**: Coverage threshold enforced (80%+ for server modules)
 
@@ -105,8 +105,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TEST-02 | Phase 10 | Complete |
 | TEST-03 | Phase 10 | Complete |
 | TEST-04 | Phase 11 | Complete |
-| TEST-05 | Phase 11 | Pending |
-| TEST-06 | Phase 11 | Pending |
+| TEST-05 | Phase 11 | Complete |
+| TEST-06 | Phase 11 | Complete |
 | TEST-07 | Phase 11 | Complete |
 | TEST-08 | Phase 11 | Complete |
 
