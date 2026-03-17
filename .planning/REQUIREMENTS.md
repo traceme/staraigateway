@@ -1,0 +1,76 @@
+# Requirements: StarAIGateway
+
+**Defined:** 2026-03-17
+**Core Value:** Any company can sign up, plug in their LLM API keys, and immediately give their entire team controlled, budget-tracked access to AI models.
+
+## v1.2 Requirements
+
+Requirements for v1.2 Feature Expansion. Each maps to roadmap phases.
+
+### Internationalization (i18n)
+
+- [ ] **I18N-01**: User can switch UI language between Chinese and English via account settings
+- [ ] **I18N-02**: All dashboard pages render in user's selected language
+- [ ] **I18N-03**: Landing page and auth pages render in user's selected language (with fallback to browser locale for unauthenticated users)
+- [ ] **I18N-04**: All email templates (verification, password reset, invitation, budget warning, admin digest) render in recipient's language preference
+- [ ] **I18N-05**: Error messages and validation feedback display in user's selected language
+
+### Audit Logs
+
+- [ ] **AUDIT-01**: System records audit events for significant org actions (member invited/removed, role changed, API key created/revoked, provider key added/removed, budget changed, settings updated)
+- [ ] **AUDIT-02**: Org owner/admin can view paginated audit log with timestamp, actor, action, and target
+- [ ] **AUDIT-03**: Audit log supports filtering by action type and date range
+
+### Model Catalog
+
+- [ ] **MODEL-01**: System auto-discovers available models from org's configured provider keys via LiteLLM
+- [ ] **MODEL-02**: Org members can browse a catalog page showing available models with provider, pricing, and capabilities
+- [ ] **MODEL-03**: Model catalog updates when provider keys are added or removed
+
+## Future Requirements
+
+### Model Management (deferred from v1.2)
+
+- **MODEL-04**: Admin can create model aliases (e.g., 'fast' → gpt-4o-mini)
+- **MODEL-05**: Admin can set per-org model allowlists
+- **MODEL-06**: Admin can configure per-org routing rules (preferred providers, fallback order)
+
+### Platform Admin (deferred from v1.2)
+
+- **ADMIN-01**: Platform super-admin dashboard for managing all orgs
+- **ADMIN-02**: Global usage analytics across all organizations
+- **ADMIN-03**: System health monitoring and diagnostics
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Platform-level super admin | v1.2 focuses on org-level admin; platform admin deferred |
+| Model aliases & routing rules | v1.2 delivers catalog only; advanced model management deferred |
+| RTL language support | Only Chinese and English needed for target market |
+| Mobile-specific i18n | Web dashboard only, no mobile app |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| I18N-01 | Pending | Pending |
+| I18N-02 | Pending | Pending |
+| I18N-03 | Pending | Pending |
+| I18N-04 | Pending | Pending |
+| I18N-05 | Pending | Pending |
+| AUDIT-01 | Pending | Pending |
+| AUDIT-02 | Pending | Pending |
+| AUDIT-03 | Pending | Pending |
+| MODEL-01 | Pending | Pending |
+| MODEL-02 | Pending | Pending |
+| MODEL-03 | Pending | Pending |
+
+**Coverage:**
+- v1.2 requirements: 11 total
+- Mapped to phases: 0
+- Unmapped: 11 ⚠️
+
+---
+*Requirements defined: 2026-03-17*
+*Last updated: 2026-03-17 after initial definition*
