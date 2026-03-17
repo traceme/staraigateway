@@ -1,5 +1,6 @@
 import { db } from '$lib/server/db';
-import { appUsageLogs } from '$lib/server/db/schema';
+import { appUsageLogs, appBudgets } from '$lib/server/db/schema';
+import { eq, sql } from 'drizzle-orm';
 import type { GatewayAuth } from './auth';
 
 interface UsageData {
@@ -110,6 +111,18 @@ export function logUsage(
 			isStreaming,
 			errorMessage: errorMessage ?? null
 		})
+		.then(() => {})
+		.catch(() => {});
+}
+
+// Fire-and-forget: increment the budget snapshot by the cost of the current request
+export function updateSpendSnapshot(budgetId: string, costCents: number): void {
+	db.update(appBudgets)
+		.set({
+			spendSnapshotCents: sql`${appBudgets.spendSnapshotCents} + ${costCents}`,
+			snapshotUpdatedAt: new Date()
+		})
+		.where(eq(appBudgets.id, budgetId))
 		.then(() => {})
 		.catch(() => {});
 }

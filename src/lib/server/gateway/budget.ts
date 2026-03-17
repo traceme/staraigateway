@@ -11,6 +11,7 @@ export interface BudgetCheckResult {
 	currentSpendCents: number;
 	hardLimitCents: number | null;
 	softLimitCents: number | null;
+	budgetId: string | null;
 }
 
 export async function checkBudget(auth: GatewayAuth): Promise<BudgetCheckResult> {
@@ -58,28 +59,43 @@ export async function checkBudget(auth: GatewayAuth): Promise<BudgetCheckResult>
 			softLimitHit: false,
 			currentSpendCents: 0,
 			hardLimitCents: null,
-			softLimitCents: null
+			softLimitCents: null,
+			budgetId: null
 		};
 	}
 
 	const resetDate = getBudgetResetDate(budget.resetDay);
 
-	// Aggregate current period spend for this user in this org
-	const result = await db
-		.select({
-			totalCost: sql<string>`COALESCE(SUM(CAST(${appUsageLogs.cost} AS numeric)), 0)`
-		})
-		.from(appUsageLogs)
-		.where(
-			and(
-				eq(appUsageLogs.orgId, auth.orgId),
-				eq(appUsageLogs.userId, auth.userId),
-				gte(appUsageLogs.createdAt, resetDate)
-			)
-		);
+	let currentSpendCents: number;
 
-	const totalCostDollars = parseFloat(result[0]?.totalCost ?? '0');
-	const currentSpendCents = Math.round(totalCostDollars * 100);
+	// Use snapshot if it was updated within the current budget period (O(1) read)
+	if (budget.snapshotUpdatedAt >= resetDate) {
+		currentSpendCents = budget.spendSnapshotCents;
+	} else {
+		// Snapshot is stale or from a previous period — fall back to SUM query
+		const result = await db
+			.select({
+				totalCost: sql<string>`COALESCE(SUM(CAST(${appUsageLogs.cost} AS numeric)), 0)`
+			})
+			.from(appUsageLogs)
+			.where(
+				and(
+					eq(appUsageLogs.orgId, auth.orgId),
+					eq(appUsageLogs.userId, auth.userId),
+					gte(appUsageLogs.createdAt, resetDate)
+				)
+			);
+
+		const totalCostDollars = parseFloat(result[0]?.totalCost ?? '0');
+		currentSpendCents = Math.round(totalCostDollars * 100);
+
+		// Fire-and-forget: re-seed the snapshot with the accurate SUM value
+		db.update(appBudgets)
+			.set({ spendSnapshotCents: currentSpendCents, snapshotUpdatedAt: new Date() })
+			.where(eq(appBudgets.id, budget.id))
+			.then(() => {})
+			.catch(() => {});
+	}
 
 	const hardLimitHit =
 		budget.hardLimitCents !== null && currentSpendCents >= budget.hardLimitCents;
@@ -92,6 +108,7 @@ export async function checkBudget(auth: GatewayAuth): Promise<BudgetCheckResult>
 		softLimitHit,
 		currentSpendCents,
 		hardLimitCents: budget.hardLimitCents,
-		softLimitCents: budget.softLimitCents
+		softLimitCents: budget.softLimitCents,
+		budgetId: budget.id
 	};
 }

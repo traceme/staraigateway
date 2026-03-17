@@ -230,7 +230,9 @@ export const appBudgets = pgTable(
 		resetDay: integer('reset_day').notNull().default(1), // 1-28
 		isOrgDefault: boolean('is_org_default').notNull().default(false),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+		spendSnapshotCents: integer('spend_snapshot_cents').notNull().default(0),
+		snapshotUpdatedAt: timestamp('snapshot_updated_at', { withTimezone: true }).notNull().defaultNow()
 	},
 	(table) => [
 		unique('app_budgets_org_user_unique').on(table.orgId, table.userId),

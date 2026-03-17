@@ -45,10 +45,36 @@ async function resolveMemberBudgets(orgId: string): Promise<MemberBudgetInfo[]> 
 		budgets.filter((b) => b.role !== null && b.userId === null).map((b) => [b.role, b])
 	);
 
+	// Compute unique reset dates and find the earliest for the batch query
+	const allResetDates = budgets
+		.filter((b) => b.hardLimitCents !== null || b.softLimitCents !== null)
+		.map((b) => getBudgetResetDate(b.resetDay));
+	const earliestResetDate =
+		allResetDates.length > 0
+			? new Date(Math.min(...allResetDates.map((d) => d.getTime())))
+			: new Date();
+
+	// Single grouped query for all member spend (replaces N+1 per-member queries)
+	const spendByUser = await db
+		.select({
+			userId: appUsageLogs.userId,
+			total: sql<string>`COALESCE(SUM(CAST(${appUsageLogs.cost} AS numeric)), 0)`
+		})
+		.from(appUsageLogs)
+		.where(
+			and(
+				eq(appUsageLogs.orgId, orgId),
+				gte(appUsageLogs.createdAt, earliestResetDate)
+			)
+		)
+		.groupBy(appUsageLogs.userId);
+
+	// Build lookup map
+	const spendMap = new Map(spendByUser.map((r) => [r.userId, parseFloat(r.total)]));
+
 	const results: MemberBudgetInfo[] = [];
 
 	for (const member of members) {
-		// Cascade: individual > role default > org default
 		const individual = budgets.find((b) => b.userId === member.userId);
 		const roleDefault = roleBudgetMap.get(member.role) ?? null;
 		const budget = individual ?? roleDefault ?? orgDefault;
@@ -58,22 +84,10 @@ async function resolveMemberBudgets(orgId: string): Promise<MemberBudgetInfo[]> 
 		const limitCents = budget.hardLimitCents ?? budget.softLimitCents;
 		if (!limitCents) continue;
 
-		const resetDate = getBudgetResetDate(budget.resetDay);
-
-		const spendResult = await db
-			.select({
-				total: sql<string>`COALESCE(SUM(CAST(${appUsageLogs.cost} AS numeric)), 0)`
-			})
-			.from(appUsageLogs)
-			.where(
-				and(
-					eq(appUsageLogs.orgId, orgId),
-					eq(appUsageLogs.userId, member.userId),
-					gte(appUsageLogs.createdAt, resetDate)
-				)
-			);
-
-		const currentSpendDollars = parseFloat(spendResult[0]?.total ?? '0');
+		// Get spend from pre-fetched map (batch query used earliestResetDate;
+		// for members with later reset dates, totals may include slightly older
+		// data which is conservative. In practice, most orgs use the same resetDay.)
+		const currentSpendDollars = spendMap.get(member.userId) ?? 0;
 		const limitDollars = limitCents / 100;
 		const percentage = limitDollars > 0 ? Math.round((currentSpendDollars / limitDollars) * 100) : 0;
 

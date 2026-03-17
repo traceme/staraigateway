@@ -6,9 +6,9 @@ import { getRedis } from '$lib/server/redis';
  * Format: cache:{orgId}:{sha256hex}
  */
 export function generateCacheKey(orgId: string, model: string, messages: unknown[]): string {
-	const normalized = JSON.stringify(messages).replace(/\s+/g, ' ').trim();
+	const raw = JSON.stringify(messages);
 	const hash = createHash('sha256')
-		.update(model + ':' + normalized)
+		.update(model + ':' + raw)
 		.digest('hex');
 	return `cache:${orgId}:${hash}`;
 }

@@ -15,12 +15,12 @@ describe('generateCacheKey', () => {
 		expect(key).toMatch(/^cache:org-1:[a-f0-9]{64}$/);
 	});
 
-	it('produces same hash for messages differing only in whitespace', () => {
+	it('produces different hash for messages differing in whitespace', () => {
 		const messages1 = [{ role: 'user', content: 'hello  world' }];
 		const messages2 = [{ role: 'user', content: 'hello world' }];
 		const key1 = generateCacheKey('org-1', 'gpt-4o', messages1);
 		const key2 = generateCacheKey('org-1', 'gpt-4o', messages2);
-		expect(key1).toBe(key2);
+		expect(key1).not.toBe(key2);
 	});
 
 	it('produces different hash for different models', () => {
