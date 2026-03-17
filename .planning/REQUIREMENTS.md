@@ -9,7 +9,7 @@ Requirements for v1.2 Feature Expansion. Each maps to roadmap phases.
 
 ### Internationalization (i18n)
 
-- [ ] **I18N-01**: User can switch UI language between Chinese and English via account settings
+- [x] **I18N-01**: User can switch UI language between Chinese and English via account settings
 - [ ] **I18N-02**: All dashboard pages render in user's selected language
 - [ ] **I18N-03**: Landing page and auth pages render in user's selected language (with fallback to browser locale for unauthenticated users)
 - [ ] **I18N-04**: All email templates (verification, password reset, invitation, budget warning, admin digest) render in recipient's language preference
@@ -54,7 +54,7 @@ Requirements for v1.2 Feature Expansion. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| I18N-01 | Phase 12 | Pending |
+| I18N-01 | Phase 12 | Complete |
 | I18N-02 | Phase 12 | Pending |
 | I18N-03 | Phase 13 | Pending |
 | I18N-04 | Phase 13 | Pending |

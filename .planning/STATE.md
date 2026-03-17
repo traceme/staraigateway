@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Feature Expansion
-status: planning
-stopped_at: Phase 12 plans verified
-last_updated: "2026-03-17T22:53:25.664Z"
-last_activity: 2026-03-17 — Roadmap created for v1.2
+status: executing
+stopped_at: Completed 12-01-PLAN.md
+last_updated: "2026-03-17T23:28:19.000Z"
+last_activity: 2026-03-17 — Completed Phase 12 Plan 01 (i18n infrastructure)
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 2
-  completed_plans: 0
-  percent: 0
+  completed_plans: 1
+  percent: 50
 ---
 
 # Project State
@@ -26,18 +26,18 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 12 (first of 4 in v1.2: phases 12-15)
-Plan: Not yet planned
-Status: Ready to plan
-Last activity: 2026-03-17 — Roadmap created for v1.2
+Plan: 01 of 2 complete, next: 02
+Status: Executing
+Last activity: 2026-03-17 — Completed Phase 12 Plan 01 (i18n infrastructure)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 30 (17 v1.0 + 13 v1.1)
+- Total plans completed: 31 (17 v1.0 + 13 v1.1 + 1 v1.2)
 - Average duration: ~2.5 min
-- Total execution time: ~1.3 hours
+- Total execution time: ~1.4 hours
 
 **By Phase (v1.1):**
 
@@ -60,6 +60,9 @@ Recent decisions from v1.1 affecting current work:
 - [Phase 09]: Redis cache-aside for auth (60s TTL)
 - [Phase 09]: Budget rolling snapshots for O(1) checks
 - [Phase 11]: Direct handler import for E2E tests
+- [Phase 12]: svelte-i18n with synchronous addMessages for en/zh locales
+- [Phase 12]: transformPageChunk for dynamic HTML lang attribute
+- [Phase 12]: resolveWithLang helper in hooks.server.ts for all resolve paths
 
 ### Pending Todos
 
@@ -71,6 +74,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T22:53:25.661Z
-Stopped at: Phase 12 plans verified
-Resume file: .planning/phases/12-dashboard-internationalization/12-01-PLAN.md
+Last session: 2026-03-17T23:28:19.000Z
+Stopped at: Completed 12-01-PLAN.md
+Resume file: .planning/phases/12-dashboard-internationalization/12-02-PLAN.md
