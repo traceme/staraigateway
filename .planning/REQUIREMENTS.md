@@ -21,11 +21,11 @@ Requirements for production hardening release. Each maps to roadmap phases.
 ### Security
 
 - [ ] **SEC-01**: OAuth account linking requires password confirmation or email challenge before linking
-- [ ] **SEC-02**: Gateway CORS restricted to configurable allowlist (not wildcard)
-- [ ] **SEC-03**: Session cookies set `Secure` flag when deployed behind HTTPS
-- [ ] **SEC-04**: Request body size limit enforced on `/v1/*` endpoints
-- [ ] **SEC-05**: Invitation tokens separated from record IDs (use `randomBytes(32)`)
-- [ ] **SEC-06**: `.env.example` placeholders are empty with generation instructions (no default secrets)
+- [x] **SEC-02**: Gateway CORS restricted to configurable allowlist (not wildcard)
+- [x] **SEC-03**: Session cookies set `Secure` flag when deployed behind HTTPS
+- [x] **SEC-04**: Request body size limit enforced on `/v1/*` endpoints
+- [x] **SEC-05**: Invitation tokens separated from record IDs (use `randomBytes(32)`)
+- [x] **SEC-06**: `.env.example` placeholders are empty with generation instructions (no default secrets)
 
 ### Performance
 
@@ -91,11 +91,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEBT-06 | Phase 7 | Complete |
 | DEBT-07 | Phase 7 | Complete |
 | SEC-01 | Phase 8 | Pending |
-| SEC-02 | Phase 8 | Pending |
-| SEC-03 | Phase 8 | Pending |
-| SEC-04 | Phase 8 | Pending |
-| SEC-05 | Phase 8 | Pending |
-| SEC-06 | Phase 8 | Pending |
+| SEC-02 | Phase 8 | Complete |
+| SEC-03 | Phase 8 | Complete |
+| SEC-04 | Phase 8 | Complete |
+| SEC-05 | Phase 8 | Complete |
+| SEC-06 | Phase 8 | Complete |
 | PERF-01 | Phase 9 | Pending |
 | PERF-02 | Phase 9 | Pending |
 | PERF-03 | Phase 9 | Pending |
