@@ -9,7 +9,7 @@ Requirements for production hardening release. Each maps to roadmap phases.
 
 ### Testing
 
-- [ ] **TEST-01**: Unit tests cover all gateway modules (auth, budget, rate-limit, usage, proxy flow)
+- [x] **TEST-01**: Unit tests cover all gateway modules (auth, budget, rate-limit, usage, proxy flow)
 - [ ] **TEST-02**: Unit tests cover auth flows (signup, login, session, OAuth, password reset)
 - [ ] **TEST-03**: Unit tests cover member management (invite, accept, remove, role change)
 - [ ] **TEST-04**: Integration tests verify DB queries (Drizzle ORM with test database)
@@ -101,7 +101,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PERF-03 | Phase 9 | Complete |
 | PERF-04 | Phase 9 | Complete |
 | PERF-05 | Phase 9 | Complete |
-| TEST-01 | Phase 10 | Pending |
+| TEST-01 | Phase 10 | Complete |
 | TEST-02 | Phase 10 | Pending |
 | TEST-03 | Phase 10 | Pending |
 | TEST-04 | Phase 11 | Pending |
