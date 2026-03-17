@@ -74,11 +74,11 @@ Plans:
   3. Sending multiple emails in sequence reuses a single SMTP transport connection (no new `createTransport` call per send)
   4. Two requests whose message content differs only in internal whitespace produce different cache keys and return independent responses
   5. Budget notification for an org with N members executes a bounded number of queries (not N individual selects)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 09-01: TBD
-- [ ] 09-02: TBD
+- [ ] 09-01-PLAN.md — Redis auth cache, budget rolling snapshot, cache key normalization fix
+- [ ] 09-02-PLAN.md — SMTP transport lazy singleton, budget notification query batching
 
 ### Phase 10: Unit Test Coverage
 **Goal**: All server-side business logic modules have unit tests covering normal, edge-case, and error behavior
@@ -124,6 +124,6 @@ Plans:
 | 6. Gap Closure | v1.0 | 1/1 | Complete | 2026-03-16 |
 | 7. Tech Debt Cleanup | v1.1 | Complete    | 2026-03-16 | 2026-03-17 |
 | 8. Security Hardening | 1/2 | Complete    | 2026-03-17 | - |
-| 9. Performance Optimization | v1.1 | 0/? | Not started | - |
+| 9. Performance Optimization | v1.1 | 0/2 | Not started | - |
 | 10. Unit Test Coverage | v1.1 | 0/? | Not started | - |
 | 11. Integration, E2E, and Load Testing | v1.1 | 0/? | Not started | - |
