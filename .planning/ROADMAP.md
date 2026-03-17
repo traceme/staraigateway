@@ -26,7 +26,7 @@
 - [x] **Phase 7: Tech Debt Cleanup** - Remove dead code, fix DRY violations, harden DB operations and configuration
 - [x] **Phase 8: Security Hardening** - Fix auth vulnerabilities, restrict CORS, enforce request limits, secure tokens and secrets (completed 2026-03-17)
 - [x] **Phase 9: Performance Optimization** - Cache gateway auth, optimize budget queries, fix cache collisions, batch notifications (completed 2026-03-17)
-- [ ] **Phase 10: Unit Test Coverage** - Unit tests for gateway, auth, and member management modules
+- [x] **Phase 10: Unit Test Coverage** - Unit tests for gateway, auth, and member management modules (completed 2026-03-17)
 - [ ] **Phase 11: Integration, E2E, and Load Testing** - DB integration tests, critical flow E2E, load testing, coverage enforcement
 
 ## Phase Details
@@ -91,9 +91,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 10-01-PLAN.md — Unit tests for gateway rate-limit and usage modules (pure/near-pure functions)
-- [ ] 10-02-PLAN.md — Unit tests for gateway auth, budget, and api-keys modules (DB-heavy mocking)
-- [ ] 10-03-PLAN.md — Unit tests for auth flows (session, password, validation, email) and member management
+- [x] 10-01-PLAN.md — Unit tests for gateway rate-limit and usage modules (pure/near-pure functions)
+- [x] 10-02-PLAN.md — Unit tests for gateway auth, budget, and api-keys modules (DB-heavy mocking)
+- [x] 10-03-PLAN.md — Unit tests for auth flows (session, password, validation, email) and member management
 
 ### Phase 11: Integration, E2E, and Load Testing
 **Goal**: The full application is verified end-to-end with automated tests and enforced coverage thresholds
@@ -126,5 +126,5 @@ Plans:
 | 7. Tech Debt Cleanup | v1.1 | Complete    | 2026-03-16 | 2026-03-17 |
 | 8. Security Hardening | 1/2 | Complete    | 2026-03-17 | - |
 | 9. Performance Optimization | 2/2 | Complete   | 2026-03-17 | - |
-| 10. Unit Test Coverage | 2/3 | In Progress|  | - |
+| 10. Unit Test Coverage | v1.1 | 3/3 | Complete | 2026-03-17 |
 | 11. Integration, E2E, and Load Testing | v1.1 | 0/? | Not started | - |
