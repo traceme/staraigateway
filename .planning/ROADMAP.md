@@ -105,11 +105,12 @@ Plans:
   3. An E2E test verifies budget enforcement end-to-end: set a budget limit, exhaust it with requests, and confirm the gateway rejects the next request
   4. Load test demonstrates the gateway handles concurrent requests at target throughput without errors or p95 latency degradation beyond an acceptable threshold
   5. `npm run test` enforces 80%+ code coverage on server modules and fails if coverage drops below the threshold
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 11-01: TBD
-- [ ] 11-02: TBD
+- [ ] 11-01-PLAN.md — Integration test infrastructure (Docker Compose test DB, vitest coverage thresholds) and Drizzle ORM DB integration tests
+- [ ] 11-02-PLAN.md — E2E tests for user journey (signup-to-gateway) and budget enforcement (limit-to-rejection)
+- [ ] 11-03-PLAN.md — Load test script with autocannon (100 connections, 1000 requests, p95 < 200ms threshold)
 
 ## Progress
 
@@ -127,4 +128,4 @@ Plans:
 | 8. Security Hardening | 1/2 | Complete    | 2026-03-17 | - |
 | 9. Performance Optimization | 2/2 | Complete   | 2026-03-17 | - |
 | 10. Unit Test Coverage | v1.1 | Complete    | 2026-03-17 | 2026-03-17 |
-| 11. Integration, E2E, and Load Testing | v1.1 | 0/? | Not started | - |
+| 11. Integration, E2E, and Load Testing | v1.1 | 0/3 | Not started | - |
