@@ -21,7 +21,8 @@ export const appUsers = pgTable(
 		name: text('name').notNull(),
 		emailVerified: boolean('email_verified').notNull().default(false),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+		language: text('language').notNull().default('en')
 	},
 	(table) => [index('app_users_email_idx').on(table.email)]
 );

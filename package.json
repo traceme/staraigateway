@@ -34,6 +34,7 @@
     "nodemailer": "^6.9.0",
     "postgres": "^3.4.0",
     "svelte": "^5.0.0",
+    "svelte-i18n": "^4.0.1",
     "zod": "^3.24.0"
   },
   "devDependencies": {

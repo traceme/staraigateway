@@ -1,0 +1,283 @@
+{
+	"common": {
+		"save": "Save",
+		"cancel": "Cancel",
+		"delete": "Delete",
+		"create": "Create",
+		"edit": "Edit",
+		"close": "Close",
+		"loading": "Loading...",
+		"never": "Never",
+		"active": "Active",
+		"revoked": "Revoked",
+		"confirm": "Are you sure?",
+		"log_out": "Log out",
+		"back": "Back",
+		"submit": "Submit",
+		"copy": "Copy",
+		"copied": "Copied!",
+		"enabled": "Enabled",
+		"disabled": "Disabled",
+		"none": "None",
+		"no_data": "No data available",
+		"search": "Search",
+		"filter": "Filter",
+		"actions": "Actions",
+		"status": "Status",
+		"name": "Name",
+		"email": "Email",
+		"role": "Role",
+		"date": "Date",
+		"description": "Description",
+		"required": "Required"
+	},
+	"nav": {
+		"dashboard": "Dashboard",
+		"provider_keys": "Provider Keys",
+		"api_keys": "API Keys",
+		"members": "Members",
+		"usage": "Usage",
+		"models": "Models",
+		"settings": "Settings"
+	},
+	"org_switcher": {
+		"create_new": "Create new organization",
+		"switch_org": "Switch organization"
+	},
+	"dashboard": {
+		"title": "{orgName} Dashboard",
+		"manage_members": "Manage Members",
+		"view_api_keys": "View API Keys",
+		"budget_settings": "Budget Settings",
+		"empty_message": "Your dashboard will show usage stats and team activity once you set up provider keys.",
+		"welcome": "Welcome to your dashboard"
+	},
+	"api_keys": {
+		"title": "API Keys",
+		"description": "Personal API keys for accessing LLM models through Cursor, Continue.dev, Claude Code, and other tools.",
+		"create": "Create API Key",
+		"my_keys": "My Keys",
+		"all_keys": "All Keys",
+		"no_keys": "No API keys yet",
+		"no_keys_hint": "Create one to get started.",
+		"no_org_keys": "No API keys in this organization",
+		"table": {
+			"name": "Name",
+			"key": "Key",
+			"status": "Status",
+			"created": "Created",
+			"last_used": "Last Used",
+			"owner": "Owner",
+			"rpm": "RPM",
+			"tpm": "TPM"
+		},
+		"revoke": "Revoke",
+		"revoking": "Revoking...",
+		"revoke_confirm": "Are you sure you want to revoke this API key? This cannot be undone.",
+		"edit_rate_limits": "Edit Rate Limits",
+		"smart_routing": "Smart Routing",
+		"key_created": {
+			"title": "API Key Created",
+			"description": "Copy your API key now. You won't be able to see it again.",
+			"warning": "Make sure to copy your API key. You won't be able to see it again!"
+		},
+		"rate_limits": {
+			"rpm": "Requests per minute (RPM)",
+			"tpm": "Tokens per minute (TPM)",
+			"rpm_help": "Maximum number of requests per minute. Leave empty for no limit.",
+			"tpm_help": "Maximum number of tokens per minute. Leave empty for no limit."
+		}
+	},
+	"kpi": {
+		"members": "Members",
+		"active_keys": "Active Keys",
+		"spend_this_month": "Spend This Month",
+		"requests_this_month": "Requests This Month"
+	},
+	"onboarding": {
+		"get_started": "Get Started",
+		"add_provider_key": "Add your first LLM provider key",
+		"invite_members": "Invite team members",
+		"create_api_key": "Create an API key"
+	},
+	"members": {
+		"title": "Members",
+		"invite": "Invite Member",
+		"invite_email": "Email address",
+		"invite_role": "Role",
+		"invite_submit": "Send Invitation",
+		"invite_sending": "Sending...",
+		"no_members": "No members yet",
+		"pending_invitations": "Pending Invitations",
+		"no_invitations": "No pending invitations",
+		"revoke_invite": "Revoke Invitation",
+		"remove_member": "Remove Member",
+		"change_role": "Change Role",
+		"remove_confirm": "Are you sure you want to remove this member? This cannot be undone."
+	},
+	"provider_keys": {
+		"title": "Provider Keys",
+		"description": "Connect your LLM provider API keys to enable AI model access for your team.",
+		"add_key": "Add Provider Key",
+		"no_keys": "No provider keys yet",
+		"no_keys_hint": "Add your first LLM provider key to get started.",
+		"provider": "Provider",
+		"label": "Label",
+		"api_key": "API Key",
+		"base_url": "Base URL",
+		"base_url_hint": "Optional. For custom OpenAI-compatible endpoints.",
+		"models_discovered": "Models Discovered",
+		"remove": "Remove",
+		"remove_confirm": "Are you sure you want to remove this provider key? This cannot be undone.",
+		"active": "Active",
+		"inactive": "Inactive",
+		"providers": {
+			"openai": "OpenAI",
+			"anthropic": "Anthropic",
+			"google": "Google",
+			"deepseek": "DeepSeek",
+			"openrouter": "OpenRouter",
+			"custom": "Custom"
+		}
+	},
+	"usage": {
+		"title": "Usage",
+		"description": "Monitor API usage, costs, and token consumption across your organization.",
+		"no_data": "No usage data for this time range",
+		"time_range": {
+			"7d": "Last 7 days",
+			"30d": "Last 30 days",
+			"90d": "Last 90 days"
+		},
+		"tabs": {
+			"overview": "Overview",
+			"by_model": "By Model",
+			"by_user": "By User",
+			"by_key": "By Key"
+		},
+		"table": {
+			"model": "Model",
+			"provider": "Provider",
+			"requests": "Requests",
+			"input_tokens": "Input Tokens",
+			"output_tokens": "Output Tokens",
+			"cost": "Cost",
+			"user": "User",
+			"key": "Key"
+		},
+		"cost_trend": {
+			"title": "Cost Trend"
+		},
+		"breakdown": {
+			"title": "Breakdown"
+		}
+	},
+	"budget": {
+		"title": "Budget",
+		"description": "Set spending limits and budget controls for your organization.",
+		"hard_limit": "Hard Limit",
+		"soft_limit": "Soft Limit",
+		"reset_day": "Reset Day",
+		"no_budget": "No budget configured",
+		"set_budget": "Set Budget",
+		"warning_banner": "You are approaching your budget limit.",
+		"exceeded_banner": "Budget limit exceeded. API requests may be blocked.",
+		"defaults": {
+			"title": "Budget Defaults",
+			"description": "Set default budget limits for organization members.",
+			"org_default": "Organization Default",
+			"role_default": "Role Default"
+		},
+		"spend_label": "Spent",
+		"of_limit": "of {limit}"
+	},
+	"models": {
+		"title": "Models",
+		"description": "Available AI models from your connected providers.",
+		"no_models": "No models available. Add a provider key to discover models.",
+		"table": {
+			"name": "Model Name",
+			"provider": "Provider",
+			"pricing": "Pricing",
+			"input_price": "Input Price",
+			"output_price": "Output Price"
+		},
+		"per_million_tokens": "per million tokens"
+	},
+	"settings": {
+		"title": "Settings",
+		"org_name": "Organization Name",
+		"org_description": "Description",
+		"org_slug": "URL Slug",
+		"save_settings": "Save Settings",
+		"cache_ttl": {
+			"title": "Cache TTL",
+			"description": "How long to cache API responses.",
+			"seconds": "seconds"
+		},
+		"smart_routing": {
+			"title": "Smart Routing",
+			"description": "Automatically route simple requests to cheaper models.",
+			"cheap_model": "Cheap Model",
+			"expensive_model": "Expensive Model"
+		},
+		"danger_zone": "Danger Zone"
+	},
+	"org_create": {
+		"title": "Create Organization",
+		"name_label": "Organization Name",
+		"name_placeholder": "My Team",
+		"description_label": "Description",
+		"description_placeholder": "A brief description of your organization",
+		"submit": "Create Organization",
+		"creating": "Creating..."
+	},
+	"validation": {
+		"name_required": "Name is required",
+		"name_too_long": "Name must be 50 characters or less",
+		"email_invalid": "Please enter a valid email address",
+		"key_id_required": "Key ID is required",
+		"invalid_role": "Invalid role",
+		"password_required": "Password is required",
+		"password_min_length": "Password must be at least 8 characters",
+		"slug_invalid": "Slug must contain only lowercase letters, numbers, and hyphens"
+	},
+	"errors": {
+		"not_authenticated": "Not authenticated",
+		"org_not_found": "Organization not found",
+		"key_not_found": "API key not found",
+		"key_not_in_org": "API key not found in this organization",
+		"create_key_failed": "Failed to create API key",
+		"only_admins_invite": "Only admins can invite members",
+		"only_admins_remove": "Only admins can remove members",
+		"only_admins_revoke_invite": "Only admins can revoke invitations",
+		"only_owner_change_role": "Only the owner can change roles",
+		"only_admins_revoke_keys": "Only owners and admins can revoke keys",
+		"only_admins_rate_limits": "Only owners and admins can update rate limits",
+		"invite_failed": "Failed to send invitation",
+		"role_change_failed": "Failed to change role",
+		"remove_failed": "Failed to remove member",
+		"revoke_invite_failed": "Failed to revoke invitation",
+		"provider_key_failed": "Failed to add provider key",
+		"settings_failed": "Failed to save settings",
+		"budget_failed": "Failed to save budget",
+		"generic": "An unexpected error occurred. Please try again."
+	},
+	"language": {
+		"switch": "Language",
+		"en": "English",
+		"zh": "Chinese (Simplified)"
+	},
+	"docs": {
+		"integration_guide": {
+			"title": "Integration Guide",
+			"description": "Connect your tools to StarAIGateway using the API key above."
+		},
+		"tool_tabs": {
+			"cursor": "Cursor",
+			"continue": "Continue.dev",
+			"claude_code": "Claude Code",
+			"openai_sdk": "OpenAI SDK"
+		}
+	}
+}

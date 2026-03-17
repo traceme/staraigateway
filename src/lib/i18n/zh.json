@@ -1,0 +1,283 @@
+{
+	"common": {
+		"save": "保存",
+		"cancel": "取消",
+		"delete": "删除",
+		"create": "创建",
+		"edit": "编辑",
+		"close": "关闭",
+		"loading": "加载中...",
+		"never": "从未",
+		"active": "活跃",
+		"revoked": "已撤销",
+		"confirm": "确定吗？",
+		"log_out": "退出登录",
+		"back": "返回",
+		"submit": "提交",
+		"copy": "复制",
+		"copied": "已复制！",
+		"enabled": "已启用",
+		"disabled": "已禁用",
+		"none": "无",
+		"no_data": "暂无数据",
+		"search": "搜索",
+		"filter": "筛选",
+		"actions": "操作",
+		"status": "状态",
+		"name": "名称",
+		"email": "邮箱",
+		"role": "角色",
+		"date": "日期",
+		"description": "描述",
+		"required": "必填"
+	},
+	"nav": {
+		"dashboard": "仪表盘",
+		"provider_keys": "提供商密钥",
+		"api_keys": "API 密钥",
+		"members": "成员",
+		"usage": "使用量",
+		"models": "模型",
+		"settings": "设置"
+	},
+	"org_switcher": {
+		"create_new": "创建新组织",
+		"switch_org": "切换组织"
+	},
+	"dashboard": {
+		"title": "{orgName} 仪表盘",
+		"manage_members": "管理成员",
+		"view_api_keys": "查看 API 密钥",
+		"budget_settings": "预算设置",
+		"empty_message": "设置提供商密钥后，仪表盘将显示使用统计和团队活动。",
+		"welcome": "欢迎使用仪表盘"
+	},
+	"api_keys": {
+		"title": "API 密钥",
+		"description": "用于通过 Cursor、Continue.dev、Claude Code 等工具访问 LLM 模型的个人 API 密钥。",
+		"create": "创建 API 密钥",
+		"my_keys": "我的密钥",
+		"all_keys": "所有密钥",
+		"no_keys": "暂无 API 密钥",
+		"no_keys_hint": "创建一个密钥以开始使用。",
+		"no_org_keys": "该组织暂无 API 密钥",
+		"table": {
+			"name": "名称",
+			"key": "密钥",
+			"status": "状态",
+			"created": "创建时间",
+			"last_used": "最后使用",
+			"owner": "所有者",
+			"rpm": "RPM",
+			"tpm": "TPM"
+		},
+		"revoke": "撤销",
+		"revoking": "撤销中...",
+		"revoke_confirm": "确定要撤销此 API 密钥吗？此操作无法撤回。",
+		"edit_rate_limits": "编辑速率限制",
+		"smart_routing": "智能路由",
+		"key_created": {
+			"title": "API 密钥已创建",
+			"description": "请立即复制您的 API 密钥，之后将无法再次查看。",
+			"warning": "请确保复制您的 API 密钥，之后将无法再次查看！"
+		},
+		"rate_limits": {
+			"rpm": "每分钟请求数 (RPM)",
+			"tpm": "每分钟令牌数 (TPM)",
+			"rpm_help": "每分钟最大请求数。留空表示无限制。",
+			"tpm_help": "每分钟最大令牌数。留空表示无限制。"
+		}
+	},
+	"kpi": {
+		"members": "成员",
+		"active_keys": "活跃密钥",
+		"spend_this_month": "本月支出",
+		"requests_this_month": "本月请求数"
+	},
+	"onboarding": {
+		"get_started": "开始使用",
+		"add_provider_key": "添加您的第一个 LLM 提供商密钥",
+		"invite_members": "邀请团队成员",
+		"create_api_key": "创建 API 密钥"
+	},
+	"members": {
+		"title": "成员",
+		"invite": "邀请成员",
+		"invite_email": "邮箱地址",
+		"invite_role": "角色",
+		"invite_submit": "发送邀请",
+		"invite_sending": "发送中...",
+		"no_members": "暂无成员",
+		"pending_invitations": "待处理邀请",
+		"no_invitations": "暂无待处理邀请",
+		"revoke_invite": "撤销邀请",
+		"remove_member": "移除成员",
+		"change_role": "更改角色",
+		"remove_confirm": "确定要移除此成员吗？此操作无法撤回。"
+	},
+	"provider_keys": {
+		"title": "提供商密钥",
+		"description": "连接您的 LLM 提供商 API 密钥，为团队启用 AI 模型访问。",
+		"add_key": "添加提供商密钥",
+		"no_keys": "暂无提供商密钥",
+		"no_keys_hint": "添加您的第一个 LLM 提供商密钥以开始使用。",
+		"provider": "提供商",
+		"label": "标签",
+		"api_key": "API 密钥",
+		"base_url": "基础 URL",
+		"base_url_hint": "可选。用于自定义 OpenAI 兼容端点。",
+		"models_discovered": "已发现模型",
+		"remove": "移除",
+		"remove_confirm": "确定要移除此提供商密钥吗？此操作无法撤回。",
+		"active": "活跃",
+		"inactive": "未启用",
+		"providers": {
+			"openai": "OpenAI",
+			"anthropic": "Anthropic",
+			"google": "Google",
+			"deepseek": "DeepSeek",
+			"openrouter": "OpenRouter",
+			"custom": "自定义"
+		}
+	},
+	"usage": {
+		"title": "使用量",
+		"description": "监控组织的 API 使用量、费用和令牌消耗。",
+		"no_data": "该时间范围内暂无使用数据",
+		"time_range": {
+			"7d": "最近 7 天",
+			"30d": "最近 30 天",
+			"90d": "最近 90 天"
+		},
+		"tabs": {
+			"overview": "概览",
+			"by_model": "按模型",
+			"by_user": "按用户",
+			"by_key": "按密钥"
+		},
+		"table": {
+			"model": "模型",
+			"provider": "提供商",
+			"requests": "请求数",
+			"input_tokens": "输入令牌",
+			"output_tokens": "输出令牌",
+			"cost": "费用",
+			"user": "用户",
+			"key": "密钥"
+		},
+		"cost_trend": {
+			"title": "费用趋势"
+		},
+		"breakdown": {
+			"title": "详细分布"
+		}
+	},
+	"budget": {
+		"title": "预算",
+		"description": "为组织设置支出限额和预算控制。",
+		"hard_limit": "硬限额",
+		"soft_limit": "软限额",
+		"reset_day": "重置日",
+		"no_budget": "未配置预算",
+		"set_budget": "设置预算",
+		"warning_banner": "您即将达到预算限额。",
+		"exceeded_banner": "预算限额已超出，API 请求可能被阻止。",
+		"defaults": {
+			"title": "预算默认值",
+			"description": "为组织成员设置默认预算限额。",
+			"org_default": "组织默认",
+			"role_default": "角色默认"
+		},
+		"spend_label": "已支出",
+		"of_limit": "共 {limit}"
+	},
+	"models": {
+		"title": "模型",
+		"description": "来自已连接提供商的可用 AI 模型。",
+		"no_models": "暂无可用模型。请添加提供商密钥以发现模型。",
+		"table": {
+			"name": "模型名称",
+			"provider": "提供商",
+			"pricing": "定价",
+			"input_price": "输入价格",
+			"output_price": "输出价格"
+		},
+		"per_million_tokens": "每百万令牌"
+	},
+	"settings": {
+		"title": "设置",
+		"org_name": "组织名称",
+		"org_description": "描述",
+		"org_slug": "URL 标识",
+		"save_settings": "保存设置",
+		"cache_ttl": {
+			"title": "缓存有效期",
+			"description": "API 响应的缓存时长。",
+			"seconds": "秒"
+		},
+		"smart_routing": {
+			"title": "智能路由",
+			"description": "自动将简单请求路由到更便宜的模型。",
+			"cheap_model": "经济模型",
+			"expensive_model": "高级模型"
+		},
+		"danger_zone": "危险操作"
+	},
+	"org_create": {
+		"title": "创建组织",
+		"name_label": "组织名称",
+		"name_placeholder": "我的团队",
+		"description_label": "描述",
+		"description_placeholder": "组织的简要描述",
+		"submit": "创建组织",
+		"creating": "创建中..."
+	},
+	"validation": {
+		"name_required": "名称为必填项",
+		"name_too_long": "名称不能超过 50 个字符",
+		"email_invalid": "请输入有效的邮箱地址",
+		"key_id_required": "密钥 ID 为必填项",
+		"invalid_role": "无效的角色",
+		"password_required": "密码为必填项",
+		"password_min_length": "密码至少需要 8 个字符",
+		"slug_invalid": "标识只能包含小写字母、数字和连字符"
+	},
+	"errors": {
+		"not_authenticated": "未登录",
+		"org_not_found": "组织未找到",
+		"key_not_found": "API 密钥未找到",
+		"key_not_in_org": "该组织中未找到此 API 密钥",
+		"create_key_failed": "创建 API 密钥失败",
+		"only_admins_invite": "仅管理员可以邀请成员",
+		"only_admins_remove": "仅管理员可以移除成员",
+		"only_admins_revoke_invite": "仅管理员可以撤销邀请",
+		"only_owner_change_role": "仅所有者可以更改角色",
+		"only_admins_revoke_keys": "仅所有者和管理员可以撤销密钥",
+		"only_admins_rate_limits": "仅所有者和管理员可以更新速率限制",
+		"invite_failed": "发送邀请失败",
+		"role_change_failed": "更改角色失败",
+		"remove_failed": "移除成员失败",
+		"revoke_invite_failed": "撤销邀请失败",
+		"provider_key_failed": "添加提供商密钥失败",
+		"settings_failed": "保存设置失败",
+		"budget_failed": "保存预算失败",
+		"generic": "发生意外错误，请重试。"
+	},
+	"language": {
+		"switch": "语言",
+		"en": "English",
+		"zh": "简体中文"
+	},
+	"docs": {
+		"integration_guide": {
+			"title": "集成指南",
+			"description": "使用上方的 API 密钥将您的工具连接到 StarAIGateway。"
+		},
+		"tool_tabs": {
+			"cursor": "Cursor",
+			"continue": "Continue.dev",
+			"claude_code": "Claude Code",
+			"openai_sdk": "OpenAI SDK"
+		}
+	}
+}
