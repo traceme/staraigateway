@@ -7,6 +7,7 @@ import {
 	appOrganizations
 } from '$lib/server/db/schema';
 import { eq, and, isNull } from 'drizzle-orm';
+import { randomBytes } from 'node:crypto';
 import { sendInvitationEmail } from '$lib/server/auth/email';
 
 export async function inviteMember(
@@ -51,7 +52,7 @@ export async function inviteMember(
 		throw new Error('This email has already been invited');
 	}
 
-	const token = crypto.randomUUID();
+	const token = randomBytes(32).toString('hex');
 	const id = crypto.randomUUID();
 	const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
