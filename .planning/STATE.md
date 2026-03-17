@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Feature Expansion
 status: planning
-stopped_at: Phase 12 context gathered
-last_updated: "2026-03-17T14:02:59.276Z"
+stopped_at: Phase 12 UI-SPEC approved
+last_updated: "2026-03-17T14:25:21.807Z"
 last_activity: 2026-03-17 — Roadmap created for v1.2
 progress:
   total_phases: 4
@@ -71,6 +71,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T14:02:59.273Z
-Stopped at: Phase 12 context gathered
-Resume file: .planning/phases/12-dashboard-internationalization/12-CONTEXT.md
+Last session: 2026-03-17T14:25:21.804Z
+Stopped at: Phase 12 UI-SPEC approved
+Resume file: .planning/phases/12-dashboard-internationalization/12-UI-SPEC.md
