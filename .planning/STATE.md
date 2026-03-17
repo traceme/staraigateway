@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Feature Expansion
 status: executing
-stopped_at: Completed 12-01-PLAN.md
-last_updated: "2026-03-17T23:28:19.000Z"
-last_activity: 2026-03-17 — Completed Phase 12 Plan 01 (i18n infrastructure)
+stopped_at: Completed 12-02-PLAN.md
+last_updated: "2026-03-17T23:50:30.000Z"
+last_activity: 2026-03-18 — Completed Phase 12 Plan 02 (dashboard i18n wiring)
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
-  percent: 50
+  completed_plans: 2
+  percent: 100
 ---
 
 # Project State
@@ -26,16 +26,16 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 12 (first of 4 in v1.2: phases 12-15)
-Plan: 01 of 2 complete, next: 02
-Status: Executing
-Last activity: 2026-03-17 — Completed Phase 12 Plan 01 (i18n infrastructure)
+Plan: 02 of 2 complete (Phase 12 done)
+Status: Phase 12 Complete
+Last activity: 2026-03-18 — Completed Phase 12 Plan 02 (dashboard i18n wiring)
 
-Progress: [█████░░░░░] 50%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 31 (17 v1.0 + 13 v1.1 + 1 v1.2)
+- Total plans completed: 32 (17 v1.0 + 13 v1.1 + 2 v1.2)
 - Average duration: ~2.5 min
 - Total execution time: ~1.4 hours
 
@@ -63,6 +63,9 @@ Recent decisions from v1.1 affecting current work:
 - [Phase 12]: svelte-i18n with synchronous addMessages for en/zh locales
 - [Phase 12]: transformPageChunk for dynamic HTML lang attribute
 - [Phase 12]: resolveWithLang helper in hooks.server.ts for all resolve paths
+- [Phase 12]: errorKey pattern for server action i18n (fail returns errorKey, client translates via $t)
+- [Phase 12]: zodErrorToKey shared helper in src/lib/server/i18n-errors.ts
+- [Phase 12]: $derived() for reactive table column definitions depending on $t() store
 
 ### Pending Todos
 
@@ -74,6 +77,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T23:28:19.000Z
-Stopped at: Completed 12-01-PLAN.md
-Resume file: .planning/phases/12-dashboard-internationalization/12-02-PLAN.md
+Last session: 2026-03-17T23:50:30.000Z
+Stopped at: Completed 12-02-PLAN.md (Phase 12 complete)
+Resume file: Next phase planning
