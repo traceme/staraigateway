@@ -88,11 +88,12 @@ Plans:
   1. Gateway modules (auth, budget, rate-limit, usage, proxy flow) each have a co-located `.test.ts` file with tests covering happy path, error cases, and boundary values
   2. Auth flows (signup, login, session validation, OAuth linking, password reset) have unit tests verifying correct behavior and security constraints (e.g., duplicate email rejected, expired token rejected)
   3. Member management (invite, accept, remove, role change) has unit tests covering success paths and edge cases (duplicate invite, expired token, removing the last owner)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 10-01: TBD
-- [ ] 10-02: TBD
+- [ ] 10-01-PLAN.md — Unit tests for gateway rate-limit and usage modules (pure/near-pure functions)
+- [ ] 10-02-PLAN.md — Unit tests for gateway auth, budget, and api-keys modules (DB-heavy mocking)
+- [ ] 10-03-PLAN.md — Unit tests for auth flows (session, password, validation, email) and member management
 
 ### Phase 11: Integration, E2E, and Load Testing
 **Goal**: The full application is verified end-to-end with automated tests and enforced coverage thresholds
@@ -125,5 +126,5 @@ Plans:
 | 7. Tech Debt Cleanup | v1.1 | Complete    | 2026-03-16 | 2026-03-17 |
 | 8. Security Hardening | 1/2 | Complete    | 2026-03-17 | - |
 | 9. Performance Optimization | 2/2 | Complete   | 2026-03-17 | - |
-| 10. Unit Test Coverage | v1.1 | 0/? | Not started | - |
+| 10. Unit Test Coverage | v1.1 | 0/3 | Not started | - |
 | 11. Integration, E2E, and Load Testing | v1.1 | 0/? | Not started | - |
