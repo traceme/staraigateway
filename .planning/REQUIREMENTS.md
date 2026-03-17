@@ -20,7 +20,7 @@ Requirements for production hardening release. Each maps to roadmap phases.
 
 ### Security
 
-- [ ] **SEC-01**: OAuth account linking requires password confirmation or email challenge before linking
+- [x] **SEC-01**: OAuth account linking requires password confirmation or email challenge before linking
 - [x] **SEC-02**: Gateway CORS restricted to configurable allowlist (not wildcard)
 - [x] **SEC-03**: Session cookies set `Secure` flag when deployed behind HTTPS
 - [x] **SEC-04**: Request body size limit enforced on `/v1/*` endpoints
@@ -90,7 +90,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEBT-05 | Phase 7 | Complete |
 | DEBT-06 | Phase 7 | Complete |
 | DEBT-07 | Phase 7 | Complete |
-| SEC-01 | Phase 8 | Pending |
+| SEC-01 | Phase 8 | Complete |
 | SEC-02 | Phase 8 | Complete |
 | SEC-03 | Phase 8 | Complete |
 | SEC-04 | Phase 8 | Complete |
