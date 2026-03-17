@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Production Hardening
 status: executing
-stopped_at: Completed 10-01-PLAN.md
-last_updated: "2026-03-17T06:49:35.204Z"
-last_activity: 2026-03-17 — Completed 09-01 Gateway Performance Optimization plan
+stopped_at: Completed 10-02-PLAN.md
+last_updated: "2026-03-17T06:50:19.721Z"
+last_activity: 2026-03-17 — Completed 10-01 Gateway Rate-Limit and Usage Unit Tests
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 10
   completed_plans: 9
-  percent: 100
+  percent: 80
 ---
 
 # Project State
@@ -54,6 +54,7 @@ Progress: [████████░░] 80%
 | Phase 09 P01 | 5min | 2 tasks | 9 files |
 | Phase 09 P02 | 2min | 2 tasks | 2 files |
 | Phase 10 P01 | 2min | 2 tasks | 2 files |
+| Phase 10 P02 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 09]: Cache key uses raw JSON without whitespace normalization
 - [Phase 10]: Used unique keyId strings per test to avoid shared mutable state in rate-limit sliding windows
 - [Phase 10]: Mocked drizzle-orm db.insert/db.update chain for fire-and-forget usage functions
+- [Phase 10]: Used thenable chain pattern for budget DB mocks to support both .limit() and direct await
 
 ### Pending Todos
 
@@ -86,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T06:49:35.200Z
-Stopped at: Completed 10-01-PLAN.md
+Last session: 2026-03-17T06:50:19.719Z
+Stopped at: Completed 10-02-PLAN.md
 Resume file: None
