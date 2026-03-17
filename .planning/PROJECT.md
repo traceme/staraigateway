@@ -27,17 +27,20 @@ Any company can sign up, plug in their LLM API keys, and immediately give their 
 - ✓ Self-host package (docker-compose for companies to deploy themselves) — v1.0
 - ✓ Landing/marketing page — v1.0
 
+- ✓ Tech debt cleanup (dead exports, DRY fixes, jsonb migration, session cron, pool config) — v1.1
+- ✓ Security hardening (OAuth linking, CORS, secure cookies, body limits, token separation) — v1.1
+- ✓ Performance optimization (Redis auth cache, budget snapshots, SMTP singleton, N+1 fix) — v1.1
+- ✓ Unit test coverage (99 tests across 14 files, gateway + auth + members) — v1.1
+- ✓ Integration, E2E, and load testing (DB integration, user journey E2E, load test, 80% coverage) — v1.1
+
 ### Active
 
-- [ ] Comprehensive test coverage (unit + integration + E2E + load testing)
-- [ ] Security audit and fixes (auth, encryption, API endpoints, input validation)
-- [ ] Gateway performance optimization (minimize proxy overhead, p95 latency)
-- [ ] Dashboard performance optimization (fast page loads with large datasets)
-- [ ] Tech debt cleanup (dead exports, DRY fixes, code quality)
+(None — next milestone not yet planned)
 
-## Current Milestone: v1.1 Production Hardening
+## Completed Milestones
 
-**Goal:** Make LLMTokenHub production-ready with comprehensive test coverage, security audit, performance optimization, and tech debt cleanup before real users arrive.
+- **v1.0 MVP** — Full platform shipped (auth, orgs, gateway, budgets, dashboard, Docker)
+- **v1.1 Production Hardening** — Security, performance, test coverage, tech debt cleanup
 
 ### Out of Scope
 
@@ -47,9 +50,7 @@ Any company can sign up, plug in their LLM API keys, and immediately give their 
 - Real-time collaboration features
 - Custom model fine-tuning or hosting
 
-## Context
-
-Shipped v1.0 MVP with ~10,500 LOC (TypeScript + Svelte) across 201 files.
+## Technical Architecture
 
 **Tech stack:** SvelteKit (Svelte 5 runes), Tailwind CSS v4, Drizzle ORM + postgres.js, PostgreSQL, Redis (ioredis), LiteLLM proxy, Node.js built-in crypto (AES-256-GCM, SHA-256).
 
@@ -89,13 +90,22 @@ Target market: 20-100 person teams, especially in China where domestic model sup
 | Chart.js direct canvas (not svelte-chartjs) | svelte-chartjs not compatible with Svelte 5 runes | ✓ Good |
 | ioredis for Redis client | Mature, lazy connect, retry strategies | ✓ Good |
 | Fire-and-forget for gateway side effects | Non-blocking notification and usage logging | ✓ Good |
+| Redis cache-aside for gateway auth | 60s TTL reduces per-request DB queries, graceful degradation | ✓ Good |
+| Budget rolling snapshots | O(1) budget checks via incremental snapshot column, full SUM fallback | ✓ Good |
+| vi.mock() for unit test mocking | No DI refactoring needed, matches existing codebase patterns | ✓ Good |
+| Docker Compose test PostgreSQL | Real DB for integration tests, transaction rollback isolation | ✓ Good |
+| autocannon for load testing | Zero external deps, Node.js native, scriptable with thresholds | ✓ Good |
+
+## Context
+
+Shipped v1.1 with ~8,700 LOC (6,161 source + 2,518 test TypeScript) across 51 modified files.
+All v1.0 tech debt resolved. 99 unit tests + integration/E2E/load tests. 80% coverage enforced.
+Gateway optimized: Redis auth cache (60s), budget O(1) snapshots, SMTP singleton.
+Security hardened: CORS allowlist, secure cookies, body limits, invitation token separation.
 
 ## Tech Debt
 
-- Dead export: `validateApiKeyFromHash` in api-keys.ts (superseded by inline gateway query)
-- Dead export: `decryptProviderKeyById` in provider-keys.ts (superseded by inline decrypt in proxy)
-- Dead export: `checkLiteLLMHealth` in litellm.ts (Docker healthcheck handles this)
-- Minor DRY: `getBudgetResetDate` logic duplicated in gateway/budget.ts and budget/notifications.ts
+(None known — all v1.0 tech debt resolved in v1.1)
 
 ---
-*Last updated: 2026-03-16 after v1.1 milestone started*
+*Last updated: 2026-03-17 after v1.1 milestone*

@@ -1,5 +1,21 @@
 # Milestones
 
+## v1.1 Production Hardening (Shipped: 2026-03-17)
+
+**Phases:** 5 | **Plans:** 13 | **Commits:** 53 | **LOC:** 3,296 additions (6,161 source + 2,518 test)
+**Timeline:** 2026-03-17 (1 day)
+
+**Key accomplishments:**
+- Tech debt cleanup: removed dead exports, extracted shared budget utils, added DB transactions, standardized env vars, migrated to jsonb, added session cleanup cron, configured connection pool
+- Security hardening: OAuth linking protection, CORS allowlist, secure cookies, body size limits, invitation token separation, env placeholder cleanup
+- Performance optimization: Redis auth cache (60s TTL), budget rolling snapshots (O(1) checks), SMTP lazy singleton, cache key normalization fix, N+1 batch query fix
+- Unit test coverage: 99 tests across 14 files covering gateway (auth, budget, rate-limit, usage, api-keys), auth flows (session, password, validation, email), and member management
+- Integration/E2E/load testing: DB integration tests against real PostgreSQL, E2E user journey + budget enforcement tests, autocannon load test (100 concurrent/1000 requests), 80% coverage threshold enforcement
+
+**Archives:** [Roadmap](milestones/v1.1-ROADMAP.md) | [Requirements](milestones/v1.1-REQUIREMENTS.md)
+
+---
+
 ## v1.0 LLMTokenHub MVP (Shipped: 2026-03-16)
 
 **Phases:** 6 | **Plans:** 17 | **Commits:** 99 | **LOC:** ~10,500 TS/Svelte
