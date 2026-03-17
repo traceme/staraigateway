@@ -3,14 +3,27 @@ import { authenticateApiKey } from '$lib/server/gateway/auth';
 import { proxyToLiteLLM } from '$lib/server/gateway/proxy';
 import { checkBudget } from '$lib/server/gateway/budget';
 import { checkAndNotifyBudgets } from '$lib/server/budget/notifications';
-
-const CORS_HEADERS = {
-	'Access-Control-Allow-Origin': '*',
-	'Access-Control-Allow-Headers': 'Authorization, Content-Type',
-	'Access-Control-Allow-Methods': 'POST, OPTIONS'
-};
+import { getCorsHeaders } from '$lib/server/gateway/cors';
+import { env } from '$env/dynamic/private';
 
 export const POST: RequestHandler = async ({ request }) => {
+	const corsHeaders = getCorsHeaders(request.headers.get('origin'));
+
+	const MAX_BODY_BYTES = parseInt(env.MAX_REQUEST_BODY_BYTES ?? '10485760', 10);
+	const contentLength = request.headers.get('content-length');
+	if (contentLength && parseInt(contentLength, 10) > MAX_BODY_BYTES) {
+		return new Response(
+			JSON.stringify({
+				error: {
+					message: `Request body exceeds maximum size of ${MAX_BODY_BYTES} bytes`,
+					type: 'invalid_request_error',
+					code: 'payload_too_large'
+				}
+			}),
+			{ status: 413, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+		);
+	}
+
 	const auth = await authenticateApiKey(request);
 	if (!auth) {
 		return new Response(
@@ -23,7 +36,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			}),
 			{
 				status: 401,
-				headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+				headers: { 'Content-Type': 'application/json', ...corsHeaders }
 			}
 		);
 	}
@@ -45,7 +58,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			}),
 			{
 				status: 429,
-				headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+				headers: { 'Content-Type': 'application/json', ...corsHeaders }
 			}
 		);
 	}
@@ -65,7 +78,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	// Add CORS headers to proxy response
 	const headers = new Headers(response.headers);
-	for (const [key, value] of Object.entries(CORS_HEADERS)) {
+	for (const [key, value] of Object.entries(corsHeaders)) {
 		headers.set(key, value);
 	}
 
@@ -75,9 +88,9 @@ export const POST: RequestHandler = async ({ request }) => {
 	});
 };
 
-export const OPTIONS: RequestHandler = async () => {
+export const OPTIONS: RequestHandler = async ({ request }) => {
 	return new Response(null, {
 		status: 204,
-		headers: CORS_HEADERS
+		headers: getCorsHeaders(request.headers.get('origin'))
 	});
 };

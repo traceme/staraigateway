@@ -1,14 +1,11 @@
 import type { RequestHandler } from './$types';
 import { authenticateApiKey } from '$lib/server/gateway/auth';
 import { getAvailableModels } from '$lib/server/gateway/models';
-
-const CORS_HEADERS = {
-	'Access-Control-Allow-Origin': '*',
-	'Access-Control-Allow-Headers': 'Authorization, Content-Type',
-	'Access-Control-Allow-Methods': 'GET, OPTIONS'
-};
+import { getCorsHeaders } from '$lib/server/gateway/cors';
 
 export const GET: RequestHandler = async ({ request }) => {
+	const corsHeaders = getCorsHeaders(request.headers.get('origin'));
+
 	const auth = await authenticateApiKey(request);
 	if (!auth) {
 		return new Response(
@@ -21,7 +18,7 @@ export const GET: RequestHandler = async ({ request }) => {
 			}),
 			{
 				status: 401,
-				headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+				headers: { 'Content-Type': 'application/json', ...corsHeaders }
 			}
 		);
 	}
@@ -35,7 +32,7 @@ export const GET: RequestHandler = async ({ request }) => {
 			}),
 			{
 				status: 200,
-				headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+				headers: { 'Content-Type': 'application/json', ...corsHeaders }
 			}
 		);
 	} catch (err) {
@@ -50,15 +47,15 @@ export const GET: RequestHandler = async ({ request }) => {
 			}),
 			{
 				status: 500,
-				headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+				headers: { 'Content-Type': 'application/json', ...corsHeaders }
 			}
 		);
 	}
 };
 
-export const OPTIONS: RequestHandler = async () => {
+export const OPTIONS: RequestHandler = async ({ request }) => {
 	return new Response(null, {
 		status: 204,
-		headers: CORS_HEADERS
+		headers: getCorsHeaders(request.headers.get('origin'))
 	});
 };

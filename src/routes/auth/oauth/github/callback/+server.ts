@@ -4,9 +4,10 @@ import { createSession, SESSION_COOKIE_NAME } from '$lib/server/auth/session';
 import { db } from '$lib/server/db';
 import { appUsers, appOauthAccounts } from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { isSecureContext } from '$lib/server/auth/cookies';
 import type { RequestHandler } from './$types';
 
-export const GET: RequestHandler = async ({ url, cookies }) => {
+export const GET: RequestHandler = async ({ url, cookies, request }) => {
 	if (!github) {
 		redirect(303, '/auth/login?error=oauth_failed');
 	}
@@ -112,7 +113,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		cookies.set(SESSION_COOKIE_NAME, token, {
 			path: '/',
 			httpOnly: true,
-			secure: false,
+			secure: isSecureContext(request, url),
 			sameSite: 'lax',
 			maxAge: 30 * 24 * 60 * 60
 		});

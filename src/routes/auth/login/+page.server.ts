@@ -6,6 +6,7 @@ import { loginSchema } from '$lib/server/auth/validation';
 import { verifyPassword } from '$lib/server/auth/password';
 import { createSession, SESSION_COOKIE_NAME } from '$lib/server/auth/session';
 import { env } from '$env/dynamic/private';
+import { isSecureContext } from '$lib/server/auth/cookies';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
@@ -78,7 +79,7 @@ export const actions = {
 		cookies.set(SESSION_COOKIE_NAME, token, {
 			path: '/',
 			httpOnly: true,
-			secure: false, // Will be true in production behind HTTPS
+			secure: isSecureContext(request, new URL(request.url)),
 			sameSite: 'lax',
 			maxAge: 30 * 24 * 60 * 60 // 30 days
 		});

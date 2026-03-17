@@ -1,5 +1,6 @@
 import type { Handle } from '@sveltejs/kit';
 import { validateSession, SESSION_COOKIE_NAME } from '$lib/server/auth/session';
+import { isSecureContext } from '$lib/server/auth/cookies';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	// /v1/* routes use API key auth (Bearer token), not session cookies
@@ -28,7 +29,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			event.cookies.set(SESSION_COOKIE_NAME, token, {
 				path: '/',
 				httpOnly: true,
-				secure: !event.url.hostname.startsWith('localhost'),
+				secure: isSecureContext(event.request, event.url),
 				sameSite: 'lax',
 				maxAge: 30 * 24 * 60 * 60 // 30 days in seconds
 			});
