@@ -58,11 +58,11 @@ Plans:
   3. Session cookies include the `Secure` flag when the application detects it is running behind HTTPS
   4. Requests to `/v1/*` endpoints with bodies exceeding the configured size limit are rejected with a 413 before the body is parsed
   5. Invitation tokens are cryptographically random 256-bit values separate from the database record ID, and `.env.example` contains no default secret values
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 08-01: TBD
-- [ ] 08-02: TBD
+- [ ] 08-01-PLAN.md — CORS allowlist, secure cookies, body size limit, invitation token upgrade, .env.example
+- [ ] 08-02-PLAN.md — OAuth account linking verification with password confirmation page
 
 ### Phase 9: Performance Optimization
 **Goal**: Gateway hot path is optimized with caching and efficient queries, reducing per-request DB overhead
@@ -123,7 +123,7 @@ Plans:
 | 5. Advanced Gateway & Launch | v1.0 | 4/4 | Complete | 2026-03-16 |
 | 6. Gap Closure | v1.0 | 1/1 | Complete | 2026-03-16 |
 | 7. Tech Debt Cleanup | v1.1 | Complete    | 2026-03-16 | 2026-03-17 |
-| 8. Security Hardening | v1.1 | 0/? | Not started | - |
+| 8. Security Hardening | v1.1 | 0/2 | Not started | - |
 | 9. Performance Optimization | v1.1 | 0/? | Not started | - |
 | 10. Unit Test Coverage | v1.1 | 0/? | Not started | - |
 | 11. Integration, E2E, and Load Testing | v1.1 | 0/? | Not started | - |
