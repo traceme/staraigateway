@@ -5,6 +5,7 @@ import { db } from '$lib/server/db';
 import { appUsers, appOauthAccounts } from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { isSecureContext } from '$lib/server/auth/cookies';
+import { encrypt } from '$lib/server/crypto';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ url, cookies, request }) => {
@@ -79,8 +80,30 @@ export const GET: RequestHandler = async ({ url, cookies, request }) => {
 				.limit(1);
 
 			if (existingUsers.length > 0) {
+				// Check if user has a password (email/password account)
+				if (existingUsers[0].passwordHash) {
+					// Store pending link data in encrypted cookie, redirect to confirmation
+					const pendingData = JSON.stringify({
+						provider: 'github',
+						providerUserId,
+						userId: existingUsers[0].id
+					});
+					const encrypted = encrypt(pendingData);
+
+					cookies.delete('github_oauth_state', { path: '/' });
+
+					cookies.set('oauth_pending_link', encrypted, {
+						path: '/',
+						httpOnly: true,
+						secure: isSecureContext(request, url),
+						sameSite: 'lax',
+						maxAge: 300 // 5 minutes
+					});
+
+					redirect(303, '/auth/oauth/confirm-link');
+				}
+				// OAuth-only account (no password) -- link directly, no risk
 				userId = existingUsers[0].id;
-				// Link OAuth account
 				await db.insert(appOauthAccounts).values({
 					id: crypto.randomUUID(),
 					userId,
