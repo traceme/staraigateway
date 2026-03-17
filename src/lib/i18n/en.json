@@ -102,6 +102,7 @@
 	},
 	"members": {
 		"title": "Members",
+		"description": "Manage your organization's team members and invitations.",
 		"invite": "Invite Member",
 		"invite_email": "Email address",
 		"invite_role": "Role",
@@ -117,7 +118,11 @@
 	},
 	"provider_keys": {
 		"title": "Provider Keys",
-		"description": "Connect your LLM provider API keys to enable AI model access for your team.",
+		"description": "Add your LLM provider API keys to enable AI access for your team",
+		"access_denied": "Access Denied",
+		"access_denied_hint": "Only organization owners and admins can manage provider keys.",
+		"global_providers": "Global Providers",
+		"china_providers": "China Providers",
 		"add_key": "Add Provider Key",
 		"no_keys": "No provider keys yet",
 		"no_keys_hint": "Add your first LLM provider key to get started.",
@@ -143,7 +148,18 @@
 	"usage": {
 		"title": "Usage",
 		"description": "Monitor API usage, costs, and token consumption across your organization.",
-		"no_data": "No usage data for this time range",
+		"no_data": "No usage data yet",
+		"no_data_hint": "Usage data will appear here once team members start making API requests.",
+		"total_spend": "Total Spend",
+		"total_requests": "Total Requests",
+		"avg_cost": "Avg Cost / Request",
+		"edit_budget": "Edit Budget",
+		"set_budget": "Set Budget",
+		"role_owners": "Owners",
+		"role_admins": "Admins",
+		"role_members": "Members",
+		"member_count": "{count} {count, plural, one {member} other {members}}",
+		"requests_count": "{count} requests",
 		"time_range": {
 			"7d": "Last 7 days",
 			"30d": "Last 30 days",
@@ -163,7 +179,10 @@
 			"output_tokens": "Output Tokens",
 			"cost": "Cost",
 			"user": "User",
-			"key": "Key"
+			"key": "Key",
+			"member": "Member",
+			"role": "Role",
+			"budget": "Budget"
 		},
 		"cost_trend": {
 			"title": "Cost Trend"
@@ -194,7 +213,11 @@
 	"models": {
 		"title": "Models",
 		"description": "Available AI models from your connected providers.",
-		"no_models": "No models available. Add a provider key to discover models.",
+		"no_models": "No models available",
+		"no_models_hint": "Add a provider key to see available models and pricing.",
+		"no_search_results": "No models found",
+		"no_search_results_hint": "No models match your search. Try a different query.",
+		"search_placeholder": "Search models...",
 		"table": {
 			"name": "Model Name",
 			"provider": "Provider",
@@ -205,7 +228,9 @@
 		"per_million_tokens": "per million tokens"
 	},
 	"settings": {
-		"title": "Settings",
+		"title": "Organization Settings",
+		"description": "Configure organization-wide defaults and policies.",
+		"page_title": "Settings",
 		"org_name": "Organization Name",
 		"org_description": "Description",
 		"org_slug": "URL Slug",
@@ -225,6 +250,7 @@
 	},
 	"org_create": {
 		"title": "Create Organization",
+		"subtitle": "Set up your team workspace to start sharing AI access.",
 		"name_label": "Organization Name",
 		"name_placeholder": "My Team",
 		"description_label": "Description",

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from 'svelte-i18n';
 	import OrgSettingsForm from '$lib/components/settings/OrgSettingsForm.svelte';
 	import SmartRoutingSettings from '$lib/components/settings/SmartRoutingSettings.svelte';
 	import CacheTtlSetting from '$lib/components/settings/CacheTtlSetting.svelte';
@@ -7,14 +8,14 @@
 </script>
 
 <svelte:head>
-	<title>Organization Settings - StarAIGateway</title>
+	<title>{$t('settings.title')} - StarAIGateway</title>
 </svelte:head>
 
 <div class="mx-auto max-w-4xl">
 	<div class="mb-8">
-		<h1 class="text-2xl font-bold text-zinc-100">Organization Settings</h1>
+		<h1 class="text-2xl font-bold text-zinc-100">{$t('settings.title')}</h1>
 		<p class="mt-1 text-sm text-zinc-500">
-			Configure organization-wide defaults and policies.
+			{$t('settings.description')}
 		</p>
 	</div>
 

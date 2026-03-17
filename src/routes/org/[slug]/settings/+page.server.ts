@@ -27,7 +27,7 @@ export const actions: Actions = {
 		const { currentOrg, membership } = await parent();
 
 		if (membership.role !== 'owner' && membership.role !== 'admin') {
-			return fail(403, { error: 'Only owners and admins can update settings' });
+			return fail(403, { errorKey: 'errors.settings_failed' });
 		}
 
 		const formData = await request.formData();
@@ -38,10 +38,10 @@ export const actions: Actions = {
 		const defaultTpmLimit = tpmStr && tpmStr.trim() !== '' ? parseInt(tpmStr, 10) : null;
 
 		if (defaultRpmLimit !== null && (isNaN(defaultRpmLimit) || defaultRpmLimit < 1)) {
-			return fail(400, { error: 'RPM limit must be a positive number' });
+			return fail(400, { errorKey: 'errors.settings_failed' });
 		}
 		if (defaultTpmLimit !== null && (isNaN(defaultTpmLimit) || defaultTpmLimit < 1)) {
-			return fail(400, { error: 'TPM limit must be a positive number' });
+			return fail(400, { errorKey: 'errors.settings_failed' });
 		}
 
 		await db
@@ -60,7 +60,7 @@ export const actions: Actions = {
 		const { currentOrg, membership } = await parent();
 
 		if (membership.role !== 'owner' && membership.role !== 'admin') {
-			return fail(403, { error: 'Only owners and admins can update settings' });
+			return fail(403, { errorKey: 'errors.settings_failed' });
 		}
 
 		const formData = await request.formData();
@@ -83,7 +83,7 @@ export const actions: Actions = {
 		const { currentOrg, membership } = await parent();
 
 		if (membership.role !== 'owner' && membership.role !== 'admin') {
-			return fail(403, { error: 'Only owners and admins can update settings' });
+			return fail(403, { errorKey: 'errors.settings_failed' });
 		}
 
 		const formData = await request.formData();
@@ -91,7 +91,7 @@ export const actions: Actions = {
 		const cacheTtlSeconds = ttlStr ? parseInt(ttlStr, 10) : null;
 
 		if (cacheTtlSeconds === null || isNaN(cacheTtlSeconds) || cacheTtlSeconds < 60 || cacheTtlSeconds > 86400) {
-			return fail(400, { error: 'TTL must be between 60 and 86,400 seconds.' });
+			return fail(400, { errorKey: 'errors.settings_failed' });
 		}
 
 		await db

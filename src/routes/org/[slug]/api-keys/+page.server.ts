@@ -1,6 +1,7 @@
 import { fail, error } from '@sveltejs/kit';
 import { z } from 'zod';
 import { db } from '$lib/server/db';
+import { zodErrorToKey } from '$lib/server/i18n-errors';
 import { appOrganizations, appOrgMembers, appApiKeys, appUsers } from '$lib/server/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { createApiKey, getUserApiKeys, revokeApiKey } from '$lib/server/api-keys';
@@ -116,7 +117,7 @@ export const actions: Actions = {
 		});
 
 		if (!parsed.success) {
-			return fail(400, { error: parsed.error.errors[0].message });
+			return fail(400, { errorKey: zodErrorToKey(parsed.error.errors[0].message) });
 		}
 
 		const smartRouting = formData.get('smartRouting') === 'true';
@@ -141,7 +142,7 @@ export const actions: Actions = {
 
 			return { success: true, key, fullKey };
 		} catch {
-			return fail(500, { error: 'Failed to create API key' });
+			return fail(500, { errorKey: 'errors.create_key_failed' });
 		}
 	},
 
@@ -152,13 +153,13 @@ export const actions: Actions = {
 		const parsed = revokeSchema.safeParse({ id: formData.get('id') });
 
 		if (!parsed.success) {
-			return fail(400, { error: parsed.error.errors[0].message });
+			return fail(400, { errorKey: zodErrorToKey(parsed.error.errors[0].message) });
 		}
 
 		const revoked = await revokeApiKey(parsed.data.id, org.id, userId);
 		if (!revoked) {
-			return fail(404, { error: 'API key not found' });
-		}
+			return fail(404, { errorKey: 'errors.key_not_found' });
+	}
 
 		return { success: true };
 	},
@@ -167,14 +168,14 @@ export const actions: Actions = {
 		const { org, role } = await resolveOrgUser(locals, params.slug);
 
 		if (role !== 'owner' && role !== 'admin') {
-			return fail(403, { error: 'Only owners and admins can revoke keys' });
+			return fail(403, { errorKey: 'errors.only_admins_revoke_keys' });
 		}
 
 		const formData = await request.formData();
 		const parsed = revokeSchema.safeParse({ id: formData.get('id') });
 
 		if (!parsed.success) {
-			return fail(400, { error: parsed.error.errors[0].message });
+			return fail(400, { errorKey: zodErrorToKey(parsed.error.errors[0].message) });
 		}
 
 		// Verify key belongs to this org and deactivate
@@ -185,7 +186,7 @@ export const actions: Actions = {
 			.limit(1);
 
 		if (keys.length === 0) {
-			return fail(404, { error: 'API key not found in this organization' });
+			return fail(404, { errorKey: 'errors.key_not_in_org' });
 		}
 
 		await db
@@ -200,7 +201,7 @@ export const actions: Actions = {
 		const { org, role } = await resolveOrgUser(locals, params.slug);
 
 		if (role !== 'owner' && role !== 'admin') {
-			return fail(403, { error: 'Only owners and admins can update rate limits' });
+			return fail(403, { errorKey: 'errors.only_admins_rate_limits' });
 		}
 
 		const formData = await request.formData();
@@ -211,7 +212,7 @@ export const actions: Actions = {
 		});
 
 		if (!parsed.success) {
-			return fail(400, { error: parsed.error.errors[0].message });
+			return fail(400, { errorKey: zodErrorToKey(parsed.error.errors[0].message) });
 		}
 
 		// Verify key belongs to this org
@@ -222,7 +223,7 @@ export const actions: Actions = {
 			.limit(1);
 
 		if (keys.length === 0) {
-			return fail(404, { error: 'API key not found in this organization' });
+			return fail(404, { errorKey: 'errors.key_not_in_org' });
 		}
 
 		const rpmVal = parsed.data.rpmLimit?.trim();

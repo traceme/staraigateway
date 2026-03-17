@@ -1,4 +1,5 @@
 import { fail } from '@sveltejs/kit';
+import { zodErrorToKey } from '$lib/server/i18n-errors';
 import { db } from '$lib/server/db';
 import {
 	appOrgMembers,
@@ -115,7 +116,7 @@ export const actions = {
 	invite: async ({ request, locals, parent }) => {
 		const { currentOrg, membership } = await parent();
 		if (membership.role !== 'admin' && membership.role !== 'owner') {
-			return fail(403, { error: 'Only admins can invite members' });
+			return fail(403, { errorKey: 'errors.only_admins_invite' });
 		}
 
 		const formData = await request.formData();
@@ -124,25 +125,25 @@ export const actions = {
 
 		const parsed = emailSchema.safeParse(email);
 		if (!parsed.success) {
-			return fail(400, { error: parsed.error.errors[0].message });
+			return fail(400, { errorKey: zodErrorToKey(parsed.error.errors[0].message) });
 		}
 
 		if (role !== 'admin' && role !== 'member') {
-			return fail(400, { error: 'Invalid role' });
+			return fail(400, { errorKey: 'validation.invalid_role' });
 		}
 
 		try {
 			await inviteMember(currentOrg.id, email, role, locals.user!.id);
 			return { success: true };
-		} catch (e) {
-			return fail(400, { error: e instanceof Error ? e.message : 'Failed to send invitation' });
+		} catch {
+			return fail(400, { errorKey: 'errors.invite_failed' });
 		}
 	},
 
 	changeRole: async ({ request, parent }) => {
 		const { currentOrg, membership } = await parent();
 		if (membership.role !== 'owner') {
-			return fail(403, { error: 'Only the owner can change roles' });
+			return fail(403, { errorKey: 'errors.only_owner_change_role' });
 		}
 
 		const formData = await request.formData();
@@ -150,21 +151,21 @@ export const actions = {
 		const newRole = formData.get('role') as string;
 
 		if (newRole !== 'admin' && newRole !== 'member') {
-			return fail(400, { error: 'Invalid role' });
+			return fail(400, { errorKey: 'validation.invalid_role' });
 		}
 
 		try {
 			await changeRole(currentOrg.id, targetUserId, newRole, membership.role);
 			return { success: true };
-		} catch (e) {
-			return fail(400, { error: e instanceof Error ? e.message : 'Failed to change role' });
+		} catch {
+			return fail(400, { errorKey: 'errors.role_change_failed' });
 		}
 	},
 
 	removeMember: async ({ request, parent }) => {
 		const { currentOrg, membership } = await parent();
 		if (membership.role !== 'admin' && membership.role !== 'owner') {
-			return fail(403, { error: 'Only admins can remove members' });
+			return fail(403, { errorKey: 'errors.only_admins_remove' });
 		}
 
 		const formData = await request.formData();
@@ -173,15 +174,15 @@ export const actions = {
 		try {
 			await removeMember(currentOrg.id, targetUserId, membership.role);
 			return { success: true };
-		} catch (e) {
-			return fail(400, { error: e instanceof Error ? e.message : 'Failed to remove member' });
+		} catch {
+			return fail(400, { errorKey: 'errors.remove_failed' });
 		}
 	},
 
 	revokeInvitation: async ({ request, parent }) => {
 		const { currentOrg, membership } = await parent();
 		if (membership.role !== 'admin' && membership.role !== 'owner') {
-			return fail(403, { error: 'Only admins can revoke invitations' });
+			return fail(403, { errorKey: 'errors.only_admins_revoke_invite' });
 		}
 
 		const formData = await request.formData();
@@ -190,9 +191,9 @@ export const actions = {
 		try {
 			await revokeInvitation(currentOrg.id, invitationId);
 			return { success: true };
-		} catch (e) {
+		} catch {
 			return fail(400, {
-				error: e instanceof Error ? e.message : 'Failed to revoke invitation'
+				errorKey: 'errors.revoke_invite_failed'
 			});
 		}
 	}

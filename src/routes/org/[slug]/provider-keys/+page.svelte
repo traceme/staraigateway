@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from 'svelte-i18n';
 	import ProviderCard from '$lib/components/provider-keys/ProviderCard.svelte';
 	import ProviderPanel from '$lib/components/provider-keys/ProviderPanel.svelte';
 	import type { ProviderDef } from '$lib/server/providers';
@@ -20,29 +21,29 @@
 </script>
 
 <svelte:head>
-	<title>Provider Keys - StarAIGateway</title>
+	<title>{$t('provider_keys.title')} - StarAIGateway</title>
 </svelte:head>
 
 {#if data.accessDenied}
 	<div class="flex items-center justify-center py-20">
 		<div class="text-center">
-			<h2 class="text-lg font-semibold text-zinc-300">Access Denied</h2>
-			<p class="mt-2 text-sm text-zinc-500">Only organization owners and admins can manage provider keys.</p>
+			<h2 class="text-lg font-semibold text-zinc-300">{$t('provider_keys.access_denied')}</h2>
+			<p class="mt-2 text-sm text-zinc-500">{$t('provider_keys.access_denied_hint')}</p>
 		</div>
 	</div>
 {:else}
 	<div class="mx-auto max-w-5xl">
 		<div class="mb-8">
-			<h1 class="text-2xl font-bold text-zinc-100">Provider Keys</h1>
+			<h1 class="text-2xl font-bold text-zinc-100">{$t('provider_keys.title')}</h1>
 			<p class="mt-1 text-sm text-zinc-500">
-				Add your LLM provider API keys to enable AI access for your team
+				{$t('provider_keys.description')}
 			</p>
 		</div>
 
 		<!-- Global Providers -->
 		<section class="mb-8">
 			<h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-zinc-500">
-				Global Providers
+				{$t('provider_keys.global_providers')}
 			</h2>
 			<div class="grid gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
 				{#each globalProviders as provider (provider.id)}
@@ -58,7 +59,7 @@
 		<!-- China Providers -->
 		<section>
 			<h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-zinc-500">
-				China Providers
+				{$t('provider_keys.china_providers')}
 			</h2>
 			<div class="grid gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
 				{#each chinaProviders as provider (provider.id)}

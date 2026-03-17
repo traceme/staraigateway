@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { t } from 'svelte-i18n';
 	import KpiCard from '$lib/components/usage/KpiCard.svelte';
 	import UsageTabs from '$lib/components/usage/UsageTabs.svelte';
 	import TimeRangePicker from '$lib/components/usage/TimeRangePicker.svelte';
@@ -35,40 +36,40 @@
 	const hasData = $derived(data.dailyCosts.length > 0 || data.kpi.totalRequests > 0);
 
 	// Overview table columns
-	const overviewColumns = [
-		{ key: 'model', label: 'Model', sortable: true },
-		{ key: 'provider', label: 'Provider', sortable: true },
-		{ key: 'requests', label: 'Requests', sortable: true, format: formatNumber },
-		{ key: 'inputTokens', label: 'Input Tokens', sortable: true, format: formatNumber },
-		{ key: 'outputTokens', label: 'Output Tokens', sortable: true, format: formatNumber },
-		{ key: 'cost', label: 'Cost', sortable: true, format: formatCost }
-	];
+	const overviewColumns = $derived([
+		{ key: 'model', label: $t('usage.table.model'), sortable: true },
+		{ key: 'provider', label: $t('usage.table.provider'), sortable: true },
+		{ key: 'requests', label: $t('usage.table.requests'), sortable: true, format: formatNumber },
+		{ key: 'inputTokens', label: $t('usage.table.input_tokens'), sortable: true, format: formatNumber },
+		{ key: 'outputTokens', label: $t('usage.table.output_tokens'), sortable: true, format: formatNumber },
+		{ key: 'cost', label: $t('usage.table.cost'), sortable: true, format: formatCost }
+	]);
 
 	// Member table columns (includes Role for TRACK-03)
-	const memberColumns = [
-		{ key: 'name', label: 'Member', sortable: true },
-		{ key: 'role', label: 'Role', sortable: true },
-		{ key: 'requests', label: 'Requests', sortable: true, format: formatNumber },
-		{ key: 'inputTokens', label: 'Input Tokens', sortable: true, format: formatNumber },
-		{ key: 'outputTokens', label: 'Output Tokens', sortable: true, format: formatNumber },
-		{ key: 'cost', label: 'Cost', sortable: true, format: formatCost },
+	const memberColumns = $derived([
+		{ key: 'name', label: $t('usage.table.member'), sortable: true },
+		{ key: 'role', label: $t('usage.table.role'), sortable: true },
+		{ key: 'requests', label: $t('usage.table.requests'), sortable: true, format: formatNumber },
+		{ key: 'inputTokens', label: $t('usage.table.input_tokens'), sortable: true, format: formatNumber },
+		{ key: 'outputTokens', label: $t('usage.table.output_tokens'), sortable: true, format: formatNumber },
+		{ key: 'cost', label: $t('usage.table.cost'), sortable: true, format: formatCost },
 		{
 			key: '_budget',
-			label: 'Budget',
+			label: $t('usage.table.budget'),
 			sortable: false,
-			render: (row: any) => row.budgetSource ? 'Edit Budget' : 'Set Budget'
+			render: (row: any) => row.budgetSource ? $t('usage.edit_budget') : $t('usage.set_budget')
 		}
-	];
+	]);
 
 	// Model table columns
-	const modelColumns = [
-		{ key: 'model', label: 'Model', sortable: true },
-		{ key: 'provider', label: 'Provider', sortable: true },
-		{ key: 'requests', label: 'Requests', sortable: true, format: formatNumber },
-		{ key: 'inputTokens', label: 'Input Tokens', sortable: true, format: formatNumber },
-		{ key: 'outputTokens', label: 'Output Tokens', sortable: true, format: formatNumber },
-		{ key: 'cost', label: 'Cost', sortable: true, format: formatCost }
-	];
+	const modelColumns = $derived([
+		{ key: 'model', label: $t('usage.table.model'), sortable: true },
+		{ key: 'provider', label: $t('usage.table.provider'), sortable: true },
+		{ key: 'requests', label: $t('usage.table.requests'), sortable: true, format: formatNumber },
+		{ key: 'inputTokens', label: $t('usage.table.input_tokens'), sortable: true, format: formatNumber },
+		{ key: 'outputTokens', label: $t('usage.table.output_tokens'), sortable: true, format: formatNumber },
+		{ key: 'cost', label: $t('usage.table.cost'), sortable: true, format: formatCost }
+	]);
 
 	// Bar chart data
 	const modelBarData = $derived(
@@ -81,22 +82,22 @@
 </script>
 
 <svelte:head>
-	<title>Usage - StarAIGateway</title>
+	<title>{$t('usage.title')} - StarAIGateway</title>
 </svelte:head>
 
 <div class="mx-auto max-w-5xl space-y-6">
 	<!-- Header -->
 	<div class="flex items-center justify-between">
-		<h1 class="text-2xl font-bold text-zinc-50">Usage</h1>
+		<h1 class="text-2xl font-bold text-zinc-50">{$t('usage.title')}</h1>
 		<TimeRangePicker range={data.range} from={data.fromDate} to={data.toDate} />
 	</div>
 
 	{#if hasData}
 		<!-- KPI Cards -->
 		<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-			<KpiCard label="Total Spend" value={formatCost(data.kpi.totalCost)} />
-			<KpiCard label="Total Requests" value={formatNumber(data.kpi.totalRequests)} />
-			<KpiCard label="Avg Cost / Request" value={formatCost(data.kpi.avgCost)} />
+			<KpiCard label={$t('usage.total_spend')} value={formatCost(data.kpi.totalCost)} />
+			<KpiCard label={$t('usage.total_requests')} value={formatNumber(data.kpi.totalRequests)} />
+			<KpiCard label={$t('usage.avg_cost')} value={formatCost(data.kpi.avgCost)} />
 		</div>
 
 		<!-- Tabs -->
@@ -121,11 +122,11 @@
 						{#each data.roleBreakdown as rb}
 							<div class="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
 								<p class="text-xs uppercase tracking-wider text-zinc-500">
-									{rb.role === 'owner' ? 'Owners' : rb.role === 'admin' ? 'Admins' : 'Members'}
+									{rb.role === 'owner' ? $t('usage.role_owners') : rb.role === 'admin' ? $t('usage.role_admins') : $t('usage.role_members')}
 								</p>
 								<p class="mt-1 text-xl font-bold text-zinc-50">{formatCost(rb.cost)}</p>
 								<p class="text-xs text-zinc-500">
-									{rb.members} {rb.members === 1 ? 'member' : 'members'} &middot; {formatNumber(rb.requests)} requests
+									{rb.members} {rb.members === 1 ? 'member' : 'members'} &middot; {formatNumber(rb.requests)} {$t('usage.table.requests').toLowerCase()}
 								</p>
 							</div>
 						{/each}
@@ -162,7 +163,7 @@
 											class="text-xs text-blue-400 hover:text-blue-300"
 											onclick={() => (selectedMember = member)}
 										>
-											{member.budgetSource ? 'Edit Budget' : 'Set Budget'}
+											{member.budgetSource ? $t('usage.edit_budget') : $t('usage.set_budget')}
 										</button>
 									</td>
 								</tr>
@@ -191,9 +192,9 @@
 	{:else}
 		<!-- Empty state -->
 		<div class="flex flex-col items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 p-12 text-center">
-			<h2 class="text-lg font-semibold text-zinc-300">No usage data yet</h2>
+			<h2 class="text-lg font-semibold text-zinc-300">{$t('usage.no_data')}</h2>
 			<p class="mt-2 max-w-md text-sm text-zinc-500">
-				Usage data will appear here once team members start making API requests.
+				{$t('usage.no_data_hint')}
 			</p>
 		</div>
 	{/if}

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { t, locale } from 'svelte-i18n';
 	import CreateKeyModal from '$lib/components/api-keys/CreateKeyModal.svelte';
 	import KeyCreatedModal from '$lib/components/api-keys/KeyCreatedModal.svelte';
 	import type { ApiKeyMetadata } from '$lib/server/api-keys';
@@ -24,10 +25,10 @@
 		createdKey = null;
 	}
 
-	function formatDate(date: Date | string | null): string {
-		if (!date) return 'Never';
+	function formatDate(date: Date | string | null, neverLabel: string = 'Never'): string {
+		if (!date) return neverLabel;
 		const d = typeof date === 'string' ? new Date(date) : date;
-		return d.toLocaleDateString('en-US', {
+		return d.toLocaleDateString($locale ?? 'en', {
 			month: 'short',
 			day: 'numeric',
 			year: 'numeric'
@@ -58,23 +59,22 @@
 </script>
 
 <svelte:head>
-	<title>API Keys - StarAIGateway</title>
+	<title>{$t('api_keys.title')} - StarAIGateway</title>
 </svelte:head>
 
 <div class="mx-auto max-w-4xl">
 	<div class="mb-8 flex items-center justify-between">
 		<div>
-			<h1 class="text-2xl font-bold text-zinc-100">API Keys</h1>
+			<h1 class="text-2xl font-bold text-zinc-100">{$t('api_keys.title')}</h1>
 			<p class="mt-1 text-sm text-zinc-500">
-				Personal API keys for accessing LLM models through Cursor, Continue.dev, Claude Code, and
-				other tools.
+				{$t('api_keys.description')}
 			</p>
 		</div>
 		<button
 			onclick={() => (showCreateModal = true)}
 			class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
 		>
-			Create API Key
+			{$t('api_keys.create')}
 		</button>
 	</div>
 
@@ -89,7 +89,7 @@
 					? 'border-b-2 border-blue-500 text-blue-400'
 					: 'text-zinc-400 hover:text-zinc-200'}"
 			>
-				My Keys
+				{$t('api_keys.my_keys')}
 			</button>
 			<button
 				role="tab"
@@ -99,7 +99,7 @@
 					? 'border-b-2 border-blue-500 text-blue-400'
 					: 'text-zinc-400 hover:text-zinc-200'}"
 			>
-				All Keys
+				{$t('api_keys.all_keys')}
 			</button>
 		</div>
 	{/if}
@@ -124,13 +124,13 @@
 				>
 					<polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" />
 				</svg>
-				<h3 class="mt-4 text-sm font-medium text-zinc-300">No API keys yet</h3>
-				<p class="mt-1 text-sm text-zinc-500">Create one to get started.</p>
+				<h3 class="mt-4 text-sm font-medium text-zinc-300">{$t('api_keys.no_keys')}</h3>
+				<p class="mt-1 text-sm text-zinc-500">{$t('api_keys.no_keys_hint')}</p>
 				<button
 					onclick={() => (showCreateModal = true)}
 					class="mt-4 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
 				>
-					Create API Key
+					{$t('api_keys.create')}
 				</button>
 			</div>
 		{:else}
@@ -138,11 +138,11 @@
 				<table class="w-full">
 					<thead>
 						<tr class="border-b border-zinc-800 bg-zinc-900/80">
-							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Name</th>
-							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Key</th>
-							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Status</th>
-							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Created</th>
-							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Last Used</th>
+							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{$t('api_keys.table.name')}</th>
+							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{$t('api_keys.table.key')}</th>
+							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{$t('api_keys.table.status')}</th>
+							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{$t('api_keys.table.created')}</th>
+							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{$t('api_keys.table.last_used')}</th>
 							<th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-zinc-500"></th>
 						</tr>
 					</thead>
@@ -157,13 +157,13 @@
 								</td>
 								<td class="px-4 py-3">
 									{#if key.isActive}
-										<span class="inline-flex rounded-full bg-green-900/40 px-2 py-0.5 text-xs font-medium text-green-400">Active</span>
+										<span class="inline-flex rounded-full bg-green-900/40 px-2 py-0.5 text-xs font-medium text-green-400">{$t('common.active')}</span>
 									{:else}
-										<span class="inline-flex rounded-full bg-red-900/40 px-2 py-0.5 text-xs font-medium text-red-400">Revoked</span>
+										<span class="inline-flex rounded-full bg-red-900/40 px-2 py-0.5 text-xs font-medium text-red-400">{$t('common.revoked')}</span>
 									{/if}
 								</td>
-								<td class="px-4 py-3 text-sm text-zinc-400">{formatDate(key.createdAt)}</td>
-								<td class="px-4 py-3 text-sm text-zinc-400">{formatDate(key.lastUsedAt)}</td>
+								<td class="px-4 py-3 text-sm text-zinc-400">{formatDate(key.createdAt, $t('common.never'))}</td>
+								<td class="px-4 py-3 text-sm text-zinc-400">{formatDate(key.lastUsedAt, $t('common.never'))}</td>
 								<td class="px-4 py-3 text-right">
 									{#if key.isActive}
 										<form
@@ -182,13 +182,13 @@
 												type="submit"
 												disabled={revokingId === key.id}
 												onclick={(e) => {
-													if (!confirm('Are you sure you want to revoke this API key? This cannot be undone.')) {
+													if (!confirm($t('api_keys.revoke_confirm'))) {
 														e.preventDefault();
 													}
 												}}
 												class="text-xs font-medium text-red-400 hover:text-red-300 disabled:opacity-50"
 											>
-												{revokingId === key.id ? 'Revoking...' : 'Revoke'}
+												{revokingId === key.id ? $t('api_keys.revoking') : $t('api_keys.revoke')}
 											</button>
 										</form>
 									{/if}
@@ -203,20 +203,20 @@
 		<!-- All Keys tab (admin only) -->
 		{#if data.allKeys.length === 0}
 			<div class="flex flex-col items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/50 py-16">
-				<h3 class="text-sm font-medium text-zinc-300">No API keys in this organization</h3>
+				<h3 class="text-sm font-medium text-zinc-300">{$t('api_keys.no_org_keys')}</h3>
 			</div>
 		{:else}
 			<div class="overflow-hidden rounded-lg border border-zinc-800">
 				<table class="w-full">
 					<thead>
 						<tr class="border-b border-zinc-800 bg-zinc-900/80">
-							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Name</th>
-							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Owner</th>
-							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Key</th>
-							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Status</th>
-							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">RPM</th>
-							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">TPM</th>
-							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Last Used</th>
+							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{$t('api_keys.table.name')}</th>
+							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{$t('api_keys.table.owner')}</th>
+							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{$t('api_keys.table.key')}</th>
+							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{$t('api_keys.table.status')}</th>
+							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{$t('api_keys.table.rpm')}</th>
+							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{$t('api_keys.table.tpm')}</th>
+							<th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{$t('api_keys.table.last_used')}</th>
 							<th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-zinc-500"></th>
 						</tr>
 					</thead>
@@ -232,14 +232,14 @@
 								</td>
 								<td class="px-4 py-3">
 									{#if key.isActive}
-										<span class="inline-flex rounded-full bg-green-900/40 px-2 py-0.5 text-xs font-medium text-green-400">Active</span>
+										<span class="inline-flex rounded-full bg-green-900/40 px-2 py-0.5 text-xs font-medium text-green-400">{$t('common.active')}</span>
 									{:else}
-										<span class="inline-flex rounded-full bg-red-900/40 px-2 py-0.5 text-xs font-medium text-red-400">Revoked</span>
+										<span class="inline-flex rounded-full bg-red-900/40 px-2 py-0.5 text-xs font-medium text-red-400">{$t('common.revoked')}</span>
 									{/if}
 								</td>
 								<td class="px-4 py-3 text-sm text-zinc-400">{formatRpm(key.rpmLimit)}</td>
 								<td class="px-4 py-3 text-sm text-zinc-400">{formatTpm(key.tpmLimit)}</td>
-								<td class="px-4 py-3 text-sm text-zinc-400">{formatDate(key.lastUsedAt)}</td>
+								<td class="px-4 py-3 text-sm text-zinc-400">{formatDate(key.lastUsedAt, $t('common.never'))}</td>
 								<td class="px-4 py-3 text-right">
 									{#if key.isActive}
 										{#if editingRateLimitId === key.id}
@@ -272,8 +272,8 @@
 													value={editTpm}
 													class="w-20 rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-xs text-zinc-200"
 												/>
-												<button type="submit" class="text-xs font-medium text-blue-400 hover:text-blue-300">Save</button>
-												<button type="button" onclick={() => (editingRateLimitId = null)} class="text-xs text-zinc-500 hover:text-zinc-300">Cancel</button>
+												<button type="submit" class="text-xs font-medium text-blue-400 hover:text-blue-300">{$t('common.save')}</button>
+												<button type="button" onclick={() => (editingRateLimitId = null)} class="text-xs text-zinc-500 hover:text-zinc-300">{$t('common.cancel')}</button>
 											</form>
 										{:else}
 											<!-- Three-dot menu -->
@@ -295,7 +295,7 @@
 															onclick={() => startEditRateLimit(key)}
 															class="block w-full px-4 py-2 text-left text-xs text-zinc-200 hover:bg-zinc-700"
 														>
-															Edit Rate Limits
+															{$t('api_keys.edit_rate_limits')}
 														</button>
 														<form
 															method="POST"
@@ -313,7 +313,7 @@
 															<button
 																type="submit"
 																onclick={(e) => {
-																	if (!confirm('Are you sure you want to revoke this API key? This cannot be undone.')) {
+																	if (!confirm($t('api_keys.revoke_confirm'))) {
 																		e.preventDefault();
 																		openMenuId = null;
 																	}

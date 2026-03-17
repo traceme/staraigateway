@@ -1,5 +1,6 @@
 import { fail, error } from '@sveltejs/kit';
 import { z } from 'zod';
+import { zodErrorToKey } from '$lib/server/i18n-errors';
 import { db } from '$lib/server/db';
 import { appOrganizations, appOrgMembers } from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -94,7 +95,7 @@ export const actions: Actions = {
 		});
 
 		if (!parsed.success) {
-			return fail(400, { error: parsed.error.errors[0].message });
+			return fail(400, { errorKey: zodErrorToKey(parsed.error.errors[0].message) });
 		}
 
 		try {
@@ -108,10 +109,10 @@ export const actions: Actions = {
 		} catch (err) {
 			if (err instanceof Error && err.message.includes('unique')) {
 				return fail(400, {
-					error: 'A key with this provider and label already exists'
+					errorKey: 'errors.provider_key_failed'
 				});
 			}
-			return fail(500, { error: 'Failed to create provider key' });
+			return fail(500, { errorKey: 'errors.provider_key_failed' });
 		}
 	},
 
@@ -128,13 +129,13 @@ export const actions: Actions = {
 		});
 
 		if (!parsed.success) {
-			return fail(400, { error: parsed.error.errors[0].message });
+			return fail(400, { errorKey: zodErrorToKey(parsed.error.errors[0].message) });
 		}
 
 		const { id, ...updates } = parsed.data;
 		const updated = await updateProviderKey(id, org.id, updates);
 		if (!updated) {
-			return fail(404, { error: 'Provider key not found' });
+			return fail(404, { errorKey: 'errors.key_not_found' });
 		}
 
 		return { success: true };
@@ -147,12 +148,12 @@ export const actions: Actions = {
 		const parsed = deleteSchema.safeParse({ id: formData.get('id') });
 
 		if (!parsed.success) {
-			return fail(400, { error: parsed.error.errors[0].message });
+			return fail(400, { errorKey: zodErrorToKey(parsed.error.errors[0].message) });
 		}
 
 		const deleted = await deleteProviderKey(parsed.data.id, org.id);
 		if (!deleted) {
-			return fail(404, { error: 'Provider key not found' });
+			return fail(404, { errorKey: 'errors.key_not_found' });
 		}
 
 		return { success: true };

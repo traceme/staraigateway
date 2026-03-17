@@ -40,7 +40,7 @@ export const actions = {
 			return fail(400, {
 				name,
 				description,
-				error: 'Organization name must be between 2 and 50 characters.'
+				errorKey: 'validation.name_required'
 			});
 		}
 
@@ -48,7 +48,7 @@ export const actions = {
 			return fail(400, {
 				name,
 				description,
-				error: 'Description must be 200 characters or fewer.'
+				errorKey: 'validation.name_too_long'
 			});
 		}
 

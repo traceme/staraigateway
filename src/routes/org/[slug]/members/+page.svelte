@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from 'svelte-i18n';
 	import MembersTable from '$lib/components/members/MembersTable.svelte';
 	import InvitePanel from '$lib/components/members/InvitePanel.svelte';
 
@@ -8,15 +9,15 @@
 </script>
 
 <svelte:head>
-	<title>Members - StarAIGateway</title>
+	<title>{$t('members.title')} - StarAIGateway</title>
 </svelte:head>
 
 <div class="mx-auto max-w-4xl">
 	<div class="mb-8 flex items-center justify-between">
 		<div>
-			<h1 class="text-2xl font-bold text-zinc-100">Members</h1>
+			<h1 class="text-2xl font-bold text-zinc-100">{$t('members.title')}</h1>
 			<p class="mt-1 text-sm text-zinc-500">
-				Manage your organization's team members and invitations.
+				{$t('members.description')}
 			</p>
 		</div>
 		{#if data.isAdmin}
@@ -24,7 +25,7 @@
 				onclick={() => (showInvitePanel = true)}
 				class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
 			>
-				Invite Member
+				{$t('members.invite')}
 			</button>
 		{/if}
 	</div>
