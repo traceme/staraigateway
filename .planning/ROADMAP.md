@@ -46,11 +46,11 @@ See: .planning/milestones/v1.1-ROADMAP.md
   2. All dashboard pages (org settings, members, API keys, usage, budgets) render text in the user's selected language
   3. Form validation errors and API error messages display in the user's selected language
   4. Switching language updates all visible UI text without requiring a page reload or re-login
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 12-01: TBD
-- [ ] 12-02: TBD
+- [ ] 12-01-PLAN.md — i18n infrastructure: svelte-i18n setup, translation JSON files, DB migration, language switcher, API endpoint, tests
+- [ ] 12-02-PLAN.md — Wire $t() into all dashboard components and page routes, migrate server errors to translatable keys
 
 ### Phase 13: Public Pages & Email Internationalization
 **Goal**: Unauthenticated visitors and email recipients experience the product in their preferred language
@@ -103,7 +103,7 @@ Phases 12 and 13 are sequential (13 depends on 12). Phases 14 and 15 are indepen
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 12. Dashboard Internationalization | v1.2 | 0/? | Not started | - |
+| 12. Dashboard Internationalization | v1.2 | 0/2 | Not started | - |
 | 13. Public Pages & Email Internationalization | v1.2 | 0/? | Not started | - |
 | 14. Audit Logs | v1.2 | 0/? | Not started | - |
 | 15. Model Catalog | v1.2 | 0/? | Not started | - |
