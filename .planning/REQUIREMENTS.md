@@ -29,10 +29,10 @@ Requirements for production hardening release. Each maps to roadmap phases.
 
 ### Performance
 
-- [ ] **PERF-01**: Gateway auth result cached in Redis with short TTL (reduce per-request DB queries)
-- [ ] **PERF-02**: Budget spend uses rolling snapshot instead of full log scan
+- [x] **PERF-01**: Gateway auth result cached in Redis with short TTL (reduce per-request DB queries)
+- [x] **PERF-02**: Budget spend uses rolling snapshot instead of full log scan
 - [x] **PERF-03**: Email transporter is a lazy singleton (not recreated per send)
-- [ ] **PERF-04**: Cache key normalization fixed (no false collisions on whitespace differences)
+- [x] **PERF-04**: Cache key normalization fixed (no false collisions on whitespace differences)
 - [x] **PERF-05**: Budget notification queries batched (fix N+1 in `resolveMemberBudgets`)
 
 ### Tech Debt
@@ -96,10 +96,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEC-04 | Phase 8 | Complete |
 | SEC-05 | Phase 8 | Complete |
 | SEC-06 | Phase 8 | Complete |
-| PERF-01 | Phase 9 | Pending |
-| PERF-02 | Phase 9 | Pending |
+| PERF-01 | Phase 9 | Complete |
+| PERF-02 | Phase 9 | Complete |
 | PERF-03 | Phase 9 | Complete |
-| PERF-04 | Phase 9 | Pending |
+| PERF-04 | Phase 9 | Complete |
 | PERF-05 | Phase 9 | Complete |
 | TEST-01 | Phase 10 | Pending |
 | TEST-02 | Phase 10 | Pending |
