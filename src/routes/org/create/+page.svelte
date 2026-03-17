@@ -6,7 +6,7 @@
 </script>
 
 <svelte:head>
-	<title>Create Organization - LLMTokenHub</title>
+	<title>Create Organization - StarAIGateway</title>
 </svelte:head>
 
 <main class="flex min-h-screen items-center justify-center px-4">

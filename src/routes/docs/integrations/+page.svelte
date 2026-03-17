@@ -18,12 +18,12 @@
 		},
 		{
 			title: 'Set the API Base URL',
-			description: 'Replace the default OpenAI URL with your LLMTokenHub instance.',
+			description: 'Replace the default OpenAI URL with your StarAIGateway instance.',
 			code: 'https://your-instance.com/v1'
 		},
 		{
 			title: 'Paste your API key',
-			description: 'Copy an API key from your LLMTokenHub dashboard and paste it here.',
+			description: 'Copy an API key from your StarAIGateway dashboard and paste it here.',
 			code: 'sk-lth-xxxxxxxxxxxx'
 		},
 		{
@@ -38,10 +38,10 @@
 			description: 'Open your Continue config file at ~/.continue/config.json.'
 		},
 		{
-			title: 'Add the LLMTokenHub provider',
+			title: 'Add the StarAIGateway provider',
 			description: 'Add the following to your models array:',
 			code: `{
-  "title": "LLMTokenHub",
+  "title": "StarAIGateway",
   "provider": "openai",
   "model": "gpt-4o",
   "apiBase": "https://your-instance.com/v1",
@@ -72,7 +72,7 @@ export ANTHROPIC_API_KEY=sk-lth-xxxxxxxxxxxx`
 		},
 		{
 			title: 'Verify the connection',
-			description: 'Run claude and send a test message. Responses should route through your LLMTokenHub instance.'
+			description: 'Run claude and send a test message. Responses should route through your StarAIGateway instance.'
 		}
 	];
 
@@ -91,14 +91,14 @@ export ANTHROPIC_API_KEY=sk-lth-xxxxxxxxxxxx`
 </script>
 
 <svelte:head>
-	<title>Integration Guides - LLMTokenHub</title>
+	<title>Integration Guides - StarAIGateway</title>
 </svelte:head>
 
 <LandingNav />
 
 <main class="max-w-3xl mx-auto px-6 py-16 pt-24">
 	<h1 class="text-[30px] font-bold text-zinc-50 mb-2">Integration Guides</h1>
-	<p class="text-zinc-400 mb-8">Connect your favorite tools to LLMTokenHub in minutes.</p>
+	<p class="text-zinc-400 mb-8">Connect your favorite tools to StarAIGateway in minutes.</p>
 
 	<ToolTabs {activeTab} {tabs} onTabChange={(tab) => (activeTab = tab)} />
 

@@ -81,7 +81,7 @@
 </script>
 
 <svelte:head>
-	<title>Usage - LLMTokenHub</title>
+	<title>Usage - StarAIGateway</title>
 </svelte:head>
 
 <div class="mx-auto max-w-5xl space-y-6">

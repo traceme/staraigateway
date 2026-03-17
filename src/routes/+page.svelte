@@ -8,7 +8,7 @@
 </script>
 
 <svelte:head>
-	<title>LLMTokenHub - Share AI Access With Your Team</title>
+	<title>StarAIGateway - 企业AI中台 | Share AI Access With Your Team</title>
 </svelte:head>
 
 <div class="bg-zinc-950 min-h-screen text-zinc-50">

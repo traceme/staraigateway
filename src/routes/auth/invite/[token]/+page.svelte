@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-	<title>Invitation - LLMTokenHub</title>
+	<title>Invitation - StarAIGateway</title>
 </svelte:head>
 
 <div class="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
@@ -41,7 +41,7 @@
 		{:else}
 			<div class="rounded-lg border border-zinc-800 bg-zinc-900 p-8">
 				<div class="text-center">
-					<h1 class="text-xl font-bold text-zinc-50">LLMTokenHub</h1>
+					<h1 class="text-xl font-bold text-zinc-50">StarAIGateway</h1>
 					<h2 class="mt-4 text-lg font-semibold text-zinc-100">You're invited!</h2>
 					<p class="mt-2 text-sm text-zinc-400">
 						<span class="font-medium text-zinc-300">{data.inviterName}</span> has invited you to join

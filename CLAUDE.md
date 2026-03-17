@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**llmtokenhub** is a reference architecture for enterprise AI tool sharing — enabling 20-100 person teams to share access to Claude, ChatGPT, Gemini and other LLMs at 40-60% lower cost than per-seat subscriptions. It bundles three open-source projects as subfolders:
+**StarAIGateway** (企业AI中台) is a reference architecture for enterprise AI tool sharing — enabling 20-100 person teams to share access to Claude, ChatGPT, Gemini and other LLMs at 40-60% lower cost than per-seat subscriptions. It bundles three open-source projects as subfolders:
 
 | Component | Role | Tech Stack |
 |---|---|---|

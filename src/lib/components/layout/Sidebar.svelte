@@ -59,7 +59,7 @@
 <nav class="flex h-full flex-col">
 	<!-- Brand -->
 	<div class="flex h-14 items-center border-b border-zinc-800 px-4">
-		<span class="text-lg font-bold text-zinc-50">LLMTokenHub</span>
+		<span class="text-lg font-bold text-zinc-50">StarAIGateway</span>
 	</div>
 
 	<!-- Navigation items -->

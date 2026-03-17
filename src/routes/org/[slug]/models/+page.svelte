@@ -17,7 +17,7 @@
 </script>
 
 <svelte:head>
-	<title>Models - LLMTokenHub</title>
+	<title>Models - StarAIGateway</title>
 </svelte:head>
 
 <div class="mx-auto max-w-4xl space-y-6">

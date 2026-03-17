@@ -14,7 +14,7 @@ export function passwordResetEmail(name: string, resetUrl: string) {
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 480px; background-color: #ffffff; border-radius: 8px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <tr>
             <td style="text-align: center; padding-bottom: 24px;">
-              <h1 style="margin: 0; font-size: 20px; font-weight: 600; color: #18181b;">LLMTokenHub</h1>
+              <h1 style="margin: 0; font-size: 20px; font-weight: 600; color: #18181b;">StarAIGateway</h1>
             </td>
           </tr>
           <tr>
@@ -50,7 +50,7 @@ export function passwordResetEmail(name: string, resetUrl: string) {
 </body>
 </html>`;
 
-	const text = `Hi ${name},\n\nWe received a request to reset your password. Visit this link to set a new password (expires in 1 hour):\n${resetUrl}\n\nIf you didn't request this, you can safely ignore this email.\n\n- LLMTokenHub`;
+	const text = `Hi ${name},\n\nWe received a request to reset your password. Visit this link to set a new password (expires in 1 hour):\n${resetUrl}\n\nIf you didn't request this, you can safely ignore this email.\n\n- StarAIGateway`;
 
 	return { subject, html, text };
 }

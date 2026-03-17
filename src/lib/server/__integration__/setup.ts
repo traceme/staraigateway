@@ -5,7 +5,7 @@ import { execSync } from 'child_process';
 import * as schema from '../db/schema';
 
 export const TEST_DATABASE_URL =
-	process.env.TEST_DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5433/llmtokenhub_test';
+	process.env.TEST_DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5433/staraigateway_test';
 
 let _client: ReturnType<typeof postgres> | null = null;
 let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;

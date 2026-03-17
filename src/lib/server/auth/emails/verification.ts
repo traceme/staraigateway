@@ -14,7 +14,7 @@ export function verificationEmail(name: string, verifyUrl: string) {
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 480px; background-color: #ffffff; border-radius: 8px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <tr>
             <td style="text-align: center; padding-bottom: 24px;">
-              <h1 style="margin: 0; font-size: 20px; font-weight: 600; color: #18181b;">LLMTokenHub</h1>
+              <h1 style="margin: 0; font-size: 20px; font-weight: 600; color: #18181b;">StarAIGateway</h1>
             </td>
           </tr>
           <tr>
@@ -45,7 +45,7 @@ export function verificationEmail(name: string, verifyUrl: string) {
 </body>
 </html>`;
 
-	const text = `Hi ${name},\n\nPlease verify your email address by visiting this link:\n${verifyUrl}\n\n- LLMTokenHub`;
+	const text = `Hi ${name},\n\nPlease verify your email address by visiting this link:\n${verifyUrl}\n\n- StarAIGateway`;
 
 	return { subject, html, text };
 }

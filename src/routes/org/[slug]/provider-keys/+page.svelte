@@ -20,7 +20,7 @@
 </script>
 
 <svelte:head>
-	<title>Provider Keys - LLMTokenHub</title>
+	<title>Provider Keys - StarAIGateway</title>
 </svelte:head>
 
 {#if data.accessDenied}

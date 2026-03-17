@@ -58,7 +58,7 @@
 </script>
 
 <svelte:head>
-	<title>API Keys - LLMTokenHub</title>
+	<title>API Keys - StarAIGateway</title>
 </svelte:head>
 
 <div class="mx-auto max-w-4xl">

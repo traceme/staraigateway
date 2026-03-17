@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>Forgot Password - LLMTokenHub</title>
+	<title>Forgot Password - StarAIGateway</title>
 </svelte:head>
 
 <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">

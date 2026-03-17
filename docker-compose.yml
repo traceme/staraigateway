@@ -4,7 +4,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/llmtokenhub
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/staraigateway
       - REDIS_URL=redis://redis:6379
       - LITELLM_API_URL=http://litellm:4000
     env_file:
@@ -22,7 +22,7 @@ services:
     ports:
       - "4000:4000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/llmtokenhub
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/staraigateway
       - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-litellm-master-key}
     depends_on:
       postgres:
@@ -37,7 +37,7 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: llmtokenhub
+      POSTGRES_DB: staraigateway
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:

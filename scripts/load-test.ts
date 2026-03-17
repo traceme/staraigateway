@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * Load test for LLMTokenHub gateway /v1/chat/completions endpoint.
+ * Load test for StarAIGateway gateway /v1/chat/completions endpoint.
  *
  * Prerequisites:
  *   1. Start the app server: npm run build && npm run preview (or docker compose up)
@@ -36,7 +36,7 @@ const requestBody = JSON.stringify({
 });
 
 async function run(): Promise<void> {
-	console.log('--- LLMTokenHub Gateway Load Test ---');
+	console.log('--- StarAIGateway Gateway Load Test ---');
 	console.log(`Target: ${BASE_URL}/v1/chat/completions`);
 	console.log(`Connections: ${CONNECTIONS}`);
 	console.log(`Total requests: ${AMOUNT}`);

@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>Organization Settings - LLMTokenHub</title>
+	<title>Organization Settings - StarAIGateway</title>
 </svelte:head>
 
 <div class="mx-auto max-w-4xl">

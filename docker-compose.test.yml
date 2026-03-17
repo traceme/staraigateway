@@ -1,9 +1,9 @@
 services:
   test-db:
     image: postgres:16-alpine
-    container_name: llmtokenhub-test-db
+    container_name: staraigateway-test-db
     environment:
-      POSTGRES_DB: llmtokenhub_test
+      POSTGRES_DB: staraigateway_test
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:

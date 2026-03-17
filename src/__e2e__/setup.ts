@@ -6,7 +6,7 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import * as schema from '$lib/server/db/schema';
 
 export const TEST_DATABASE_URL =
-	process.env.TEST_DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5433/llmtokenhub_test';
+	process.env.TEST_DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5433/staraigateway_test';
 
 // Valid 64-char hex encryption key for tests (32 bytes)
 export const TEST_ENCRYPTION_KEY = 'aa'.repeat(32);

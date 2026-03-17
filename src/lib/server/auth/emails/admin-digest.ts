@@ -3,7 +3,7 @@ export function adminDigestEmail(
 	date: string,
 	members: Array<{ name: string; spend: string; limit: string; percentage: number }>
 ): { subject: string; html: string; text: string } {
-	const subject = `LLMTokenHub: Daily budget digest for ${orgName}`;
+	const subject = `StarAIGateway: Daily budget digest for ${orgName}`;
 
 	const memberRows = members
 		.map(
@@ -32,7 +32,7 @@ export function adminDigestEmail(
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 560px; background-color: #ffffff; border-radius: 8px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <tr>
             <td style="text-align: center; padding-bottom: 24px;">
-              <h1 style="margin: 0; font-size: 20px; font-weight: 600; color: #18181b;">LLMTokenHub</h1>
+              <h1 style="margin: 0; font-size: 20px; font-weight: 600; color: #18181b;">StarAIGateway</h1>
             </td>
           </tr>
           <tr>
@@ -65,7 +65,7 @@ export function adminDigestEmail(
           </tr>
           <tr>
             <td style="padding-top: 24px; border-top: 1px solid #e4e4e7; margin-top: 24px;">
-              <p style="margin: 0; font-size: 13px; color: #a1a1aa;">${orgName} &middot; LLMTokenHub</p>
+              <p style="margin: 0; font-size: 13px; color: #a1a1aa;">${orgName} &middot; StarAIGateway</p>
             </td>
           </tr>
         </table>
@@ -75,7 +75,7 @@ export function adminDigestEmail(
 </body>
 </html>`;
 
-	const text = `Daily budget digest for ${orgName}\n${date}\n\nMembers at 90%+ of budget:\n${textRows}\n\n${orgName} - LLMTokenHub`;
+	const text = `Daily budget digest for ${orgName}\n${date}\n\nMembers at 90%+ of budget:\n${textRows}\n\n${orgName} - StarAIGateway`;
 
 	return { subject, html, text };
 }

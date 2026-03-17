@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-	<title>Verify Email - LLMTokenHub</title>
+	<title>Verify Email - StarAIGateway</title>
 </svelte:head>
 
 <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6 text-center">

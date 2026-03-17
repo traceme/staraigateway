@@ -6,7 +6,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.orgName} Dashboard - LLMTokenHub</title>
+	<title>{data.orgName} Dashboard - StarAIGateway</title>
 </svelte:head>
 
 <div class="mx-auto max-w-4xl space-y-6">

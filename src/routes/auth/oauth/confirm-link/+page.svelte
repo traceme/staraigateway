@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>Confirm Account Link - LLMTokenHub</title>
+	<title>Confirm Account Link - StarAIGateway</title>
 </svelte:head>
 
 <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">

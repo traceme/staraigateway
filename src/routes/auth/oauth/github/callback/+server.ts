@@ -27,7 +27,7 @@ export const GET: RequestHandler = async ({ url, cookies, request }) => {
 
 		// Fetch user info from GitHub API
 		const userResponse = await fetch('https://api.github.com/user', {
-			headers: { Authorization: `Bearer ${accessToken}`, 'User-Agent': 'LLMTokenHub' }
+			headers: { Authorization: `Bearer ${accessToken}`, 'User-Agent': 'StarAIGateway' }
 		});
 		const githubUser = (await userResponse.json()) as {
 			id: number;
@@ -41,7 +41,7 @@ export const GET: RequestHandler = async ({ url, cookies, request }) => {
 		// If email is private, fetch from emails endpoint
 		if (!email) {
 			const emailsResponse = await fetch('https://api.github.com/user/emails', {
-				headers: { Authorization: `Bearer ${accessToken}`, 'User-Agent': 'LLMTokenHub' }
+				headers: { Authorization: `Bearer ${accessToken}`, 'User-Agent': 'StarAIGateway' }
 			});
 			const emails = (await emailsResponse.json()) as Array<{
 				email: string;

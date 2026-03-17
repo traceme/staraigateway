@@ -8,7 +8,7 @@
 </script>
 
 <svelte:head>
-	<title>Members - LLMTokenHub</title>
+	<title>Members - StarAIGateway</title>
 </svelte:head>
 
 <div class="mx-auto max-w-4xl">

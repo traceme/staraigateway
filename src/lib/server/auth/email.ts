@@ -29,7 +29,7 @@ function getTransport(): nodemailer.Transporter | null {
 }
 
 function getFromAddress(): string {
-	return env.SMTP_FROM || `LLMTokenHub <noreply@${env.SMTP_HOST || 'localhost'}>`;
+	return env.SMTP_FROM || `StarAIGateway <noreply@${env.SMTP_HOST || 'localhost'}>`;
 }
 
 function getAppUrl(): string {

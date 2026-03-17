@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>Sign Up - LLMTokenHub</title>
+	<title>Sign Up - StarAIGateway</title>
 </svelte:head>
 
 <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">

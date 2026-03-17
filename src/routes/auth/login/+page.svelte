@@ -11,7 +11,7 @@
 </script>
 
 <svelte:head>
-	<title>Log In - LLMTokenHub</title>
+	<title>Log In - StarAIGateway</title>
 </svelte:head>
 
 <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">

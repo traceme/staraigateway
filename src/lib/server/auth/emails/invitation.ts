@@ -4,7 +4,7 @@ export function invitationEmail(
 	role: string,
 	acceptUrl: string
 ) {
-	const subject = `You've been invited to join ${orgName} on LLMTokenHub`;
+	const subject = `You've been invited to join ${orgName} on StarAIGateway`;
 
 	const html = `<!DOCTYPE html>
 <html>
@@ -19,7 +19,7 @@ export function invitationEmail(
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 480px; background-color: #ffffff; border-radius: 8px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <tr>
             <td style="text-align: center; padding-bottom: 24px;">
-              <h1 style="margin: 0; font-size: 20px; font-weight: 600; color: #18181b;">LLMTokenHub</h1>
+              <h1 style="margin: 0; font-size: 20px; font-weight: 600; color: #18181b;">StarAIGateway</h1>
             </td>
           </tr>
           <tr>
@@ -51,7 +51,7 @@ export function invitationEmail(
 </body>
 </html>`;
 
-	const text = `Hi there,\n\n${inviterName} has invited you to join ${orgName} as a ${role}.\n\nAccept the invitation: ${acceptUrl}\n\nThis invitation expires in 7 days.\n\n- LLMTokenHub`;
+	const text = `Hi there,\n\n${inviterName} has invited you to join ${orgName} as a ${role}.\n\nAccept the invitation: ${acceptUrl}\n\nThis invitation expires in 7 days.\n\n- StarAIGateway`;
 
 	return { subject, html, text };
 }

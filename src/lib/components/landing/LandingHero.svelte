@@ -1,8 +1,9 @@
 <section class="bg-gradient-to-b from-blue-900/20 to-zinc-950 pt-24 pb-16">
 	<div class="max-w-4xl mx-auto px-6 text-center">
 		<h1 class="text-3xl md:text-5xl font-bold text-zinc-50">
-			Share AI access with your team. Save 40-60% on LLM costs.
+			StarAIGateway — 企业AI中台
 		</h1>
+		<p class="text-lg text-zinc-300 mt-3">Share AI access with your team. Save 40-60% on LLM costs.</p>
 		<p class="text-xl text-zinc-400 max-w-2xl mx-auto mt-6">
 			Pool API keys across your team instead of buying per-seat subscriptions. Budget controls, smart routing, and usage tracking built in.
 		</p>

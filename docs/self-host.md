@@ -1,6 +1,6 @@
-# Self-Hosting LLMTokenHub
+# Self-Hosting StarAIGateway
 
-Deploy LLMTokenHub on your own infrastructure with Docker Compose. Your data stays on your servers.
+Deploy StarAIGateway on your own infrastructure with Docker Compose. Your data stays on your servers.
 
 ## Prerequisites
 
@@ -12,8 +12,8 @@ Deploy LLMTokenHub on your own infrastructure with Docker Compose. Your data sta
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-org/llmtokenhub.git
-cd llmtokenhub
+git clone https://github.com/your-org/staraigateway.git
+cd staraigateway
 
 # 2. Copy the example environment file
 cp .env.example .env
@@ -31,10 +31,10 @@ The app will be available at `http://localhost:3000`.
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `DATABASE_URL` | Yes | `postgresql://postgres:postgres@postgres:5432/llmtokenhub` | PostgreSQL connection string. Set automatically in Docker Compose. |
+| `DATABASE_URL` | Yes | `postgresql://postgres:postgres@postgres:5432/staraigateway` | PostgreSQL connection string. Set automatically in Docker Compose. |
 | `REDIS_URL` | No | `redis://redis:6379` | Redis connection string for response caching. Set automatically in Docker Compose. |
 | `ENCRYPTION_KEY` | Yes | — | 32-byte hex string (64 characters) for AES-256-GCM encryption of provider API keys. Generate with: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
-| `BASE_URL` | No | `http://localhost:3000` | Public URL of your LLMTokenHub instance. Used for OAuth callbacks and email links. |
+| `BASE_URL` | No | `http://localhost:3000` | Public URL of your StarAIGateway instance. Used for OAuth callbacks and email links. |
 | `LITELLM_API_URL` | No | `http://litellm:4000` | LiteLLM proxy URL. Set automatically in Docker Compose. |
 | `LITELLM_MASTER_KEY` | No | `sk-litellm-master-key` | Master API key for LiteLLM admin operations. Change in production. |
 | `CRON_SECRET` | No | — | Secret token for authenticating cron job requests (e.g., `/api/cron/digest`). Generate with: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
@@ -42,7 +42,7 @@ The app will be available at `http://localhost:3000`.
 | `SMTP_PORT` | No | `587` | SMTP server port. |
 | `SMTP_USER` | No | — | SMTP authentication username. |
 | `SMTP_PASS` | No | — | SMTP authentication password. |
-| `SMTP_FROM` | No | `noreply@llmtokenhub.com` | Sender address for outgoing emails. |
+| `SMTP_FROM` | No | `noreply@staraigateway.com` | Sender address for outgoing emails. |
 | `GOOGLE_CLIENT_ID` | No | — | Google OAuth client ID for "Sign in with Google". |
 | `GOOGLE_CLIENT_SECRET` | No | — | Google OAuth client secret. |
 | `GITHUB_CLIENT_ID` | No | — | GitHub OAuth client ID for "Sign in with GitHub". |
@@ -91,10 +91,10 @@ Back up your PostgreSQL database regularly:
 
 ```bash
 # Create a backup
-docker compose exec postgres pg_dump -U postgres llmtokenhub > backup_$(date +%Y%m%d).sql
+docker compose exec postgres pg_dump -U postgres staraigateway > backup_$(date +%Y%m%d).sql
 
 # Restore from backup
-cat backup_20260316.sql | docker compose exec -T postgres psql -U postgres llmtokenhub
+cat backup_20260316.sql | docker compose exec -T postgres psql -U postgres staraigateway
 ```
 
 ## Troubleshooting
@@ -133,7 +133,7 @@ docker compose exec redis redis-cli ping
 
 For Google or GitHub OAuth, you need to:
 
-1. Set `BASE_URL` to your public URL (e.g., `https://llmtokenhub.yourcompany.com`)
+1. Set `BASE_URL` to your public URL (e.g., `https://staraigateway.yourcompany.com`)
 2. Configure OAuth callback URLs in your provider's developer console:
    - Google: `{BASE_URL}/auth/callback/google`
    - GitHub: `{BASE_URL}/auth/callback/github`
