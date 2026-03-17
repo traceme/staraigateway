@@ -9,7 +9,8 @@ import {
 	logUsage,
 	extractUsageFromJSON,
 	extractUsageFromSSEText,
-	calculateCost
+	calculateCost,
+	updateSpendSnapshot
 } from './usage';
 import {
 	checkRateLimit,
@@ -65,7 +66,8 @@ export async function proxyToLiteLLM(
 	orgId: string,
 	path: string,
 	auth?: GatewayAuth,
-	apiKeyId?: string
+	apiKeyId?: string,
+	budgetId?: string | null
 ): Promise<Response> {
 	const startTime = Date.now();
 
@@ -293,6 +295,9 @@ export async function proxyToLiteLLM(
 											'success',
 											true
 										);
+										if (budgetId && cost > 0) {
+											updateSpendSnapshot(budgetId, Math.round(cost * 100));
+										}
 									} else {
 										logUsage(
 											auth,
@@ -388,6 +393,9 @@ export async function proxyToLiteLLM(
 						'success',
 						false
 					);
+					if (budgetId && cost > 0) {
+						updateSpendSnapshot(budgetId, Math.round(cost * 100));
+					}
 				} else {
 					logUsage(
 						auth,

@@ -73,7 +73,8 @@ export const POST: RequestHandler = async ({ request }) => {
 		auth.orgId,
 		'/v1/embeddings',
 		auth,
-		auth.apiKeyId
+		auth.apiKeyId,
+		budgetResult.budgetId
 	);
 
 	const headers = new Headers(response.headers);

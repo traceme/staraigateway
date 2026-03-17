@@ -73,7 +73,8 @@ export const POST: RequestHandler = async ({ request }) => {
 		auth.orgId,
 		'/v1/chat/completions',
 		auth,
-		auth.apiKeyId
+		auth.apiKeyId,
+		budgetResult.budgetId
 	);
 
 	// Add CORS headers to proxy response

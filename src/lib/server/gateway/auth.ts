@@ -2,6 +2,7 @@ import { createHash } from 'crypto';
 import { db } from '$lib/server/db';
 import { appApiKeys, appUsers, appOrganizations } from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { getRedis } from '$lib/server/redis';
 
 export interface GatewayAuth {
 	userId: string;
@@ -21,10 +22,35 @@ export interface GatewayAuth {
 	};
 }
 
+const AUTH_CACHE_TTL = 60; // seconds
+
+async function getCachedAuth(keyHash: string): Promise<GatewayAuth | null> {
+	try {
+		const redis = getRedis();
+		if (!redis) return null;
+		const cached = await redis.get(`auth:${keyHash}`);
+		if (!cached) return null;
+		return JSON.parse(cached) as GatewayAuth;
+	} catch {
+		return null;
+	}
+}
+
+async function setCachedAuth(keyHash: string, auth: GatewayAuth): Promise<void> {
+	try {
+		const redis = getRedis();
+		if (!redis) return;
+		await redis.setex(`auth:${keyHash}`, AUTH_CACHE_TTL, JSON.stringify(auth));
+	} catch {
+		// Cache write failure is non-critical
+	}
+}
+
 /**
  * Authenticate an API request using a Bearer sk-th-* API key.
  * Extracts the token from the Authorization header, hashes it with SHA-256,
  * and looks it up in appApiKeys. Returns user/org info with effective rate limits or null.
+ * Uses Redis cache-aside with 60s TTL; gracefully degrades to DB on Redis failure.
  */
 export async function authenticateApiKey(request: Request): Promise<GatewayAuth | null> {
 	const authHeader = request.headers.get('Authorization');
@@ -35,6 +61,18 @@ export async function authenticateApiKey(request: Request): Promise<GatewayAuth 
 
 	// SHA-256 hash (same as api-keys.ts uses)
 	const keyHash = createHash('sha256').update(token).digest('hex');
+
+	// Try Redis cache first
+	const cached = await getCachedAuth(keyHash);
+	if (cached) {
+		// Fire-and-forget lastUsedAt update
+		db.update(appApiKeys)
+			.set({ lastUsedAt: new Date() })
+			.where(eq(appApiKeys.keyHash, keyHash))
+			.then(() => {})
+			.catch(() => {});
+		return cached;
+	}
 
 	// Look up the key with org join, including rate limit fields
 	const rows = await db
@@ -74,7 +112,7 @@ export async function authenticateApiKey(request: Request): Promise<GatewayAuth 
 	const effectiveRpmLimit = row.rpmLimit ?? row.defaultRpmLimit ?? null;
 	const effectiveTpmLimit = row.tpmLimit ?? row.defaultTpmLimit ?? null;
 
-	return {
+	const result: GatewayAuth = {
 		userId: row.userId,
 		orgId: row.orgId,
 		apiKeyId: row.keyId,
@@ -91,4 +129,9 @@ export async function authenticateApiKey(request: Request): Promise<GatewayAuth 
 			cacheTtlSeconds: row.cacheTtlSeconds
 		}
 	};
+
+	// Cache the result (fire-and-forget)
+	setCachedAuth(keyHash, result).catch(() => {});
+
+	return result;
 }
