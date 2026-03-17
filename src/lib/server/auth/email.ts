@@ -6,8 +6,17 @@ import { budgetWarningEmail } from './emails/budget-warning';
 import { adminDigestEmail } from './emails/admin-digest';
 import { invitationEmail } from './emails/invitation';
 
-function getTransport() {
-	return nodemailer.createTransport({
+let transport: nodemailer.Transporter | null | undefined; // undefined = not yet initialized
+
+function getTransport(): nodemailer.Transporter | null {
+	if (transport !== undefined) return transport;
+
+	if (!env.SMTP_HOST) {
+		transport = null;
+		return null;
+	}
+
+	transport = nodemailer.createTransport({
 		host: env.SMTP_HOST,
 		port: Number(env.SMTP_PORT) || 587,
 		secure: Number(env.SMTP_PORT) === 465,
@@ -16,6 +25,7 @@ function getTransport() {
 			pass: env.SMTP_PASS
 		}
 	});
+	return transport;
 }
 
 function getFromAddress(): string {
@@ -35,6 +45,7 @@ export async function sendVerificationEmail(
 	const { subject, html, text } = verificationEmail(name, verifyUrl);
 
 	const transport = getTransport();
+	if (!transport) throw new Error('SMTP not configured');
 	await transport.sendMail({
 		from: getFromAddress(),
 		to: email,
@@ -53,6 +64,7 @@ export async function sendPasswordResetEmail(
 	const { subject, html, text } = passwordResetEmail(name, resetUrl);
 
 	const transport = getTransport();
+	if (!transport) throw new Error('SMTP not configured');
 	await transport.sendMail({
 		from: getFromAddress(),
 		to: email,
@@ -71,6 +83,7 @@ export async function sendBudgetWarningEmail(
 ): Promise<void> {
 	const { subject, html, text } = budgetWarningEmail(memberName, currentSpend, limit, orgName);
 	const transport = getTransport();
+	if (!transport) throw new Error('SMTP not configured');
 	await transport.sendMail({ from: getFromAddress(), to: email, subject, html, text });
 }
 
@@ -85,6 +98,7 @@ export async function sendInvitationEmail(
 	const { subject, html, text } = invitationEmail(orgName, inviterName, role, acceptUrl);
 
 	const transport = getTransport();
+	if (!transport) throw new Error('SMTP not configured');
 	await transport.sendMail({
 		from: getFromAddress(),
 		to: email,
@@ -102,5 +116,6 @@ export async function sendAdminDigestEmail(
 ): Promise<void> {
 	const { subject, html, text } = adminDigestEmail(orgName, date, members);
 	const transport = getTransport();
+	if (!transport) throw new Error('SMTP not configured');
 	await transport.sendMail({ from: getFromAddress(), to: adminEmail, subject, html, text });
 }
