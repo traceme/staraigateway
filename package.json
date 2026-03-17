@@ -16,6 +16,7 @@
     "test": "vitest run --coverage",
     "test:unit": "vitest run",
     "test:integration": "vitest run --include 'src/lib/server/__integration__/**/*.test.ts' --no-coverage",
+    "test:e2e": "vitest run --include 'src/__e2e__/**/*.test.ts' --no-coverage",
     "test:load": "npx tsx scripts/load-test.ts",
     "test:watch": "vitest"
   },
