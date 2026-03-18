@@ -105,5 +105,5 @@ Phases 12 and 13 are sequential (13 depends on 12). Phases 14 and 15 are indepen
 |-------|-----------|----------------|--------|-----------|
 | 12. Dashboard Internationalization | v1.2 | Complete    | 2026-03-17 | 2026-03-18 |
 | 13. Public Pages & Email Internationalization | 2/2 | Complete    | 2026-03-18 | - |
-| 14. Audit Logs | v1.2 | 0/2 | Planned | - |
+| 14. Audit Logs | 1/2 | In Progress|  | - |
 | 15. Model Catalog | v1.2 | 0/? | Not started | - |

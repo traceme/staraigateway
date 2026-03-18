@@ -17,7 +17,7 @@ Requirements for v1.2 Feature Expansion. Each maps to roadmap phases.
 
 ### Audit Logs
 
-- [ ] **AUDIT-01**: System records audit events for significant org actions (member invited/removed, role changed, API key created/revoked, provider key added/removed, budget changed, settings updated)
+- [x] **AUDIT-01**: System records audit events for significant org actions (member invited/removed, role changed, API key created/revoked, provider key added/removed, budget changed, settings updated)
 - [ ] **AUDIT-02**: Org owner/admin can view paginated audit log with timestamp, actor, action, and target
 - [ ] **AUDIT-03**: Audit log supports filtering by action type and date range
 
@@ -59,7 +59,7 @@ Requirements for v1.2 Feature Expansion. Each maps to roadmap phases.
 | I18N-03 | Phase 13 | Complete |
 | I18N-04 | Phase 13 | Complete |
 | I18N-05 | Phase 12 | Complete |
-| AUDIT-01 | Phase 14 | Pending |
+| AUDIT-01 | Phase 14 | Complete |
 | AUDIT-02 | Phase 14 | Pending |
 | AUDIT-03 | Phase 14 | Pending |
 | MODEL-01 | Phase 15 | Pending |
