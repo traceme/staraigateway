@@ -33,7 +33,7 @@ See: .planning/milestones/v1.1-ROADMAP.md
 - [x] **Phase 12: Dashboard Internationalization** - i18n infrastructure, language switcher, dashboard and error message translation
 - [x] **Phase 13: Public Pages & Email Internationalization** - Landing/auth page translation with browser locale fallback, bilingual email templates (completed 2026-03-18)
 - [x] **Phase 14: Audit Logs** - Event recording, paginated audit log viewer with filtering for org admins (completed 2026-03-18)
-- [ ] **Phase 15: Model Catalog** - Auto-discover models from LiteLLM, browsable catalog page, reactive updates on key changes
+- [x] **Phase 15: Model Catalog** - Auto-discover models from LiteLLM, browsable catalog page, reactive updates on key changes (completed 2026-03-18)
 
 ## Phase Details
 
@@ -93,8 +93,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 15-01-PLAN.md — Fire-and-forget model discovery function + wiring into provider key create/update actions
-- [ ] 15-02-PLAN.md — Dynamic catalog page with pricing enrichment, nullable pricing UI, hasKey column removal
+- [x] 15-01-PLAN.md — Fire-and-forget model discovery function + wiring into provider key create/update actions
+- [x] 15-02-PLAN.md — Dynamic catalog page with pricing enrichment, nullable pricing UI, hasKey column removal
 
 ## Progress
 
@@ -106,4 +106,4 @@ Phases 12 and 13 are sequential (13 depends on 12). Phases 14 and 15 are indepen
 | 12. Dashboard Internationalization | v1.2 | Complete    | 2026-03-17 | 2026-03-18 |
 | 13. Public Pages & Email Internationalization | 2/2 | Complete    | 2026-03-18 | - |
 | 14. Audit Logs | 2/2 | Complete    | 2026-03-18 | - |
-| 15. Model Catalog | 1/2 | In Progress|  | - |
+| 15. Model Catalog | 2/2 | Complete   | 2026-03-18 | 2026-03-18 |

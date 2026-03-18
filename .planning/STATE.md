@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Feature Expansion
 status: in_progress
-stopped_at: Completed 15-01-PLAN.md
-last_updated: "2026-03-18T09:33:32Z"
-last_activity: 2026-03-18 — Completed Phase 15 Plan 01 (model discovery fire-and-forget)
+stopped_at: Completed 15-02-PLAN.md
+last_updated: "2026-03-18T09:37:44Z"
+last_activity: 2026-03-18 — Completed Phase 15 Plan 02 (dynamic model catalog with pricing enrichment)
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
   percent: 100
 ---
 
@@ -26,16 +26,16 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 15 (fourth of 4 in v1.2: phases 12-15)
-Plan: 01 of 2 complete
-Status: In Progress
-Last activity: 2026-03-18 — Completed Phase 15 Plan 01 (model discovery fire-and-forget)
+Plan: 02 of 2 complete
+Status: Complete
+Last activity: 2026-03-18 — Completed Phase 15 Plan 02 (dynamic model catalog with pricing enrichment)
 
-Progress: [█████████░] 88%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 34 (17 v1.0 + 13 v1.1 + 4 v1.2)
+- Total plans completed: 35 (17 v1.0 + 13 v1.1 + 5 v1.2)
 - Average duration: ~2.5 min
 - Total execution time: ~1.4 hours
 
@@ -54,6 +54,7 @@ Progress: [█████████░] 88%
 | Phase 14 P01 | 158 | 2 tasks | 6 files |
 | Phase 14 P02 | 333 | 2 tasks | 7 files |
 | Phase 15 P01 | 212s | 2 tasks | 3 files |
+| Phase 15 P02 | 124s | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -80,6 +81,9 @@ Recent decisions from v1.1 affecting current work:
 - [Phase 15]: discoverModelsForKey returns void (fire-and-forget) matching recordAuditEvent and logUsage patterns
 - [Phase 15]: Model re-discovery only when apiKey field is provided on update
 - [Phase 15]: Delete action excluded from discovery -- models removed via active-key filtering
+- [Phase 15]: Iterate discovered models from appProviderKeys.models instead of hardcoded MODEL_PRICING keys
+- [Phase 15]: Remove hasKey column since all displayed models have active keys by definition
+- [Phase 15]: Null pricing displays as N/A rather than $0 or crashing
 
 ### Pending Todos
 
@@ -91,6 +95,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T09:33:32Z
-Stopped at: Completed 15-01-PLAN.md
-Resume file: .planning/phases/15-model-catalog/15-01-SUMMARY.md
+Last session: 2026-03-18T09:37:44Z
+Stopped at: Completed 15-02-PLAN.md
+Resume file: .planning/phases/15-model-catalog/15-02-SUMMARY.md
