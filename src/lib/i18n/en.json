@@ -38,6 +38,7 @@
 		"members": "Members",
 		"usage": "Usage",
 		"models": "Models",
+		"audit_log": "Audit Log",
 		"settings": "Settings"
 	},
 	"org_switcher": {
@@ -417,6 +418,40 @@
 			"continue": "Continue.dev",
 			"claude_code": "Claude Code",
 			"openai_sdk": "OpenAI SDK"
+		}
+	},
+	"audit": {
+		"title": "Audit Log",
+		"empty": "No audit log entries yet",
+		"columns": {
+			"timestamp": "Timestamp",
+			"actor": "Actor",
+			"action": "Action",
+			"target": "Target",
+			"details": "Details"
+		},
+		"actions": {
+			"member_invited": "Member Invited",
+			"member_removed": "Member Removed",
+			"role_changed": "Role Changed",
+			"api_key_created": "API Key Created",
+			"api_key_revoked": "API Key Revoked",
+			"provider_key_added": "Provider Key Added",
+			"provider_key_removed": "Provider Key Removed",
+			"budget_changed": "Budget Changed",
+			"settings_updated": "Settings Updated"
+		},
+		"filter": {
+			"action_type": "Action Type",
+			"date_range": "Date Range",
+			"start_date": "Start Date",
+			"end_date": "End Date",
+			"clear": "Clear Filters",
+			"all_actions": "All Actions"
+		},
+		"pagination": {
+			"newer": "Newer",
+			"older": "Older"
 		}
 	}
 }
