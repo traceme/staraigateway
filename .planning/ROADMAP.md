@@ -61,11 +61,11 @@ Plans:
   2. Unauthenticated user can manually switch language on public pages
   3. All email templates (verification, password reset, invitation, budget warning, admin digest) render in the recipient's stored language preference
   4. Emails to users without a stored preference fall back to English
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 13-01: TBD
-- [ ] 13-02: TBD
+- [ ] 13-01-PLAN.md — Browser locale detection, cookie-based language switch for public pages, $t() wiring for landing and auth pages with full en/zh translations
+- [ ] 13-02-PLAN.md — Bilingual email templates (verification, password-reset, invitation, budget-warning, admin-digest) with language preference threading
 
 ### Phase 14: Audit Logs
 **Goal**: Org owners and admins have full visibility into who did what within their organization
@@ -104,6 +104,6 @@ Phases 12 and 13 are sequential (13 depends on 12). Phases 14 and 15 are indepen
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 12. Dashboard Internationalization | v1.2 | Complete    | 2026-03-17 | 2026-03-18 |
-| 13. Public Pages & Email Internationalization | v1.2 | 0/? | Not started | - |
+| 13. Public Pages & Email Internationalization | v1.2 | 0/2 | Not started | - |
 | 14. Audit Logs | v1.2 | 0/? | Not started | - |
 | 15. Model Catalog | v1.2 | 0/? | Not started | - |
