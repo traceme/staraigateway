@@ -99,6 +99,33 @@ export async function deleteProviderKey(id: string, orgId: string) {
 }
 
 /**
+ * Fire-and-forget model discovery for a provider key.
+ * Calls validateProviderKey to list models, then writes them to the DB.
+ * Google model names have the "models/" prefix stripped before storage.
+ * Failure is silently ignored -- non-blocking.
+ */
+export function discoverModelsForKey(
+	keyId: string,
+	provider: string,
+	apiKey: string,
+	baseUrl?: string
+): void {
+	validateProviderKey(provider, apiKey, baseUrl)
+		.then(async (result) => {
+			if (result.valid && result.models.length > 0) {
+				const cleanModels = result.models.map((m) =>
+					m.startsWith('models/') ? m.slice(7) : m
+				);
+				await db
+					.update(appProviderKeys)
+					.set({ models: cleanModels, updatedAt: new Date() })
+					.where(eq(appProviderKeys.id, keyId));
+			}
+		})
+		.catch(() => {}); // Silent failure -- non-blocking
+}
+
+/**
  * Validate a provider key by calling the provider's /models endpoint.
  */
 export async function validateProviderKey(
