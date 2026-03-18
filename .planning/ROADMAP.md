@@ -31,7 +31,7 @@ See: .planning/milestones/v1.1-ROADMAP.md
 **Milestone Goal:** Add internationalization (Chinese/English), org-level audit logs, and a browsable model catalog to make StarAIGateway ready for Chinese enterprise teams.
 
 - [x] **Phase 12: Dashboard Internationalization** - i18n infrastructure, language switcher, dashboard and error message translation
-- [ ] **Phase 13: Public Pages & Email Internationalization** - Landing/auth page translation with browser locale fallback, bilingual email templates
+- [x] **Phase 13: Public Pages & Email Internationalization** - Landing/auth page translation with browser locale fallback, bilingual email templates (completed 2026-03-18)
 - [ ] **Phase 14: Audit Logs** - Event recording, paginated audit log viewer with filtering for org admins
 - [ ] **Phase 15: Model Catalog** - Auto-discover models from LiteLLM, browsable catalog page, reactive updates on key changes
 
@@ -104,6 +104,6 @@ Phases 12 and 13 are sequential (13 depends on 12). Phases 14 and 15 are indepen
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 12. Dashboard Internationalization | v1.2 | Complete    | 2026-03-17 | 2026-03-18 |
-| 13. Public Pages & Email Internationalization | 1/2 | In Progress|  | - |
+| 13. Public Pages & Email Internationalization | 2/2 | Complete   | 2026-03-18 | - |
 | 14. Audit Logs | v1.2 | 0/? | Not started | - |
 | 15. Model Catalog | v1.2 | 0/? | Not started | - |
