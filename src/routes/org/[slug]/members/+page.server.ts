@@ -1,5 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import { zodErrorToKey } from '$lib/server/i18n-errors';
+import { recordAuditEvent } from '$lib/server/audit';
 import { db } from '$lib/server/db';
 import {
 	appOrgMembers,
@@ -134,13 +135,14 @@ export const actions = {
 
 		try {
 			await inviteMember(currentOrg.id, email, role, locals.user!.id);
+			recordAuditEvent(currentOrg.id, locals.user!.id, 'member_invited', 'user', email, { role });
 			return { success: true };
 		} catch {
 			return fail(400, { errorKey: 'errors.invite_failed' });
 		}
 	},
 
-	changeRole: async ({ request, parent }) => {
+	changeRole: async ({ request, locals, parent }) => {
 		const { currentOrg, membership } = await parent();
 		if (membership.role !== 'owner') {
 			return fail(403, { errorKey: 'errors.only_owner_change_role' });
@@ -156,13 +158,14 @@ export const actions = {
 
 		try {
 			await changeRole(currentOrg.id, targetUserId, newRole, membership.role);
+			recordAuditEvent(currentOrg.id, locals.user!.id, 'role_changed', 'user', targetUserId, { newRole });
 			return { success: true };
 		} catch {
 			return fail(400, { errorKey: 'errors.role_change_failed' });
 		}
 	},
 
-	removeMember: async ({ request, parent }) => {
+	removeMember: async ({ request, locals, parent }) => {
 		const { currentOrg, membership } = await parent();
 		if (membership.role !== 'admin' && membership.role !== 'owner') {
 			return fail(403, { errorKey: 'errors.only_admins_remove' });
@@ -173,6 +176,7 @@ export const actions = {
 
 		try {
 			await removeMember(currentOrg.id, targetUserId, membership.role);
+			recordAuditEvent(currentOrg.id, locals.user!.id, 'member_removed', 'user', targetUserId, null);
 			return { success: true };
 		} catch {
 			return fail(400, { errorKey: 'errors.remove_failed' });

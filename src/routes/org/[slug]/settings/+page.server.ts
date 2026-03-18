@@ -1,4 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
+import { recordAuditEvent } from '$lib/server/audit';
 import { db } from '$lib/server/db';
 import { appOrganizations } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
@@ -23,7 +24,7 @@ export const load: PageServerLoad = async ({ parent }) => {
 };
 
 export const actions: Actions = {
-	saveDefaults: async ({ request, parent }) => {
+	saveDefaults: async ({ request, locals, parent }) => {
 		const { currentOrg, membership } = await parent();
 
 		if (membership.role !== 'owner' && membership.role !== 'admin') {
@@ -53,10 +54,11 @@ export const actions: Actions = {
 			})
 			.where(eq(appOrganizations.id, currentOrg.id));
 
+		recordAuditEvent(currentOrg.id, locals.user!.id, 'settings_updated', 'organization', currentOrg.id, { setting: 'defaults', defaultRpmLimit, defaultTpmLimit });
 		return { success: true };
 	},
 
-	saveRouting: async ({ request, parent }) => {
+	saveRouting: async ({ request, locals, parent }) => {
 		const { currentOrg, membership } = await parent();
 
 		if (membership.role !== 'owner' && membership.role !== 'admin') {
@@ -76,10 +78,11 @@ export const actions: Actions = {
 			})
 			.where(eq(appOrganizations.id, currentOrg.id));
 
+		recordAuditEvent(currentOrg.id, locals.user!.id, 'settings_updated', 'organization', currentOrg.id, { setting: 'routing', cheapModel, expensiveModel });
 		return { success: true };
 	},
 
-	saveCacheTtl: async ({ request, parent }) => {
+	saveCacheTtl: async ({ request, locals, parent }) => {
 		const { currentOrg, membership } = await parent();
 
 		if (membership.role !== 'owner' && membership.role !== 'admin') {
@@ -102,6 +105,7 @@ export const actions: Actions = {
 			})
 			.where(eq(appOrganizations.id, currentOrg.id));
 
+		recordAuditEvent(currentOrg.id, locals.user!.id, 'settings_updated', 'organization', currentOrg.id, { setting: 'cacheTtl', cacheTtlSeconds });
 		return { success: true };
 	}
 };

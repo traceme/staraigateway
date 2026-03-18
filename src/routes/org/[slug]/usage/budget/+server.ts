@@ -1,5 +1,6 @@
 import type { RequestHandler } from './$types';
 import { json, error } from '@sveltejs/kit';
+import { recordAuditEvent } from '$lib/server/audit';
 import { db } from '$lib/server/db';
 import { appBudgets, appOrgMembers, appOrganizations } from '$lib/server/db/schema';
 import { eq, and, isNull } from 'drizzle-orm';
@@ -100,6 +101,7 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 		});
 	}
 
+	recordAuditEvent(orgId, locals.user!.id, 'budget_changed', 'budget', userId ?? role ?? 'org_default', { hardLimit, softLimit, resetDay, isOrgDefault: isOrgDefault ?? false });
 	return json({ success: true });
 };
 
@@ -145,5 +147,6 @@ export const DELETE: RequestHandler = async ({ request, locals, params }) => {
 			);
 	}
 
+	recordAuditEvent(orgId, locals.user!.id, 'budget_changed', 'budget', userId ?? role ?? 'org_default', { action: 'deleted' });
 	return json({ success: true });
 };

@@ -1,5 +1,6 @@
 import { fail, error } from '@sveltejs/kit';
 import { z } from 'zod';
+import { recordAuditEvent } from '$lib/server/audit';
 import { db } from '$lib/server/db';
 import { zodErrorToKey } from '$lib/server/i18n-errors';
 import { appOrganizations, appOrgMembers, appApiKeys, appUsers } from '$lib/server/db/schema';
@@ -140,6 +141,7 @@ export const actions: Actions = {
 					.where(eq(appApiKeys.id, key.id));
 			}
 
+			recordAuditEvent(org.id, userId, 'api_key_created', 'api_key', key.id, { name: parsed.data.name });
 			return { success: true, key, fullKey };
 		} catch {
 			return fail(500, { errorKey: 'errors.create_key_failed' });
@@ -161,6 +163,7 @@ export const actions: Actions = {
 			return fail(404, { errorKey: 'errors.key_not_found' });
 	}
 
+		recordAuditEvent(org.id, userId, 'api_key_revoked', 'api_key', parsed.data.id, null);
 		return { success: true };
 	},
 
@@ -194,6 +197,7 @@ export const actions: Actions = {
 			.set({ isActive: false })
 			.where(eq(appApiKeys.id, parsed.data.id));
 
+		recordAuditEvent(org.id, locals.user!.id, 'api_key_revoked', 'api_key', parsed.data.id, { adminRevoke: true });
 		return { success: true };
 	},
 

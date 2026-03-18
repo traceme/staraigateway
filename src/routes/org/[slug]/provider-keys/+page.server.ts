@@ -1,6 +1,7 @@
 import { fail, error } from '@sveltejs/kit';
 import { z } from 'zod';
 import { zodErrorToKey } from '$lib/server/i18n-errors';
+import { recordAuditEvent } from '$lib/server/audit';
 import { db } from '$lib/server/db';
 import { appOrganizations, appOrgMembers } from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -105,6 +106,7 @@ export const actions: Actions = {
 				apiKey: parsed.data.apiKey,
 				baseUrl: parsed.data.baseUrl || undefined
 			});
+			recordAuditEvent(org.id, locals.user!.id, 'provider_key_added', 'provider_key', key.id, { provider: parsed.data.provider, label: parsed.data.label });
 			return { success: true, key };
 		} catch (err) {
 			if (err instanceof Error && err.message.includes('unique')) {
@@ -156,6 +158,7 @@ export const actions: Actions = {
 			return fail(404, { errorKey: 'errors.key_not_found' });
 		}
 
+		recordAuditEvent(org.id, locals.user!.id, 'provider_key_removed', 'provider_key', parsed.data.id, null);
 		return { success: true };
 	}
 };
