@@ -224,7 +224,8 @@
 			"provider": "提供商",
 			"pricing": "定价",
 			"input_price": "输入价格",
-			"output_price": "输出价格"
+			"output_price": "输出价格",
+			"context_window": "上下文窗口"
 		},
 		"per_million_tokens": "每百万令牌"
 	},

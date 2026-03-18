@@ -4,10 +4,9 @@
 	type Model = {
 		name: string;
 		provider: string;
-		inputPrice: number;
-		outputPrice: number;
-		contextWindow: string;
-		hasKey: boolean;
+		inputPrice: number | null;
+		outputPrice: number | null;
+		contextWindow: string | null;
 	};
 
 	type Props = {
@@ -16,7 +15,7 @@
 
 	let { models }: Props = $props();
 
-	type SortKey = 'provider' | 'name' | 'inputPrice' | 'outputPrice' | 'contextWindow' | 'hasKey';
+	type SortKey = 'provider' | 'name' | 'inputPrice' | 'outputPrice' | 'contextWindow';
 	let sortKey = $state<SortKey>('provider');
 	let sortDir = $state<'asc' | 'desc'>('asc');
 
@@ -29,7 +28,8 @@
 		}
 	}
 
-	function formatPrice(price: number): string {
+	function formatPrice(price: number | null): string {
+		if (price === null) return 'N/A';
 		if (price < 0.1) return `$${price.toFixed(3)}/1M`;
 		return `$${price.toFixed(2)}/1M`;
 	}
@@ -38,11 +38,12 @@
 		return [...models].sort((a, b) => {
 			const aVal = a[sortKey];
 			const bVal = b[sortKey];
+			// Handle nulls -- sort nulls to end
+			if (aVal === null && bVal === null) return 0;
+			if (aVal === null) return 1;
+			if (bVal === null) return -1;
 			if (typeof aVal === 'number' && typeof bVal === 'number') {
 				return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
-			}
-			if (typeof aVal === 'boolean' && typeof bVal === 'boolean') {
-				return sortDir === 'asc' ? Number(aVal) - Number(bVal) : Number(bVal) - Number(aVal);
 			}
 			const aStr = String(aVal ?? '');
 			const bStr = String(bVal ?? '');
@@ -55,8 +56,7 @@
 		{ key: 'name', labelKey: 'models.table.name' },
 		{ key: 'inputPrice', labelKey: 'models.table.input_price' },
 		{ key: 'outputPrice', labelKey: 'models.table.output_price' },
-		{ key: 'contextWindow', labelKey: 'common.name' },
-		{ key: 'hasKey', labelKey: 'common.status' }
+		{ key: 'contextWindow', labelKey: 'models.table.context_window' }
 	];
 </script>
 
@@ -84,20 +84,7 @@
 					<td class="px-4 py-3 font-mono text-xs">{model.name}</td>
 					<td class="px-4 py-3">{formatPrice(model.inputPrice)}</td>
 					<td class="px-4 py-3">{formatPrice(model.outputPrice)}</td>
-					<td class="px-4 py-3">{model.contextWindow}</td>
-					<td class="px-4 py-3">
-						{#if model.hasKey}
-							<span class="inline-flex items-center gap-1.5">
-								<span class="inline-block h-2 w-2 rounded-full bg-green-500"></span>
-								{$t('common.active')}
-							</span>
-						{:else}
-							<span class="inline-flex items-center gap-1.5 text-zinc-500">
-								<span class="inline-block h-2 w-2 rounded-full bg-zinc-600"></span>
-								No key
-							</span>
-						{/if}
-					</td>
+					<td class="px-4 py-3">{model.contextWindow ?? 'N/A'}</td>
 				</tr>
 			{/each}
 		</tbody>

@@ -224,7 +224,8 @@
 			"provider": "Provider",
 			"pricing": "Pricing",
 			"input_price": "Input Price",
-			"output_price": "Output Price"
+			"output_price": "Output Price",
+			"context_window": "Context Window"
 		},
 		"per_million_tokens": "per million tokens"
 	},
