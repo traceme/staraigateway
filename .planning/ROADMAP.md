@@ -76,11 +76,11 @@ Plans:
   2. Org owner/admin can view a paginated audit log page showing entries in reverse chronological order
   3. Org owner/admin can filter audit log entries by action type and date range
   4. Regular members cannot access the audit log
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 14-01: TBD
-- [ ] 14-02: TBD
+- [ ] 14-01-PLAN.md — Schema table, fire-and-forget recordAuditEvent() helper, unit tests, i18n keys, sidebar nav entry
+- [ ] 14-02-PLAN.md — Instrument all server actions with audit calls, build audit log viewer page with cursor pagination and filtering
 
 ### Phase 15: Model Catalog
 **Goal**: Org members can see exactly which models are available to them with pricing and capabilities
@@ -105,5 +105,5 @@ Phases 12 and 13 are sequential (13 depends on 12). Phases 14 and 15 are indepen
 |-------|-----------|----------------|--------|-----------|
 | 12. Dashboard Internationalization | v1.2 | Complete    | 2026-03-17 | 2026-03-18 |
 | 13. Public Pages & Email Internationalization | 2/2 | Complete    | 2026-03-18 | - |
-| 14. Audit Logs | v1.2 | 0/? | Not started | - |
+| 14. Audit Logs | v1.2 | 0/2 | Planned | - |
 | 15. Model Catalog | v1.2 | 0/? | Not started | - |
