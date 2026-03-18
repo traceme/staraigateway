@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from 'svelte-i18n';
 	import LandingNav from '$lib/components/landing/LandingNav.svelte';
 	import LandingHero from '$lib/components/landing/LandingHero.svelte';
 	import FeaturesGrid from '$lib/components/landing/FeaturesGrid.svelte';
@@ -8,7 +9,8 @@
 </script>
 
 <svelte:head>
-	<title>StarAIGateway - 企业AI中台 | Share AI Access With Your Team</title>
+	<title>{$t('landing.meta_title')}</title>
+	<meta name="description" content={$t('landing.meta_description')} />
 </svelte:head>
 
 <div class="bg-zinc-950 min-h-screen text-zinc-50">

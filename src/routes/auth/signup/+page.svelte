@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { t } from 'svelte-i18n';
 	import type { ActionData } from './$types';
 
 	let { form }: { form: ActionData } = $props();
@@ -7,16 +8,16 @@
 </script>
 
 <svelte:head>
-	<title>Sign Up - StarAIGateway</title>
+	<title>{$t('auth.signup.page_title')}</title>
 </svelte:head>
 
 <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
 	{#if form?.success}
 		<div class="rounded-md bg-emerald-900/50 border border-emerald-800 p-4 text-sm text-emerald-200">
-			Check your email to verify your account. You can then log in.
+			{$t('auth.signup.success')}
 		</div>
 	{:else}
-		<h2 class="mb-6 text-lg font-medium text-zinc-50">Create your account</h2>
+		<h2 class="mb-6 text-lg font-medium text-zinc-50">{$t('auth.signup.title')}</h2>
 
 		<form
 			method="POST"
@@ -30,7 +31,7 @@
 			class="space-y-4"
 		>
 			<div>
-				<label for="name" class="block text-sm font-medium text-zinc-300">Name</label>
+				<label for="name" class="block text-sm font-medium text-zinc-300">{$t('auth.name_label')}</label>
 				<input
 					id="name"
 					name="name"
@@ -46,7 +47,7 @@
 			</div>
 
 			<div>
-				<label for="email" class="block text-sm font-medium text-zinc-300">Email</label>
+				<label for="email" class="block text-sm font-medium text-zinc-300">{$t('auth.email_label')}</label>
 				<input
 					id="email"
 					name="email"
@@ -62,7 +63,7 @@
 			</div>
 
 			<div>
-				<label for="password" class="block text-sm font-medium text-zinc-300">Password</label>
+				<label for="password" class="block text-sm font-medium text-zinc-300">{$t('auth.password_label')}</label>
 				<input
 					id="password"
 					name="password"
@@ -70,7 +71,7 @@
 					required
 					minlength="8"
 					class="mt-1 block w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-50 placeholder-zinc-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-					placeholder="Min. 8 characters"
+					placeholder={$t('auth.signup.password_placeholder')}
 				/>
 				{#if form?.errors?.password}
 					<p class="mt-1 text-sm text-red-400">{form.errors.password[0]}</p>
@@ -82,13 +83,13 @@
 				disabled={loading}
 				class="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-zinc-900 disabled:opacity-50"
 			>
-				{loading ? 'Creating account...' : 'Create account'}
+				{loading ? $t('auth.signup.loading') : $t('auth.signup.submit')}
 			</button>
 		</form>
 
 		<p class="mt-4 text-center text-sm text-zinc-400">
-			Already have an account?
-			<a href="/auth/login" class="text-blue-400 hover:text-blue-300">Log in</a>
+			{$t('auth.signup.has_account')}
+			<a href="/auth/login" class="text-blue-400 hover:text-blue-300">{$t('auth.signup.login_link')}</a>
 		</p>
 	{/if}
 </div>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { t } from 'svelte-i18n';
 	import type { ActionData, PageData } from './$types';
 
 	let { form, data }: { form: ActionData; data: PageData } = $props();
@@ -7,14 +8,13 @@
 </script>
 
 <svelte:head>
-	<title>Confirm Account Link - StarAIGateway</title>
+	<title>{$t('auth.oauth_confirm.page_title')}</title>
 </svelte:head>
 
 <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-	<h2 class="mb-2 text-lg font-medium text-zinc-50">Confirm Account Link</h2>
+	<h2 class="mb-2 text-lg font-medium text-zinc-50">{$t('auth.oauth_confirm.title')}</h2>
 	<p class="mb-6 text-sm text-zinc-400">
-		An account with your email already exists. Enter your password to link your
-		<span class="font-medium text-zinc-300">{data.provider}</span> account.
+		{$t('auth.oauth_confirm.description', { values: { provider: data.provider } })}
 	</p>
 
 	{#if form?.error}
@@ -35,7 +35,7 @@
 		class="space-y-4"
 	>
 		<div>
-			<label for="password" class="block text-sm font-medium text-zinc-300">Password</label>
+			<label for="password" class="block text-sm font-medium text-zinc-300">{$t('auth.password_label')}</label>
 			<input
 				id="password"
 				name="password"
@@ -51,11 +51,11 @@
 			disabled={loading}
 			class="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-zinc-900 disabled:opacity-50"
 		>
-			{loading ? 'Verifying...' : 'Confirm & Link Account'}
+			{loading ? $t('auth.oauth_confirm.loading') : $t('auth.oauth_confirm.submit')}
 		</button>
 	</form>
 
 	<p class="mt-4 text-center text-sm text-zinc-400">
-		<a href="/auth/login" class="text-blue-400 hover:text-blue-300">Cancel and return to login</a>
+		<a href="/auth/login" class="text-blue-400 hover:text-blue-300">{$t('auth.oauth_confirm.cancel')}</a>
 	</p>
 </div>
