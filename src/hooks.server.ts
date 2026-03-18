@@ -1,18 +1,38 @@
-import type { Handle } from '@sveltejs/kit';
+import type { Handle, RequestEvent } from '@sveltejs/kit';
 import { validateSession, SESSION_COOKIE_NAME } from '$lib/server/auth/session';
 import { isSecureContext } from '$lib/server/auth/cookies';
+
+function detectLocale(event: RequestEvent): string {
+	// 1. Authenticated user preference
+	if (event.locals.user?.language) {
+		return event.locals.user.language;
+	}
+	// 2. Cookie preference
+	const cookieLang = event.cookies.get('lang');
+	if (cookieLang === 'zh' || cookieLang === 'en') {
+		return cookieLang;
+	}
+	// 3. Accept-Language header
+	const acceptLang = event.request.headers.get('accept-language') ?? '';
+	if (/zh[-_]?/i.test(acceptLang) || acceptLang.startsWith('zh')) {
+		return 'zh';
+	}
+	// 4. Default
+	return 'en';
+}
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const resolveWithLang = (e: typeof event) =>
 		resolve(e, {
 			transformPageChunk: ({ html }) =>
-				html.replace('%lang%', e.locals.user?.language ?? 'en')
+				html.replace('%lang%', e.locals.locale ?? 'en')
 		});
 
 	// /v1/* routes use API key auth (Bearer token), not session cookies
 	if (event.url.pathname.startsWith('/v1/')) {
 		event.locals.user = null;
 		event.locals.session = null;
+		event.locals.locale = detectLocale(event);
 		return resolveWithLang(event);
 	}
 
@@ -21,6 +41,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (!token) {
 		event.locals.user = null;
 		event.locals.session = null;
+		event.locals.locale = detectLocale(event);
 		return resolveWithLang(event);
 	}
 
@@ -47,5 +68,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.cookies.delete(SESSION_COOKIE_NAME, { path: '/' });
 	}
 
+	event.locals.locale = detectLocale(event);
 	return resolveWithLang(event);
 };

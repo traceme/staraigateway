@@ -3,6 +3,7 @@ declare global {
 		interface Locals {
 			user: import('$lib/types').User | null;
 			session: import('$lib/types').Session | null;
+			locale?: string;
 		}
 	}
 }

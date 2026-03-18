@@ -2,6 +2,7 @@
 	import { locale } from 'svelte-i18n';
 	import { invalidateAll } from '$app/navigation';
 
+	let { authenticated = true }: { authenticated?: boolean } = $props();
 	let open = $state(false);
 
 	const languages = [
@@ -14,14 +15,21 @@
 	}
 
 	async function switchLanguage(lang: string) {
-		await fetch('/api/user/language', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ language: lang })
-		});
+		if (authenticated) {
+			await fetch('/api/user/language', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ language: lang })
+			});
+		} else {
+			document.cookie = `lang=${lang};path=/;max-age=${365 * 24 * 60 * 60};samesite=lax`;
+		}
 		locale.set(lang);
 		await invalidateAll();
 		open = false;
+		if (!authenticated) {
+			window.location.reload();
+		}
 	}
 </script>
 
