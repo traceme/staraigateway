@@ -1,5 +1,6 @@
-export function passwordResetEmail(name: string, resetUrl: string) {
-	const subject = 'Reset your password';
+export function passwordResetEmail(name: string, resetUrl: string, lang: string = 'en') {
+	const isZh = lang === 'zh';
+	const subject = isZh ? '重置您的密码' : 'Reset your password';
 
 	const html = `<!DOCTYPE html>
 <html>
@@ -19,28 +20,28 @@ export function passwordResetEmail(name: string, resetUrl: string) {
           </tr>
           <tr>
             <td style="padding-bottom: 16px;">
-              <p style="margin: 0; font-size: 15px; color: #3f3f46; line-height: 1.5;">Hi ${name},</p>
+              <p style="margin: 0; font-size: 15px; color: #3f3f46; line-height: 1.5;">${isZh ? `您好 ${name}，` : `Hi ${name},`}</p>
             </td>
           </tr>
           <tr>
             <td style="padding-bottom: 24px;">
-              <p style="margin: 0; font-size: 15px; color: #3f3f46; line-height: 1.5;">We received a request to reset your password. Click the button below to set a new password. This link expires in 1 hour.</p>
+              <p style="margin: 0; font-size: 15px; color: #3f3f46; line-height: 1.5;">${isZh ? '我们收到了重置您密码的请求。点击下方按钮重置密码。此链接将在1小时后过期。' : "We received a request to reset your password. Click the button below to set a new password. This link expires in 1 hour."}</p>
             </td>
           </tr>
           <tr>
             <td style="text-align: center; padding-bottom: 24px;">
-              <a href="${resetUrl}" style="display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500; padding: 10px 24px; border-radius: 6px;">Reset Password</a>
+              <a href="${resetUrl}" style="display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500; padding: 10px 24px; border-radius: 6px;">${isZh ? '重置密码' : 'Reset Password'}</a>
             </td>
           </tr>
           <tr>
             <td style="padding-bottom: 16px;">
-              <p style="margin: 0; font-size: 13px; color: #71717a; line-height: 1.5;">If the button doesn't work, copy and paste this link into your browser:</p>
+              <p style="margin: 0; font-size: 13px; color: #71717a; line-height: 1.5;">${isZh ? '如果按钮无法使用，请复制以下链接到浏览器中打开：' : "If the button doesn't work, copy and paste this link into your browser:"}</p>
               <p style="margin: 4px 0 0; font-size: 13px; color: #2563eb; word-break: break-all;">${resetUrl}</p>
             </td>
           </tr>
           <tr>
             <td>
-              <p style="margin: 0; font-size: 13px; color: #71717a; line-height: 1.5;">If you didn't request this, you can safely ignore this email.</p>
+              <p style="margin: 0; font-size: 13px; color: #71717a; line-height: 1.5;">${isZh ? '如果您没有请求重置密码，请忽略此邮件。' : "If you didn't request this, you can safely ignore this email."}</p>
             </td>
           </tr>
         </table>
@@ -50,7 +51,9 @@ export function passwordResetEmail(name: string, resetUrl: string) {
 </body>
 </html>`;
 
-	const text = `Hi ${name},\n\nWe received a request to reset your password. Visit this link to set a new password (expires in 1 hour):\n${resetUrl}\n\nIf you didn't request this, you can safely ignore this email.\n\n- StarAIGateway`;
+	const text = isZh
+		? `您好 ${name}，\n\n我们收到了重置您密码的请求。请访问以下链接设置新密码（1小时后过期）：\n${resetUrl}\n\n如果您没有请求重置密码，请忽略此邮件。\n\n- StarAIGateway`
+		: `Hi ${name},\n\nWe received a request to reset your password. Visit this link to set a new password (expires in 1 hour):\n${resetUrl}\n\nIf you didn't request this, you can safely ignore this email.\n\n- StarAIGateway`;
 
 	return { subject, html, text };
 }

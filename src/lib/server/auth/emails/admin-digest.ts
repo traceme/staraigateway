@@ -1,9 +1,13 @@
 export function adminDigestEmail(
 	orgName: string,
 	date: string,
-	members: Array<{ name: string; spend: string; limit: string; percentage: number }>
+	members: Array<{ name: string; spend: string; limit: string; percentage: number }>,
+	lang: string = 'en'
 ): { subject: string; html: string; text: string } {
-	const subject = `StarAIGateway: Daily budget digest for ${orgName}`;
+	const isZh = lang === 'zh';
+	const subject = isZh
+		? `每日预算摘要 - ${orgName}`
+		: `StarAIGateway: Daily budget digest for ${orgName}`;
 
 	const memberRows = members
 		.map(
@@ -37,13 +41,13 @@ export function adminDigestEmail(
           </tr>
           <tr>
             <td style="padding-bottom: 16px;">
-              <p style="margin: 0; font-size: 15px; color: #3f3f46; line-height: 1.5;">Daily budget digest for <strong>${orgName}</strong></p>
+              <p style="margin: 0; font-size: 15px; color: #3f3f46; line-height: 1.5;">${isZh ? `<strong>${orgName}</strong> 每日预算摘要` : `Daily budget digest for <strong>${orgName}</strong>`}</p>
               <p style="margin: 4px 0 0; font-size: 13px; color: #a1a1aa;">${date}</p>
             </td>
           </tr>
           <tr>
             <td style="padding-bottom: 16px;">
-              <p style="margin: 0; font-size: 14px; color: #3f3f46;">The following members are at 90% or more of their budget:</p>
+              <p style="margin: 0; font-size: 14px; color: #3f3f46;">${isZh ? '以下成员的预算使用率已达到90%或以上：' : 'The following members are at 90% or more of their budget:'}</p>
             </td>
           </tr>
           <tr>
@@ -51,10 +55,10 @@ export function adminDigestEmail(
               <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; border: 1px solid #e4e4e7; border-radius: 6px;">
                 <thead>
                   <tr style="background-color: #fafafa;">
-                    <th style="padding: 8px 12px; text-align: left; font-size: 12px; font-weight: 500; color: #71717a; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e4e4e7;">Name</th>
-                    <th style="padding: 8px 12px; text-align: left; font-size: 12px; font-weight: 500; color: #71717a; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e4e4e7;">Spend</th>
-                    <th style="padding: 8px 12px; text-align: left; font-size: 12px; font-weight: 500; color: #71717a; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e4e4e7;">Limit</th>
-                    <th style="padding: 8px 12px; text-align: left; font-size: 12px; font-weight: 500; color: #71717a; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e4e4e7;">Usage</th>
+                    <th style="padding: 8px 12px; text-align: left; font-size: 12px; font-weight: 500; color: #71717a; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e4e4e7;">${isZh ? '姓名' : 'Name'}</th>
+                    <th style="padding: 8px 12px; text-align: left; font-size: 12px; font-weight: 500; color: #71717a; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e4e4e7;">${isZh ? '消费' : 'Spend'}</th>
+                    <th style="padding: 8px 12px; text-align: left; font-size: 12px; font-weight: 500; color: #71717a; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e4e4e7;">${isZh ? '上限' : 'Limit'}</th>
+                    <th style="padding: 8px 12px; text-align: left; font-size: 12px; font-weight: 500; color: #71717a; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e4e4e7;">${isZh ? '使用率' : 'Usage'}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -75,7 +79,9 @@ export function adminDigestEmail(
 </body>
 </html>`;
 
-	const text = `Daily budget digest for ${orgName}\n${date}\n\nMembers at 90%+ of budget:\n${textRows}\n\n${orgName} - StarAIGateway`;
+	const text = isZh
+		? `${orgName} 每日预算摘要\n${date}\n\n预算使用率达到90%以上的成员：\n${textRows}\n\n${orgName} - StarAIGateway`
+		: `Daily budget digest for ${orgName}\n${date}\n\nMembers at 90%+ of budget:\n${textRows}\n\n${orgName} - StarAIGateway`;
 
 	return { subject, html, text };
 }

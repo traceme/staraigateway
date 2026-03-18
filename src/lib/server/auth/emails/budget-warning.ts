@@ -2,9 +2,11 @@ export function budgetWarningEmail(
 	memberName: string,
 	currentSpend: string,
 	limit: string,
-	orgName: string
+	orgName: string,
+	lang: string = 'en'
 ): { subject: string; html: string; text: string } {
-	const subject = "You're approaching your monthly AI budget";
+	const isZh = lang === 'zh';
+	const subject = isZh ? `预算警告 - ${orgName}` : "You're approaching your monthly AI budget";
 
 	// Calculate percentage for progress bar
 	const spendNum = parseFloat(currentSpend.replace('$', ''));
@@ -30,12 +32,12 @@ export function budgetWarningEmail(
           </tr>
           <tr>
             <td style="padding-bottom: 16px;">
-              <p style="margin: 0; font-size: 15px; color: #3f3f46; line-height: 1.5;">Hi ${memberName},</p>
+              <p style="margin: 0; font-size: 15px; color: #3f3f46; line-height: 1.5;">${isZh ? `您好 ${memberName}，` : `Hi ${memberName},`}</p>
             </td>
           </tr>
           <tr>
             <td style="padding-bottom: 16px;">
-              <p style="margin: 0; font-size: 15px; color: #3f3f46; line-height: 1.5;">You've used <strong>${currentSpend}</strong> of your <strong>${limit}</strong> monthly AI budget.</p>
+              <p style="margin: 0; font-size: 15px; color: #3f3f46; line-height: 1.5;">${isZh ? `您在 ${orgName} 的使用量已达到预算的 ${pct}%。当前消费 <strong>${currentSpend}</strong>，预算上限 <strong>${limit}</strong>。` : `You've used <strong>${currentSpend}</strong> of your <strong>${limit}</strong> monthly AI budget.`}</p>
             </td>
           </tr>
           <tr>
@@ -55,12 +57,12 @@ export function budgetWarningEmail(
           </tr>
           <tr>
             <td style="padding-bottom: 24px;">
-              <p style="margin: 0; font-size: 13px; color: #71717a;">${pct}% used</p>
+              <p style="margin: 0; font-size: 13px; color: #71717a;">${isZh ? `已使用 ${pct}%` : `${pct}% used`}</p>
             </td>
           </tr>
           <tr>
             <td>
-              <p style="margin: 0; font-size: 15px; color: #3f3f46; line-height: 1.5;">Contact your admin if you need a higher limit.</p>
+              <p style="margin: 0; font-size: 15px; color: #3f3f46; line-height: 1.5;">${isZh ? '如需提高预算上限，请联系您的管理员。' : 'Contact your admin if you need a higher limit.'}</p>
             </td>
           </tr>
           <tr>
@@ -75,7 +77,9 @@ export function budgetWarningEmail(
 </body>
 </html>`;
 
-	const text = `Hi ${memberName},\n\nYou've used ${currentSpend} of your ${limit} monthly AI budget (${pct}%).\n\nContact your admin if you need a higher limit.\n\n${orgName} - StarAIGateway`;
+	const text = isZh
+		? `您好 ${memberName}，\n\n您在 ${orgName} 的使用量已达到预算的 ${pct}%。当前消费 ${currentSpend}，预算上限 ${limit}。\n\n如需提高预算上限，请联系您的管理员。\n\n${orgName} - StarAIGateway`
+		: `Hi ${memberName},\n\nYou've used ${currentSpend} of your ${limit} monthly AI budget (${pct}%).\n\nContact your admin if you need a higher limit.\n\n${orgName} - StarAIGateway`;
 
 	return { subject, html, text };
 }
