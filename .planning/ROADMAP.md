@@ -90,11 +90,11 @@ Plans:
   1. System automatically discovers available models from the org's configured provider keys via LiteLLM API
   2. Org members can browse a catalog page listing available models with provider name, pricing (input/output per token), and capabilities
   3. Adding or removing a provider key triggers a model catalog refresh so the catalog stays current
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 15-01: TBD
-- [ ] 15-02: TBD
+- [ ] 15-01-PLAN.md — Fire-and-forget model discovery function + wiring into provider key create/update actions
+- [ ] 15-02-PLAN.md — Dynamic catalog page with pricing enrichment, nullable pricing UI, hasKey column removal
 
 ## Progress
 
