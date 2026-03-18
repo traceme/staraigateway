@@ -241,3 +241,25 @@ export const appBudgets = pgTable(
 		unique('app_budgets_org_role_unique').on(table.orgId, table.role)
 	]
 );
+
+export const appAuditLogs = pgTable(
+	'app_audit_logs',
+	{
+		id: text('id').primaryKey(),
+		orgId: text('org_id')
+			.notNull()
+			.references(() => appOrganizations.id),
+		actorId: text('actor_id')
+			.notNull()
+			.references(() => appUsers.id),
+		actionType: text('action_type').notNull(),
+		targetType: text('target_type').notNull(),
+		targetId: text('target_id'),
+		metadata: jsonb('metadata').$type<Record<string, unknown>>(),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(table) => [
+		index('app_audit_logs_org_created_idx').on(table.orgId, table.createdAt),
+		index('app_audit_logs_org_action_idx').on(table.orgId, table.actionType)
+	]
+);
