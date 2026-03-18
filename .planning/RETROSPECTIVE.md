@@ -92,6 +92,52 @@
 
 ---
 
+## Milestone: v1.2 — Feature Expansion
+
+**Shipped:** 2026-03-18
+**Phases:** 4 | **Plans:** 8 | **Files:** 119 modified
+
+### What Was Built
+- Full bilingual i18n (Chinese/English) across 27 dashboard components, 9 page routes, 6 server actions
+- Public page locale detection (browser Accept-Language, cookie persistence), auth page translations
+- Bilingual email templates for all 5 email types with language preference threading
+- Org admin audit logs with fire-and-forget recording across 9 mutation types
+- Audit log viewer with cursor-based pagination and filtering
+- Auto-discovery model catalog from LiteLLM with pricing enrichment
+
+### What Worked
+- Fire-and-forget pattern (established in v1.0 for notifications) reused seamlessly for audit logging and model discovery — consistent codebase pattern
+- svelte-i18n with synchronous addMessages avoided async loading complexity; $t() reactivity worked cleanly with Svelte 5 runes
+- errorKey pattern for server action i18n kept server/client cleanly separated (server returns key, client translates)
+- Phases 14 and 15 executed independently of i18n phases — parallel milestone work with zero conflicts
+
+### What Was Inefficient
+- SUMMARY.md `one_liner` field still not populated by executor agents — third milestone with this gap
+- Phase 13 plan checkboxes in ROADMAP.md still showing `[ ]` despite being complete (same issue as v1.0)
+- MODEL_PRICING hardcoded rather than fetched dynamically from LiteLLM — known tech debt
+
+### Patterns Established
+- errorKey pattern: server actions return i18n keys via `fail()`, client components translate via `$t(form?.errorKey)`
+- zodErrorToKey: shared helper maps Zod validation errors to i18n keys
+- isZh conditional pattern for bilingual email templates (simple, readable)
+- detectLocale() priority chain: user.language > cookie > Accept-Language > 'en'
+- Cursor-based compound pagination (createdAt, id) for append-heavy audit tables
+- Fire-and-forget model discovery triggered by provider key CRUD
+
+### Key Lessons
+1. **i18n is a cross-cutting concern** — touching 27 components + 9 routes + 6 server files means i18n should be planned for from v1.0 to avoid massive retro-wiring
+2. **errorKey pattern > translated server errors** — keeping translations client-side simplifies server logic and avoids locale threading through every server action
+3. **Fire-and-forget is a project idiom** — notifications, audit logs, model discovery all use the same pattern; consistency makes the codebase predictable
+4. **Cursor pagination > offset pagination** — for append-heavy tables (audit logs, usage), cursor-based avoids drift and performs better at scale
+5. **Hardcoded pricing is acceptable for v1** — dynamic pricing fetch adds complexity; N/A display for unknown pricing is honest and non-breaking
+
+### Cost Observations
+- Model mix: Opus for planning/execution, quality profile throughout
+- Sessions: ~2 sessions in 1 day
+- Notable: 8 plans across 4 phases completed in ~10 hours wall clock, ~20 min active execution
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -100,6 +146,7 @@
 |-----------|----------|--------|------------|
 | v1.0 | ~8 | 6 | Established GSD workflow with wave-based parallel execution |
 | v1.1 | ~3 | 5 | Skipped research for test phases, delegated all decisions to Claude |
+| v1.2 | ~2 | 4 | Parallel independent phases (i18n vs audit vs catalog), fire-and-forget as project idiom |
 
 ### Cumulative Quality
 
@@ -107,6 +154,7 @@
 |-----------|-------|----------|-------------------|
 | v1.0 | 20 | Gateway modules | Node.js built-in crypto (no external deps for encryption/hashing) |
 | v1.1 | 99+ | 80%+ enforced | autocannon (load testing), @vitest/coverage-v8 (coverage) |
+| v1.2 | 99+ | 80%+ enforced | svelte-i18n (i18n), cursor pagination, fire-and-forget audit/discovery |
 
 ### Top Lessons (Verified Across Milestones)
 

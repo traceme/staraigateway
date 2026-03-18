@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A multi-tenant LLM API gateway where companies create organizations, submit their own provider API keys (OpenAI, Anthropic, Google, DeepSeek, Qwen, GLM, Doubao, and 100+ more), and team members generate personal API keys to access LLMs through a unified OpenAI-compatible endpoint. Features smart routing, fallback chains, Redis caching, budget controls with email notifications, and a full admin dashboard. Available as SaaS or self-hosted via Docker Compose.
+A multi-tenant LLM API gateway where companies create organizations, submit their own provider API keys (OpenAI, Anthropic, Google, DeepSeek, Qwen, GLM, Doubao, and 100+ more), and team members generate personal API keys to access LLMs through a unified OpenAI-compatible endpoint. Features smart routing, fallback chains, Redis caching, budget controls with email notifications, full bilingual (Chinese/English) admin dashboard with audit logs, and auto-discovery model catalog. Available as SaaS or self-hosted via Docker Compose.
 
 ## Core Value
 
@@ -33,25 +33,19 @@ Any company can sign up, plug in their LLM API keys, and immediately give their 
 - ✓ Unit test coverage (99 tests across 14 files, gateway + auth + members) — v1.1
 - ✓ Integration, E2E, and load testing (DB integration, user journey E2E, load test, 80% coverage) — v1.1
 
+- ✓ Full i18n (Chinese + English) across all dashboard, public pages, and email templates with user language preference — v1.2
+- ✓ Org admin audit logs with paginated viewer and filtering — v1.2
+- ✓ Model catalog auto-populated from LiteLLM with pricing enrichment — v1.2
+
 ### Active
 
-- [ ] Full i18n (Chinese + English) across all UI pages, landing page, and email templates with user language preference
-- [ ] Org admin audit logs (activity log: key created, member invited, settings changed)
-- [ ] Model catalog auto-populated from LiteLLM with pricing and capabilities
-
-## Current Milestone: v1.2 Feature Expansion
-
-**Goal:** Add internationalization (Chinese/English), org-level audit logs, and a browsable model catalog to make StarAIGateway ready for Chinese enterprise teams.
-
-**Target features:**
-- Complete bilingual UI (Chinese + English) with user language preference in account settings
-- Org admin audit logs tracking all significant actions
-- Auto-populated model catalog from LiteLLM showing available models per org
+(None — next milestone TBD)
 
 ## Completed Milestones
 
 - **v1.0 MVP** — Full platform shipped (auth, orgs, gateway, budgets, dashboard, Docker)
 - **v1.1 Production Hardening** — Security, performance, test coverage, tech debt cleanup
+- **v1.2 Feature Expansion** — Bilingual i18n, audit logs, model catalog for Chinese enterprise readiness
 
 ### Out of Scope
 
@@ -105,18 +99,25 @@ Target market: 20-100 person teams, especially in China where domestic model sup
 | Budget rolling snapshots | O(1) budget checks via incremental snapshot column, full SUM fallback | ✓ Good |
 | vi.mock() for unit test mocking | No DI refactoring needed, matches existing codebase patterns | ✓ Good |
 | Docker Compose test PostgreSQL | Real DB for integration tests, transaction rollback isolation | ✓ Good |
+| svelte-i18n with synchronous addMessages | Avoids async loading overhead, simpler init | ✓ Good |
+| errorKey pattern for server action i18n | Server returns i18n key, client translates via $t() | ✓ Good |
+| Fire-and-forget for audit + model discovery | Non-blocking, matches logUsage pattern | ✓ Good |
+| Cursor-based pagination for audit logs | Efficient for append-heavy tables, no offset drift | ✓ Good |
 | autocannon for load testing | Zero external deps, Node.js native, scriptable with thresholds | ✓ Good |
 
 ## Context
 
-Shipped v1.1 with ~8,700 LOC (6,161 source + 2,518 test TypeScript) across 51 modified files.
-All v1.0 tech debt resolved. 99 unit tests + integration/E2E/load tests. 80% coverage enforced.
-Gateway optimized: Redis auth cache (60s), budget O(1) snapshots, SMTP singleton.
-Security hardened: CORS allowlist, secure cookies, body limits, invitation token separation.
+Shipped v1.2 with ~14,460 LOC TypeScript/Svelte across 119 modified files (+7,546/-583 in v1.2).
+Full bilingual UI (Chinese/English) with svelte-i18n, 200+ translation keys per locale.
+Audit logging across all 9 org mutation types with cursor-paginated viewer.
+Auto-discovery model catalog from LiteLLM with pricing enrichment.
+99 unit tests + integration/E2E/load tests. 80% coverage enforced.
 
 ## Tech Debt
 
-(None known — all v1.0 tech debt resolved in v1.1)
+- Model discovery only runs on key create/update — no periodic refresh for new provider models
+- MODEL_PRICING hardcoded — no dynamic pricing fetch from LiteLLM model_cost_map
+- In-memory Map for rate limit windows needs revisiting for multi-instance deployment
 
 ---
-*Last updated: 2026-03-17 after v1.2 milestone start*
+*Last updated: 2026-03-18 after v1.2 milestone*
