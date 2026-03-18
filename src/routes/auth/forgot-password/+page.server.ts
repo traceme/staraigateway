@@ -44,7 +44,7 @@ export const actions = {
 
 			// Send reset email
 			try {
-				await sendPasswordResetEmail(email, user.name, resetToken);
+				await sendPasswordResetEmail(email, user.name, resetToken, user.language ?? 'en');
 			} catch {
 				// Email may fail in dev without SMTP
 			}

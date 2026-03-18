@@ -39,10 +39,11 @@ function getAppUrl(): string {
 export async function sendVerificationEmail(
 	email: string,
 	name: string,
-	token: string
+	token: string,
+	lang: string = 'en'
 ): Promise<void> {
 	const verifyUrl = `${getAppUrl()}/auth/verify-email?token=${token}`;
-	const { subject, html, text } = verificationEmail(name, verifyUrl);
+	const { subject, html, text } = verificationEmail(name, verifyUrl, lang);
 
 	const transport = getTransport();
 	if (!transport) throw new Error('SMTP not configured');
@@ -58,10 +59,11 @@ export async function sendVerificationEmail(
 export async function sendPasswordResetEmail(
 	email: string,
 	name: string,
-	token: string
+	token: string,
+	lang: string = 'en'
 ): Promise<void> {
 	const resetUrl = `${getAppUrl()}/auth/reset-password?token=${token}`;
-	const { subject, html, text } = passwordResetEmail(name, resetUrl);
+	const { subject, html, text } = passwordResetEmail(name, resetUrl, lang);
 
 	const transport = getTransport();
 	if (!transport) throw new Error('SMTP not configured');
@@ -79,9 +81,10 @@ export async function sendBudgetWarningEmail(
 	memberName: string,
 	currentSpend: string,
 	limit: string,
-	orgName: string
+	orgName: string,
+	lang: string = 'en'
 ): Promise<void> {
-	const { subject, html, text } = budgetWarningEmail(memberName, currentSpend, limit, orgName);
+	const { subject, html, text } = budgetWarningEmail(memberName, currentSpend, limit, orgName, lang);
 	const transport = getTransport();
 	if (!transport) throw new Error('SMTP not configured');
 	await transport.sendMail({ from: getFromAddress(), to: email, subject, html, text });
@@ -92,10 +95,11 @@ export async function sendInvitationEmail(
 	token: string,
 	orgName: string,
 	inviterName: string,
-	role: string
+	role: string,
+	lang: string = 'en'
 ): Promise<void> {
 	const acceptUrl = `${getAppUrl()}/auth/invite/${token}`;
-	const { subject, html, text } = invitationEmail(orgName, inviterName, role, acceptUrl);
+	const { subject, html, text } = invitationEmail(orgName, inviterName, role, acceptUrl, lang);
 
 	const transport = getTransport();
 	if (!transport) throw new Error('SMTP not configured');
@@ -112,9 +116,10 @@ export async function sendAdminDigestEmail(
 	adminEmail: string,
 	orgName: string,
 	date: string,
-	members: Array<{ name: string; spend: string; limit: string; percentage: number }>
+	members: Array<{ name: string; spend: string; limit: string; percentage: number }>,
+	lang: string = 'en'
 ): Promise<void> {
-	const { subject, html, text } = adminDigestEmail(orgName, date, members);
+	const { subject, html, text } = adminDigestEmail(orgName, date, members, lang);
 	const transport = getTransport();
 	if (!transport) throw new Error('SMTP not configured');
 	await transport.sendMail({ from: getFromAddress(), to: adminEmail, subject, html, text });

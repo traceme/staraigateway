@@ -15,6 +15,7 @@ interface MemberBudgetInfo {
 	name: string;
 	email: string;
 	role: string;
+	language: string;
 	currentSpendDollars: number;
 	limitDollars: number;
 	percentage: number;
@@ -31,7 +32,8 @@ async function resolveMemberBudgets(orgId: string): Promise<MemberBudgetInfo[]> 
 			userId: appOrgMembers.userId,
 			role: appOrgMembers.role,
 			name: appUsers.name,
-			email: appUsers.email
+			email: appUsers.email,
+			language: appUsers.language
 		})
 		.from(appOrgMembers)
 		.innerJoin(appUsers, eq(appOrgMembers.userId, appUsers.id))
@@ -97,6 +99,7 @@ async function resolveMemberBudgets(orgId: string): Promise<MemberBudgetInfo[]> 
 				name: member.name,
 				email: member.email,
 				role: member.role,
+				language: member.language ?? 'en',
 				currentSpendDollars,
 				limitDollars,
 				percentage
@@ -132,7 +135,8 @@ export async function checkAndNotifyBudgets(orgId: string): Promise<void> {
 				member.name,
 				`$${member.currentSpendDollars.toFixed(2)}`,
 				`$${member.limitDollars.toFixed(2)}`,
-				orgName
+				orgName,
+				member.language
 			);
 		} catch {
 			// Graceful failure -- don't block on email errors
@@ -163,7 +167,8 @@ export async function sendAdminDigest(orgId: string): Promise<void> {
 	const admins = await db
 		.select({
 			email: appUsers.email,
-			name: appUsers.name
+			name: appUsers.name,
+			language: appUsers.language
 		})
 		.from(appOrgMembers)
 		.innerJoin(appUsers, eq(appOrgMembers.userId, appUsers.id))
@@ -189,7 +194,7 @@ export async function sendAdminDigest(orgId: string): Promise<void> {
 
 	for (const admin of admins) {
 		try {
-			await sendAdminDigestEmail(admin.email, orgName, date, digestMembers);
+			await sendAdminDigestEmail(admin.email, orgName, date, digestMembers, admin.language ?? 'en');
 		} catch {
 			console.error(`Failed to send admin digest to ${admin.email}`);
 		}
