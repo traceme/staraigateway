@@ -9,7 +9,8 @@ import {
 	getProviderKeys,
 	createProviderKey,
 	updateProviderKey,
-	deleteProviderKey
+	deleteProviderKey,
+	discoverModelsForKey
 } from '$lib/server/provider-keys';
 import { PROVIDERS } from '$lib/server/providers';
 import type { PageServerLoad, Actions } from './$types';
@@ -106,6 +107,7 @@ export const actions: Actions = {
 				apiKey: parsed.data.apiKey,
 				baseUrl: parsed.data.baseUrl || undefined
 			});
+			discoverModelsForKey(key.id, parsed.data.provider, parsed.data.apiKey, parsed.data.baseUrl || undefined);
 			recordAuditEvent(org.id, locals.user!.id, 'provider_key_added', 'provider_key', key.id, { provider: parsed.data.provider, label: parsed.data.label });
 			return { success: true, key };
 		} catch (err) {
@@ -138,6 +140,10 @@ export const actions: Actions = {
 		const updated = await updateProviderKey(id, org.id, updates);
 		if (!updated) {
 			return fail(404, { errorKey: 'errors.key_not_found' });
+		}
+
+		if (parsed.data.apiKey && updated) {
+			discoverModelsForKey(id, updated.provider, parsed.data.apiKey);
 		}
 
 		return { success: true };
