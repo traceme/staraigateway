@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Feature Expansion
-status: completed
-stopped_at: Phase 15 context gathered
-last_updated: "2026-03-18T08:57:38.540Z"
-last_activity: 2026-03-18 — Completed Phase 14 Plan 02 (audit event instrumentation and log viewer)
+status: in_progress
+stopped_at: Completed 15-01-PLAN.md
+last_updated: "2026-03-18T09:33:32Z"
+last_activity: 2026-03-18 — Completed Phase 15 Plan 01 (model discovery fire-and-forget)
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 8
+  completed_plans: 7
   percent: 100
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Any company can sign up, plug in their LLM API keys, and immediately give their entire team controlled, budget-tracked access to AI models.
-**Current focus:** Phase 14 — Audit Logs
+**Current focus:** Phase 15 — Model Catalog
 
 ## Current Position
 
-Phase: 14 (third of 4 in v1.2: phases 12-15)
-Plan: 02 of 2 complete
-Status: Phase Complete
-Last activity: 2026-03-18 — Completed Phase 14 Plan 02 (audit event instrumentation and log viewer)
+Phase: 15 (fourth of 4 in v1.2: phases 12-15)
+Plan: 01 of 2 complete
+Status: In Progress
+Last activity: 2026-03-18 — Completed Phase 15 Plan 01 (model discovery fire-and-forget)
 
-Progress: [██████████] 100%
+Progress: [█████████░] 88%
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [██████████] 100%
 | Phase 13 P01 | 293s | 2 tasks | 21 files |
 | Phase 14 P01 | 158 | 2 tasks | 6 files |
 | Phase 14 P02 | 333 | 2 tasks | 7 files |
+| Phase 15 P01 | 212s | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,9 @@ Recent decisions from v1.1 affecting current work:
 - [Phase 14]: recordAuditEvent returns void (not Promise) to enforce fire-and-forget usage
 - [Phase 14]: Fire-and-forget audit recording (no await) across all 5 server action files
 - [Phase 14]: Cursor-based pagination using compound (createdAt|id) for audit log viewer
+- [Phase 15]: discoverModelsForKey returns void (fire-and-forget) matching recordAuditEvent and logUsage patterns
+- [Phase 15]: Model re-discovery only when apiKey field is provided on update
+- [Phase 15]: Delete action excluded from discovery -- models removed via active-key filtering
 
 ### Pending Todos
 
@@ -87,6 +91,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T08:57:38.537Z
-Stopped at: Phase 15 context gathered
-Resume file: .planning/phases/15-model-catalog/15-CONTEXT.md
+Last session: 2026-03-18T09:33:32Z
+Stopped at: Completed 15-01-PLAN.md
+Resume file: .planning/phases/15-model-catalog/15-01-SUMMARY.md

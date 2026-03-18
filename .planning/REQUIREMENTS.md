@@ -23,9 +23,9 @@ Requirements for v1.2 Feature Expansion. Each maps to roadmap phases.
 
 ### Model Catalog
 
-- [ ] **MODEL-01**: System auto-discovers available models from org's configured provider keys via LiteLLM
+- [x] **MODEL-01**: System auto-discovers available models from org's configured provider keys via LiteLLM
 - [ ] **MODEL-02**: Org members can browse a catalog page showing available models with provider, pricing, and capabilities
-- [ ] **MODEL-03**: Model catalog updates when provider keys are added or removed
+- [x] **MODEL-03**: Model catalog updates when provider keys are added or removed
 
 ## Future Requirements
 
@@ -62,9 +62,9 @@ Requirements for v1.2 Feature Expansion. Each maps to roadmap phases.
 | AUDIT-01 | Phase 14 | Complete |
 | AUDIT-02 | Phase 14 | Complete |
 | AUDIT-03 | Phase 14 | Complete |
-| MODEL-01 | Phase 15 | Pending |
+| MODEL-01 | Phase 15 | Complete |
 | MODEL-02 | Phase 15 | Pending |
-| MODEL-03 | Phase 15 | Pending |
+| MODEL-03 | Phase 15 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 11 total
